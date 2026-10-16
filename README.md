@@ -226,7 +226,7 @@ Ces données servent uniquement à une fonction demandée par le visiteur et res
 
 ## Licences et crédits
 
-- Thèmes jchable : GPL version 2 ou ultérieure (voir l'en-tête de `themes/*/style.css`).
+- Thèmes jchable : © Julien Chable, sous licence GNU GPL version 2 ou ultérieure. Le texte complet est dans [`LICENSE`](LICENSE), et chaque thème en embarque une copie (`themes/*/license.txt`, incluse dans les zips) ; la licence est aussi déclarée dans l'en-tête de `themes/*/style.css`.
 - Polices Chivo et Chivo Mono : SIL OFL 1.1 (fichier fourni dans `themes/jchable-bureau/assets/fonts/`).
 - DOOM : moteur WebAssembly (projet cloudflare/doom-wasm, GPL) et données ; licences, lien vers le code source et offre écrite dans `themes/jchable-bureau/assets/doom/README.md`, et panneau « À propos de DOOM » dans la fenêtre du jeu.
 - Wipeout : non inclus (reporté).
