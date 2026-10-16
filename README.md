@@ -60,9 +60,9 @@ Pour ajouter ou corriger un texte : chaque appli a son fichier `i18n.ts` (`src/a
 
 ## Préférences et écrans de veille
 
-Menu Démarrer › **Préférences…** (ou clic droit sur le bureau) ouvre une fenêtre de réglages : écran de veille (choix de la scène avec aperçu plein écran, activation automatique, délai de 1 à 30 minutes), langue, son, rangement des icônes. Chaque changement s'applique tout de suite et est mémorisé dans le navigateur.
+Menu Démarrer › **Préférences…** (ou clic droit sur le bureau) ouvre une fenêtre de réglages : écran de veille (choix de la scène avec aperçu plein écran, activation automatique, délai de 1 à 30 minutes), langue, son, rangement des icônes. Les réglages sont un brouillon : ils ne s'appliquent (et la page ne se recharge pour la langue) qu'au clic sur **Enregistrer** ; **Fermer** les abandonne. Ils sont mémorisés dans le navigateur.
 
-Six écrans de veille, dessinés sur un canevas 2D avec une 3D logicielle maison (aucune dépendance, pas de WebGL) : **Tunnel néon** (par défaut), **Fenêtres flottantes** (titres de vos derniers articles), **Graphe de connaissances**, **Planète de code**, **Bureau en voxels** et le **Badge JC** d'origine. Chaque scène est un module `src/ui/screensaver/scenes/<id>.ts` chargé seulement quand on la choisit ; pour en ajouter une, il suffit d'exporter `create: SceneFactory`, de l'inscrire dans `catalog.ts` et `loader.ts`, et de la tester avec `expectSceneConforms`. L'écran de veille automatique ne se lance que sur l'accueil, les archives et la 404, jamais avec « moins d'animations », et une scène qui échoue retombe sur le badge JC.
+Quatre écrans de veille, dessinés sur un canevas 2D avec une 3D logicielle maison (aucune dépendance, pas de WebGL) : **Tunnel néon** (par défaut), **Fenêtres flottantes** (titres de vos derniers articles), **Graphe de connaissances** et **Bureau en voxels**. Chaque scène est un module `src/ui/screensaver/scenes/<id>.ts` chargé seulement quand on la choisit ; pour en ajouter une, il suffit d'exporter `create: SceneFactory`, de l'inscrire dans `catalog.ts` et `loader.ts`, et de la tester avec `expectSceneConforms`. L'écran de veille automatique ne se lance que sur l'accueil, les archives et la 404, jamais avec « moins d'animations », et une scène qui échoue laisse un simple ciel bleu.
 
 ## Données du visiteur
 

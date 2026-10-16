@@ -88,7 +88,7 @@ describe('createScreensaver : scènes 3D', () => {
       reducedMotion: () => Boolean(options.reduced),
       requestFrame: requestFrame as never,
       cancelFrame: vi.fn() as never,
-      scene: options.scene ?? (() => 'planet'),
+      scene: options.scene ?? (() => 'graph'),
       loadScene: loadScene as never,
       context,
     });
@@ -97,7 +97,7 @@ describe('createScreensaver : scènes 3D', () => {
     const s = make();
     s.start();
     expect(overlay()).not.toBeNull();
-    expect(loadScene).toHaveBeenCalledWith('planet');
+    expect(loadScene).toHaveBeenCalledWith('graph');
     await flush();
     expect(created).toHaveLength(1);
     expect(created[0]!.width).toBe(window.innerWidth);
@@ -168,16 +168,16 @@ describe('createScreensaver : scènes 3D', () => {
     s.stop();
   });
 
-  it('une scène qui ne se charge pas retombe sur le badge JC', async () => {
+  it('une scène qui ne se charge pas retombe sur le ciel bleu', async () => {
     loadScene.mockRejectedValueOnce(new Error('réseau'));
     const s = make();
     s.start();
     await flush();
-    expect(rec.calls.some((c) => c.name === 'fillText' && c.args[0] === 'JC')).toBe(true);
+    expect(rec.calls.some((c) => c.name === 'fillRect')).toBe(true);
     s.stop();
   });
 
-  it('une scène qui plante en dessinant retombe sur le badge JC', async () => {
+  it('une scène qui plante en dessinant retombe sur le ciel bleu', async () => {
     factory = () => ({
       step: () => undefined,
       draw: () => {
@@ -188,7 +188,7 @@ describe('createScreensaver : scènes 3D', () => {
     const s = make();
     s.start();
     await flush();
-    expect(rec.calls.some((c) => c.name === 'fillText' && c.args[0] === 'JC')).toBe(true);
+    expect(rec.calls.some((c) => c.name === 'fillRect')).toBe(true);
     expect(s.isRunning()).toBe(true);
     s.stop();
   });
@@ -202,11 +202,10 @@ describe('createScreensaver : scènes 3D', () => {
     s.stop();
   });
 
-  it('la scène « classic » reste synchrone et ne charge rien', () => {
-    const s = make({ scene: () => 'classic' });
+  it('sans préférence ni aperçu, c’est le tunnel néon', () => {
+    const s = createScreensaver({ reducedMotion: () => false, requestFrame: requestFrame as never, cancelFrame: vi.fn() as never, loadScene: loadScene as never, context });
     s.start();
-    expect(loadScene).not.toHaveBeenCalled();
-    expect(rec.calls.some((c) => c.name === 'fillText' && c.args[0] === 'JC')).toBe(true);
+    expect(loadScene).toHaveBeenCalledWith('tunnel');
     s.stop();
   });
 });

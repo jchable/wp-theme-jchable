@@ -33,11 +33,11 @@ describe('préférences de l’écran de veille', () => {
   it('mémorise la scène et le délai choisis', () => {
     const storage = new MemoryStorage();
     createPrefs(storage).update((p) => {
-      p.saver = 'planet';
+      p.saver = 'voxel';
       p.saverDelay = 10;
     });
     const got = createPrefs(storage).get();
-    expect(got.saver).toBe('planet');
+    expect(got.saver).toBe('voxel');
     expect(got.saverDelay).toBe(10);
   });
 
@@ -47,6 +47,14 @@ describe('préférences de l’écran de veille', () => {
     const got = createPrefs(storage).get();
     expect(got.saver).toBe('tunnel');
     expect(got.saverDelay).toBe(3);
+  });
+
+  it('un écran de veille retiré (planète, badge JC) retombe sur le tunnel', () => {
+    const storage = new MemoryStorage();
+    for (const gone of ['planet', 'classic']) {
+      storage.setItem(PREFS_KEY, JSON.stringify({ v: 1, saver: gone }));
+      expect(createPrefs(storage).get().saver).toBe('tunnel');
+    }
   });
 
   it('un délai valide est conservé, un délai non listé retombe sur 3', () => {

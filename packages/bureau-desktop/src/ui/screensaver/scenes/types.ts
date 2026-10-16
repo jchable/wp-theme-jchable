@@ -4,7 +4,7 @@
  * Les scènes dessinent en 2D avec de la 3D logicielle (voir math3d.ts) : aucune dépendance, aucun WebGL.
  */
 
-export type SceneId = 'tunnel' | 'windows' | 'graph' | 'planet' | 'voxel' | 'classic';
+export type SceneId = 'tunnel' | 'windows' | 'graph' | 'voxel';
 
 /** Couleurs du thème Bureau (valeurs par défaut du thème, lues dans les variables CSS quand elles existent). */
 export interface SceneColors {

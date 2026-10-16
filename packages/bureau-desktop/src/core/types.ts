@@ -23,7 +23,7 @@ export interface DesktopSettings {
   sound: boolean;
   /** Écran de veille automatique activé ? */
   screensaver: boolean;
-  /** Identifiant de la scène (tunnel, windows, graph, planet, voxel, classic). */
+  /** Identifiant de la scène (tunnel, windows, graph, voxel). */
   saverScene: string;
   /** Délai d'inactivité en minutes (1, 2, 3, 5, 10, 15 ou 30). */
   saverDelayMin: number;

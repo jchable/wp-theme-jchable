@@ -44,6 +44,29 @@ describe('scène « Fenêtres flottantes »', () => {
     expect(texts.every((t) => t.length < long.length)).toBe(true);
   });
 
+  it('le titre suit l’orientation de la fenêtre : il est dessiné dans le repère incliné de la carte', () => {
+    const scene = create(testContext({ titles: ['Zebra'] }));
+    const { ctx, calls } = recordingContext();
+    for (let i = 0; i < 300; i++) {
+      scene.step(50);
+      if (i % 5 === 0) scene.draw(ctx);
+    }
+    const matrices: number[][] = [];
+    calls.forEach((call, index) => {
+      if (call.name !== 'fillText') return;
+      expect(call.args.slice(1)).toEqual([0, 0]); // dessiné à l'origine du repère de la carte
+      const before = calls.slice(0, index).reverse().find((c) => c.name === 'transform');
+      expect(before, 'fillText sans repère propre à la carte').toBeDefined();
+      matrices.push(before!.args as number[]);
+    });
+    expect(matrices.length).toBeGreaterThan(0);
+    // La carte bascule (lacet, tangage, roulis) : le repère du texte est cisaillé ou tourné, jamais un simple zoom.
+    expect(matrices.some(([a, b, c, d]) => Math.abs(b!) > 1e-3 || Math.abs(c!) > 1e-3 || Math.abs(a! - d!) > 1e-3)).toBe(true);
+    // Le repère est rendu au dessin suivant : chaque transformation du texte (qui s'ajoute à l'échelle de l'écran) est encadré par save/restore.
+    const names = calls.map((c) => c.name);
+    expect(names.filter((n) => n === 'save').length).toBe(names.filter((n) => n === 'restore').length);
+  });
+
   it('n’écrit aucun texte quand tout est trop petit (1×1)', () => {
     expect(drawnTexts({ width: 1, height: 1 })).toEqual([]);
   });

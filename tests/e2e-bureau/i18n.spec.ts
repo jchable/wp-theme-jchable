@@ -30,7 +30,7 @@ test.describe('interface en anglais (navigateur anglais)', () => {
     await expect(page.locator('.welcome .window-title')).toHaveText('welcome.txt');
     await expect(page.locator('.site-sidebar .window-titlebar')).toHaveText(['Search…', 'Archives', 'About']);
     await expect(page.locator('.retro-pagination')).toContainText('Older posts');
-    await expect(page.locator('.taskbar')).toContainText('Powered by');
+    await expect(page.locator('.taskbar')).not.toContainText('Powered by');
   });
 
   test('le contenu des articles n’est jamais traduit', async ({ page }) => {

@@ -5,6 +5,7 @@ export const messages = {
   fr: {
     'win.minimize': 'Réduire',
     'win.maximize': 'Agrandir',
+    'win.restore': 'Restaurer',
     'win.close': 'Fermer',
     'win.loading': 'Chargement…',
     'win.crashed': '{title} a cessé de fonctionner.',
@@ -57,6 +58,7 @@ export const messages = {
   en: {
     'win.minimize': 'Minimize',
     'win.maximize': 'Maximize',
+    'win.restore': 'Restore',
     'win.close': 'Close',
     'win.loading': 'Loading…',
     'win.crashed': '{title} has stopped working.',

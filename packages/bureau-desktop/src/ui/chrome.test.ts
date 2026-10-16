@@ -10,12 +10,11 @@ afterEach(() => {
 describe('translateChrome', () => {
   it('traduit les textes du thème en anglais, en gardant les espaces', () => {
     document.body.innerHTML =
-      '<div class="taskbar"><a class="start-button">✦ Démarrer</a><p>Propulsé par <a href="#">WordPress</a></p></div>' +
+      '<div class="taskbar"><a class="start-button">✦ Démarrer</a></div>' +
       '<h2 class="feed-title">Derniers articles</h2><header class="window-titlebar"><p>Rechercher…</p></header>';
     setLang('en');
     translateChrome(document);
     expect(document.querySelector('.start-button')?.textContent).toBe('✦ Start');
-    expect(document.querySelector('.taskbar p')?.textContent).toBe('Powered by WordPress');
     expect(document.querySelector('.feed-title')?.textContent).toBe('Latest posts');
     expect(document.querySelector('.window-titlebar p')?.textContent).toBe('Search…');
   });

@@ -23,7 +23,6 @@ const CHROME_EN: Readonly<Record<string, string>> = {
   'Archives par mois': 'Archives by month',
   'Catégories': 'Categories',
   '✦ Démarrer': '✦ Start',
-  'Propulsé par': 'Powered by',
   'Page introuvable': 'Page not found',
   'Une erreur fatale est survenue à l’adresse :': 'A fatal error occurred at address:',
   "Une erreur fatale est survenue à l'adresse :": 'A fatal error occurred at address:',

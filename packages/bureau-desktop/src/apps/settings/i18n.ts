@@ -19,6 +19,8 @@ export const messages = {
     desktop: 'Bureau',
     reset: 'Réorganiser les icônes',
     close: 'Fermer',
+    save: 'Enregistrer',
+    saved: 'Préférences enregistrées.',
   },
   en: {
     title: 'Settings',
@@ -38,6 +40,8 @@ export const messages = {
     desktop: 'Desktop',
     reset: 'Arrange icons',
     close: 'Close',
+    save: 'Save',
+    saved: 'Settings saved.',
   },
 };
 

@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const isDesktop = (name: string): boolean => name === 'desktop';
-const SCENES = ['tunnel', 'windows', 'graph', 'planet', 'voxel', 'classic'] as const;
+const SCENES = ['tunnel', 'windows', 'graph', 'voxel'] as const;
 
 async function openSettings(page: Page) {
   await page.locator('.start-button').click();
@@ -21,7 +21,7 @@ test.describe('fenêtre Préférences', () => {
   test('le menu Démarrer ouvre les préférences, le tunnel néon est coché par défaut', async ({ page }) => {
     await page.goto('/');
     const win = await openSettings(page);
-    await expect(win.locator('input[name="bset-scene"]')).toHaveCount(6);
+    await expect(win.locator('input[name="bset-scene"]')).toHaveCount(4);
     await expect(win.locator('input[name="bset-scene"]:checked')).toHaveValue('tunnel');
     await expect(win).toContainText('Tunnel néon');
     await expect(win).toContainText('Bureau en voxels');
@@ -33,11 +33,14 @@ test.describe('fenêtre Préférences', () => {
   test('le choix d’un écran de veille est mémorisé, même après rechargement', async ({ page }) => {
     await page.goto('/');
     const win = await openSettings(page);
-    await win.getByRole('radio', { name: /Planète de code/ }).check();
-    expect((await storedPrefs(page)).saver).toBe('planet');
+    await win.getByRole('radio', { name: /Graphe de connaissances/ }).check();
+    expect((await storedPrefs(page)).saver).toBeUndefined(); // rien n'est enregistré avant « Enregistrer »
+    await win.locator('.bset-save').click();
+    await expect(win.locator('.bset-status')).toHaveText('Préférences enregistrées.');
+    expect((await storedPrefs(page)).saver).toBe('graph');
     await page.reload();
     const again = await openSettings(page);
-    await expect(again.locator('input[name="bset-scene"]:checked')).toHaveValue('planet');
+    await expect(again.locator('input[name="bset-scene"]:checked')).toHaveValue('graph');
   });
 
   for (const scene of SCENES) {
@@ -66,6 +69,7 @@ test.describe('fenêtre Préférences', () => {
     await page.goto('/');
     const win = await openSettings(page);
     await win.locator('.bset-delay').selectOption('1');
+    await win.locator('.bset-save').click();
     await win.locator('.bset-close').click();
     await page.clock.fastForward(30 * 1000);
     await expect(page.locator('.bscr-overlay')).toHaveCount(0);
@@ -79,6 +83,7 @@ test.describe('fenêtre Préférences', () => {
     await page.goto('/');
     const win = await openSettings(page);
     await win.getByRole('radio', { name: /Fenêtres flottantes/ }).check();
+    await win.locator('.bset-save').click();
     await win.locator('.bset-close').click();
     await page.clock.fastForward(3 * 60 * 1000 + 1000);
     await expect(page.locator('.bscr-overlay')).toBeVisible();
@@ -90,6 +95,7 @@ test.describe('fenêtre Préférences', () => {
     const win = await openSettings(page);
     await win.locator('.bset-auto').uncheck();
     await expect(win.locator('.bset-delay')).toBeDisabled();
+    await win.locator('.bset-save').click();
     await page.clock.fastForward(10 * 60 * 1000);
     await expect(page.locator('.bscr-overlay')).toHaveCount(0);
     await win.locator('.bset-preview').click();
@@ -99,13 +105,32 @@ test.describe('fenêtre Préférences', () => {
   test('changer la langue recharge le bureau dans cette langue', async ({ page }) => {
     await page.goto('/');
     const win = await openSettings(page);
-    await win.getByRole('radio', { name: 'English' }).click(); // la page se recharge aussitôt
+    await win.getByRole('radio', { name: 'English' }).check();
+    // Rien ne se recharge tant qu'on n'a pas validé : la fenêtre reste ouverte, l'interface reste en français.
+    await page.waitForTimeout(500);
+    await expect(win).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('data-bureau-lang', 'fr');
+    expect((await storedPrefs(page)).lang).toBeUndefined();
+    await win.locator('.bset-save').click(); // la page se recharge
     await expect(page.locator('html')).toHaveAttribute('data-bureau-lang', 'en');
     await expect(page.locator('.start-button')).toContainText('Start');
     await page.locator('.start-button').click();
     await page.locator('.bmenu').getByRole('menuitem', { name: 'Settings…' }).click();
     await expect(page.locator('.bwin[data-app="settings"]')).toContainText('Neon tunnel');
     expect((await storedPrefs(page)).lang).toBe('en');
+  });
+
+  test('fermer sans enregistrer abandonne les changements', async ({ page }) => {
+    await page.goto('/');
+    const win = await openSettings(page);
+    await expect(win.locator('.bset-save')).toBeDisabled();
+    await win.getByRole('radio', { name: /Bureau en voxels/ }).check();
+    await expect(win.locator('.bset-save')).toBeEnabled();
+    await win.locator('.bset-close').click();
+    await expect(win).toHaveCount(0);
+    const again = await openSettings(page);
+    await expect(again.locator('input[name="bset-scene"]:checked')).toHaveValue('tunnel');
+    expect((await storedPrefs(page)).saver).toBeUndefined();
   });
 
   test('« Réorganiser les icônes » remet les icônes en place', async ({ page }) => {
@@ -126,6 +151,7 @@ test.describe('fenêtre Préférences', () => {
     const win = await openSettings(page);
     await expect(win.locator('.bset-sound')).toBeChecked(); // le son est activé par défaut
     await win.locator('.bset-sound').uncheck();
+    await win.locator('.bset-save').click();
     expect((await storedPrefs(page)).sound).toBe(false);
     await win.locator('.bset-sound').press('Escape');
     await expect(win).toHaveCount(0);

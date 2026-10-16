@@ -199,6 +199,11 @@ body {
 	padding: clamp(1rem, 2.5vw, 1.75rem);
 }
 
+/* Articles et pages : le texte profite de la largeur de la fenêtre, avec juste un peu d'air. */
+.single-window > .window-body {
+	padding: clamp(0.5rem, 1.4vw, 0.875rem);
+}
+
 .window--paper > .window-titlebar {
 	background: repeating-linear-gradient(0deg, var(--bureau-paper) 0 2px, var(--bureau-ink) 2px 3px);
 }
@@ -569,10 +574,6 @@ body:not(.paged) .post-feed .wp-block-post-template > li:first-child .wp-block-p
 
 .taskbar .taskbar-credit {
 	margin: 0;
-}
-
-.taskbar .taskbar-credit a {
-	color: var(--bureau-ink);
 }
 
 .taskbar .taskbar-clock {

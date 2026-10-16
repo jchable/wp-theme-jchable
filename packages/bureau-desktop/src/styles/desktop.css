@@ -239,6 +239,23 @@ html.bureau-desktop-on .sidebar-windows .window {
 	background: var(--b-yellow);
 }
 
+.bwin-btn svg {
+	width: 14px;
+	height: 14px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.6;
+}
+
+/* Le carré de devant masque celui de derrière (double carré = restaurer). */
+.bwin-btn svg rect:last-child {
+	fill: var(--b-paper);
+}
+
+.bwin-btn:hover svg rect:last-child {
+	fill: var(--b-yellow);
+}
+
 .bwin-body {
 	flex: 1 1 auto;
 	min-height: 0;
@@ -614,6 +631,29 @@ html:not(.bureau-desktop-on) .bwin-handle {
 	outline-offset: 2px;
 }
 
-.bset-close {
-	justify-self: end;
+.bset-actions {
+	position: sticky;
+	bottom: 0;
+	z-index: 1;
+	margin: 0 -1.25rem -1rem;
+	padding: 0.5rem 1.25rem 0.75rem;
+	border-top: 2px solid var(--b-ink);
+	background: var(--b-paper);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.25rem;
+}
+
+.bset-status {
+	flex: 1 1 auto;
+	margin: 0.35rem 0.25rem 0;
+	font-size: 0.9em;
+}
+
+.bset-btn:disabled {
+	opacity: 0.5;
+	box-shadow: none;
+	cursor: default;
 }

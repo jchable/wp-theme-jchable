@@ -10,6 +10,8 @@ const Z_RECYCLE = 1.3;
 const TITLE_BAR = 0.3;
 const MONO = 'ui-monospace, "Cascadia Code", Menlo, Consolas, monospace';
 const MIN_FONT_PX = 6;
+/** Taille de police du repère local du titre (le repère est ensuite mis à l'échelle de la carte). */
+const TEXT_PX = 20;
 /** Largeur d'un caractère monospace, en fraction de la taille de police. */
 const CHAR_RATIO = 0.6;
 
@@ -224,18 +226,25 @@ export const create: SceneFactory = (context) => {
       ctx.stroke();
     }
 
-    // Titre tronqué selon la place disponible ; pas de texte trop petit pour être lu
-    const fontPx = Math.round(TITLE_BAR * scale * 0.62);
-    if (fontPx >= MIN_FONT_PX) {
-      const room = ((win.w - 0.75 - 0.15) * scale) / (fontPx * CHAR_RATIO);
-      const title = fitTitle(win.title, room);
-      const p = title ? at(-hw + 0.75, barMid) : null;
-      if (p) {
-        ctx.font = `bold ${fontPx}px ${MONO}`;
+    // Le titre est dessiné dans le repère de la carte (affine tirée de trois points projetés), pour en suivre
+    // l'orientation ; il est tronqué selon la place disponible et omis s'il serait trop petit pour être lu.
+    const fontWorld = TITLE_BAR * 0.62;
+    if (fontWorld * scale >= MIN_FONT_PX) {
+      const title = fitTitle(win.title, ((win.w - 0.9) / (fontWorld * CHAR_RATIO)));
+      const origin = title ? at(-hw + 0.75, barMid) : null;
+      const right = origin ? at(-hw + 0.75 + 0.5, barMid) : null;
+      const down = origin ? at(-hw + 0.75, barMid - 0.5) : null;
+      if (title && origin && right && down) {
+        // 1 pixel du repère local = fontWorld / TEXT_PX unités du monde ; 0,5 est l'écart des points de mesure.
+        const k = fontWorld / TEXT_PX / 0.5;
+        ctx.save();
+        ctx.transform((right.x - origin.x) * k, (right.y - origin.y) * k, (down.x - origin.x) * k, (down.y - origin.y) * k, origin.x, origin.y);
+        ctx.font = `bold ${TEXT_PX}px ${MONO}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = tint.text;
-        ctx.fillText(title, p.x, p.y);
+        ctx.fillText(title, 0, 0);
+        ctx.restore();
       }
     }
   }

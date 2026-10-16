@@ -39,15 +39,39 @@ function choice(type: 'radio' | 'checkbox', label: string, options: { name?: str
 
 const delayLabel = (minutes: number): string => t(minutes === 1 ? 'minute' : 'minutes', { n: minutes });
 
-/** « Préférences » : écran de veille, langue, son, rangement des icônes. Chaque changement s'applique tout de suite. */
+/**
+ * « Préférences » : écran de veille, langue, son, rangement des icônes. Les réglages sont un brouillon :
+ * rien ne change (et la page ne se recharge pas) avant un clic sur « Enregistrer ». « Fermer » abandonne le brouillon.
+ */
 export function mount(host: HTMLElement, ctx: AppContext): void {
   ctx.setTitle(t('title'));
   root = host;
   const read = (): Readonly<DesktopSettings> =>
     ctx.settings?.get() ?? { lang: 'auto', sound: false, screensaver: true, saverScene: 'tunnel', saverDelayMin: 3 };
-  const change = (patch: Partial<DesktopSettings>): void => ctx.settings?.update(patch);
   const current = read();
+  let saved: DesktopSettings = { ...current };
+  const draft: DesktopSettings = { ...current };
   const id = ++uid;
+
+  const saveButton = el('button', 'bset-btn bset-save', t('save'));
+  saveButton.type = 'button';
+  saveButton.disabled = true;
+  const status = el('p', 'bset-status');
+  status.setAttribute('role', 'status');
+
+  const changes = (): Partial<DesktopSettings> => {
+    const patch: Partial<DesktopSettings> = {};
+    for (const key of Object.keys(draft) as Array<keyof DesktopSettings>) {
+      if (draft[key] !== saved[key]) Object.assign(patch, { [key]: draft[key] });
+    }
+    return patch;
+  };
+  /** Un réglage du brouillon a changé : l'éventuel message « enregistré » n'est plus d'actualité. */
+  const change = (patch: Partial<DesktopSettings>): void => {
+    Object.assign(draft, patch);
+    status.textContent = '';
+    saveButton.disabled = Object.keys(changes()).length === 0;
+  };
 
   const wrap = el('div', 'bset');
 
@@ -56,7 +80,6 @@ export function mount(host: HTMLElement, ctx: AppContext): void {
   const scenes = el('div', 'bset-scenes');
   scenes.setAttribute('role', 'radiogroup');
   scenes.setAttribute('aria-label', t('saver'));
-  let selected = current.saverScene;
   for (const scene of SCENE_IDS) {
     const { row, input } = choice('radio', sceneLabel(scene), {
       name: 'bset-scene',
@@ -64,17 +87,14 @@ export function mount(host: HTMLElement, ctx: AppContext): void {
       checked: scene === current.saverScene,
       description: sceneDescription(scene),
     });
-    input.addEventListener('change', () => {
-      selected = scene;
-      change({ saverScene: scene });
-    });
+    input.addEventListener('change', () => change({ saverScene: scene }));
     scenes.append(row);
   }
 
   const preview = el('button', 'bset-btn bset-preview', t('preview'));
   preview.type = 'button';
   preview.title = t('previewHint');
-  preview.addEventListener('click', () => ctx.previewScreensaver?.(selected));
+  preview.addEventListener('click', () => ctx.previewScreensaver?.(draft.saverScene));
 
   const auto = choice('checkbox', t('saverAuto'), { checked: current.screensaver, className: 'bset-auto' });
   const delayRow = el('div', 'bset-delay-row');
@@ -122,7 +142,19 @@ export function mount(host: HTMLElement, ctx: AppContext): void {
   close.type = 'button';
   close.addEventListener('click', () => ctx.close());
 
-  wrap.append(saver.box, language.box, sound.box, desktop.box, close);
+  saveButton.addEventListener('click', () => {
+    const patch = changes();
+    if (Object.keys(patch).length === 0) return;
+    saved = { ...draft };
+    saveButton.disabled = true;
+    status.textContent = t('saved');
+    ctx.settings?.update(patch); // un changement de langue recharge la page : le message ci-dessus est alors déjà en place
+  });
+
+  const actions = el('div', 'bset-actions');
+  actions.append(status, saveButton, close);
+
+  wrap.append(saver.box, language.box, sound.box, desktop.box, actions);
   host.replaceChildren(wrap);
   scenes.querySelector<HTMLInputElement>('input:checked')?.focus();
 }

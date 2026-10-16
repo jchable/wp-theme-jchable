@@ -779,3 +779,44 @@ test.describe('un seul bureau, même après le chargement d’une appli', () => 
     expect(entries).toHaveLength(1);
   });
 });
+
+test.describe('agrandir et restaurer une fenêtre', () => {
+  test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
+
+  test('le bouton d’agrandissement devient « Restaurer » (double carré), puis redevient « Agrandir »', async ({ page }) => {
+    await page.goto('/');
+    await openApp(page, 'Terminal');
+    const win = page.locator('.bwin[data-app="terminal"]');
+    const before = await win.boundingBox();
+    const button = win.locator('.bwin-controls [data-action="maximize"]');
+    await expect(button).toHaveAttribute('aria-label', 'Agrandir');
+    await expect(button.locator('svg rect')).toHaveCount(1); // un seul carré
+
+    await button.click();
+    await expect(win).toHaveClass(/bwin--maximized/);
+    await expect(button).toHaveAttribute('aria-label', 'Restaurer');
+    await expect(button.locator('svg rect')).toHaveCount(2); // double carré : on peut rétrécir
+    expect((await win.boundingBox())!.width).toBeGreaterThan(before!.width);
+
+    await button.click();
+    await expect(win).not.toHaveClass(/bwin--maximized/);
+    await expect(button).toHaveAttribute('aria-label', 'Agrandir');
+    await expect(button.locator('svg rect')).toHaveCount(1);
+    const after = await win.boundingBox();
+    expect(Math.round(after!.width)).toBe(Math.round(before!.width));
+    // Ce n'est pas une réduction : la fenêtre reste ouverte et visible.
+    await expect(win).toBeVisible();
+  });
+
+  test('le bouton Restaurer est traduit en anglais', async ({ browser }) => {
+    const context = await browser.newContext({ locale: 'en-US', viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' }).dblclick();
+    const button = page.locator('.bwin[data-app="terminal"] [data-action="maximize"]');
+    await expect(button).toHaveAttribute('aria-label', 'Maximize');
+    await button.click();
+    await expect(button).toHaveAttribute('aria-label', 'Restore');
+    await context.close();
+  });
+});

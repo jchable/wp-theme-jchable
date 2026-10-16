@@ -40,3 +40,26 @@ test.describe('article Bureau', () => {
     await expect(page.locator('textarea#comment')).toHaveCount(0);
   });
 });
+
+test.describe('retouches de présentation', () => {
+  test('la barre des tâches n’affiche plus « Propulsé par WordPress »', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.taskbar')).not.toContainText('WordPress');
+    await expect(page.locator('.taskbar')).not.toContainText('Propulsé');
+    await expect(page.locator('.taskbar a[href*="wordpress.org"]')).toHaveCount(0);
+  });
+
+  test('la fenêtre d’un article ou d’une page garde peu de marge autour du texte', async ({ page }) => {
+    for (const path of [POSTS.latest.path, '/a-propos/']) {
+      await page.goto(path);
+      const padding = await page.locator('.single-window > .window-body').evaluate((el) => {
+        const style = getComputedStyle(el);
+        return [style.paddingLeft, style.paddingRight, style.paddingTop].map(parseFloat);
+      });
+      for (const value of padding) {
+        expect(value, path).toBeGreaterThan(0); // « un peu » : pas zéro
+        expect(value, path).toBeLessThanOrEqual(16);
+      }
+    }
+  });
+});

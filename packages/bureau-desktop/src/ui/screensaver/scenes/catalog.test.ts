@@ -3,13 +3,15 @@ import { setLang, missingKeys } from '../../../core/i18n';
 import { DEFAULT_SCENE, SCENE_IDS, isSceneId, messages, sceneDescription, sceneLabel } from './catalog';
 
 describe('catalogue des écrans de veille', () => {
-  it('propose les cinq scènes 3D et le badge classique, avec le tunnel par défaut', () => {
-    expect(SCENE_IDS).toEqual(['tunnel', 'windows', 'graph', 'planet', 'voxel', 'classic']);
+  it('propose les quatre scènes 3D, avec le tunnel par défaut', () => {
+    expect(SCENE_IDS).toEqual(['tunnel', 'windows', 'graph', 'voxel']);
     expect(DEFAULT_SCENE).toBe('tunnel');
   });
 
   it('reconnaît les identifiants valides seulement', () => {
     expect(isSceneId('voxel')).toBe(true);
+    expect(isSceneId('planet')).toBe(false); // écrans de veille retirés
+    expect(isSceneId('classic')).toBe(false);
     expect(isSceneId('nope')).toBe(false);
     expect(isSceneId(undefined)).toBe(false);
   });

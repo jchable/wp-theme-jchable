@@ -1,7 +1,7 @@
 import './style.css';
-import { createScene, resize, step, type Scene as BadgeScene } from './physics';
 import { t } from './i18n';
 import { readSceneContext } from './scenes/context';
+import { DEFAULT_SCENE } from './scenes/catalog';
 import { loadScene as defaultLoadScene } from './scenes/loader';
 import type { SceneContext, SceneFactory, SceneId } from './scenes/types';
 
@@ -9,10 +9,10 @@ export interface ScreensaverOptions {
   reducedMotion?: () => boolean;
   requestFrame?: (cb: (time: number) => void) => number;
   cancelFrame?: (handle: number) => void;
-  /** L'écran de veille choisi par le visiteur (le badge JC si absent). */
+  /** L'écran de veille choisi par le visiteur (le tunnel néon si absent). */
   scene?: () => SceneId;
   /** Charge une scène 3D à la demande. */
-  loadScene?: (id: Exclude<SceneId, 'classic'>) => Promise<SceneFactory>;
+  loadScene?: (id: SceneId) => Promise<SceneFactory>;
   /** Le contexte d'une scène (titres, couleurs, langue) ; les dimensions sont ajoutées par l'écran de veille. */
   context?: () => SceneContext;
 }
@@ -25,7 +25,7 @@ export interface Screensaver {
   destroy(): void;
 }
 
-/** Ce que l'écran de veille fait tourner : le badge d'origine, une scène 3D, ou l'attente du chargement. */
+/** Ce que l'écran de veille fait tourner : une scène 3D, ou le ciel bleu (chargement en cours, ou repli si la scène échoue). */
 interface Renderer {
   step(dtMs: number): void;
   draw(ctx: CanvasRenderingContext2D, dpr: number): void;
@@ -49,44 +49,8 @@ function paintSky(ctx: CanvasRenderingContext2D, width: number, height: number):
   ctx.fillRect(0, 0, width, height);
 }
 
-function draw(ctx: CanvasRenderingContext2D, scene: BadgeScene, dpr: number): void {
-  const { width, height, badge } = scene;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.globalAlpha = 1;
-
-  paintSky(ctx, width, height);
-
-  ctx.fillStyle = '#ffffff';
-  for (const star of scene.stars) {
-    ctx.globalAlpha = star.alpha;
-    ctx.fillRect(Math.round(star.x), Math.round(star.y), star.size, star.size);
-  }
-  ctx.globalAlpha = 1;
-
-  const border = Math.max(2, Math.round(badge.w / 24));
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(badge.x, badge.y, badge.w, badge.h);
-  ctx.strokeStyle = '#ffd800';
-  ctx.lineWidth = border;
-  ctx.strokeRect(badge.x + border / 2, badge.y + border / 2, badge.w - border, badge.h - border);
-  ctx.fillStyle = '#ffd800';
-  ctx.font = `bold ${Math.round(badge.h * 0.46)}px "Courier New", Courier, monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('JC', badge.x + badge.w / 2, badge.y + badge.h / 2 + badge.h * 0.03);
-}
-
-const badgeRenderer = (width: number, height: number): Renderer => {
-  const scene = createScene(width, height, Math.random);
-  return {
-    step: (dtMs) => step(scene, dtMs),
-    draw: (ctx, dpr) => draw(ctx, scene, dpr),
-    resize: (w, h) => resize(scene, w, h),
-  };
-};
-
-/** Le ciel bleu, le temps que la scène choisie se charge. */
-const waitingRenderer = (width: number, height: number): Renderer => {
+/** Le ciel bleu : le temps que la scène choisie se charge, et en repli si elle ne peut pas tourner. */
+const skyRenderer = (width: number, height: number): Renderer => {
   let w = width;
   let h = height;
   return {
@@ -133,18 +97,18 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
 
   const size = (): { w: number; h: number } => ({ w: Math.max(1, window.innerWidth), h: Math.max(1, window.innerHeight) });
 
-  /** Une scène qui plante ne doit jamais laisser un écran figé : on retombe sur le badge JC. */
+  /** Une scène qui plante ne doit jamais casser la page : on retombe sur le ciel bleu. */
   const guarded = (action: (r: Renderer) => void): void => {
     if (!renderer) return;
     try {
       action(renderer);
     } catch {
       const { w, h } = size();
-      renderer = badgeRenderer(w, h);
+      renderer = skyRenderer(w, h);
       try {
         action(renderer);
       } catch {
-        /* le badge ne devrait pas échouer ; en tout cas on ne casse pas la page */
+        /* le ciel ne devrait pas échouer ; en tout cas on ne casse pas la page */
       }
     }
   };
@@ -191,7 +155,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
   };
 
   /** Charge la scène 3D puis prend sa place ; un arrêt ou un redémarrage entre-temps annule tout. */
-  const switchTo = async (id: Exclude<SceneId, 'classic'>, mine: number): Promise<void> => {
+  const switchTo = async (id: SceneId, mine: number): Promise<void> => {
     let next: Renderer;
     try {
       const factory = await (options.loadScene ?? defaultLoadScene)(id);
@@ -201,7 +165,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
     } catch {
       if (mine !== generation || !root) return;
       const { w, h } = size();
-      next = badgeRenderer(w, h);
+      next = skyRenderer(w, h);
     }
     renderer = next;
     render();
@@ -227,8 +191,8 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
 
       root.append(canvas, live);
       const { w, h } = size();
-      const id = sceneId ?? options.scene?.() ?? 'classic';
-      renderer = id === 'classic' ? badgeRenderer(w, h) : waitingRenderer(w, h);
+      const id = sceneId ?? options.scene?.() ?? DEFAULT_SCENE;
+      renderer = skyRenderer(w, h);
       fit();
       document.body.append(root);
       live.textContent = t('liveText');
@@ -242,7 +206,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       render();
       if (!ctx) return; // pas de canevas 2D : un fond uni, sans rien charger ni animer
       if (animated) frame = requestFrame(loop);
-      if (id !== 'classic') void switchTo(id, ++generation);
+      void switchTo(id, ++generation);
     },
 
     stop() {
