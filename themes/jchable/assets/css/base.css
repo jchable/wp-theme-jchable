@@ -21,22 +21,6 @@
 	content: "© ";
 }
 
-/* Lien d'évitement : invisible jusqu'à ce qu'il reçoive le focus clavier. */
-.jchable-skip-link {
-	position: absolute;
-	left: -9999px;
-	top: 0;
-	z-index: 100000;
-	padding: 0.75rem 1rem;
-	background: var(--wp--preset--color--contrast);
-	color: var(--wp--preset--color--base);
-}
-
-.jchable-skip-link:focus {
-	left: 1rem;
-	top: 1rem;
-}
-
 /* Cartes d'articles : le premier article de la page 1 est « à la une ». */
 .post-card .wp-block-post-title {
 	font-size: var(--wp--preset--font-size--large);
@@ -81,4 +65,32 @@ body:not(.paged) .post-feed.is-archive-feed .wp-block-post-template > li:first-c
 	font-family: var(--wp--preset--font-family--mono);
 	font-size: var(--wp--preset--font-size--small);
 	overflow-wrap: anywhere;
+}
+
+/* Débordements : mots interminables, URL, code, médias. */
+.wp-block-post-title,
+.wp-block-post-content,
+.wp-block-post-excerpt,
+.wp-block-query-title {
+	overflow-wrap: anywhere;
+}
+
+.wp-block-post-content pre,
+.wp-block-code {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.wp-block-post-content img,
+.wp-block-post-featured-image img {
+	max-width: 100%;
+	height: auto;
+}
+
+.site-header .wp-block-navigation__container {
+	flex-wrap: wrap;
+}
+
+.wp-block-search__inside-wrapper {
+	min-width: 0;
 }

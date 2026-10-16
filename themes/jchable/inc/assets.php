@@ -23,13 +23,3 @@ add_action(
 		add_editor_style( 'assets/css/base.css' );
 	}
 );
-
-// Lien d'évitement écrit en HTML : celui du cœur (thèmes blocs) est créé en JavaScript
-// et disparaîtrait sans JS. Chaque gabarit donne l'ancre « contenu » à son <main>.
-remove_action( 'wp_enqueue_scripts', 'wp_enqueue_block_template_skip_link' );
-add_action(
-	'wp_body_open',
-	static function (): void {
-		echo '<a class="jchable-skip-link" href="#contenu">Aller au contenu</a>';
-	}
-);

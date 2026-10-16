@@ -206,11 +206,8 @@ $sitemap = jchable_seed_post(
 );
 update_post_meta( $sitemap, '_wp_page_template', 'plan-du-site' );
 
-// Le bloc Navigation sans menu crée un menu de repli au premier affichage. On le crée ici,
-// une seule fois, pour que les tests lancés en parallèle n'en créent pas plusieurs.
-if ( class_exists( 'WP_Navigation_Fallback' ) ) {
-	WP_Navigation_Fallback::get_fallback();
-}
+// Menu principal réel (le menu de repli de WordPress produit des listes imbriquées invalides).
+require __DIR__ . "/navigation.php";
 
 update_option( 'jchable_seeded', 1 );
 WP_CLI::success( 'Contenu de test créé.' );
