@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { listThemeFiles } from './files.mjs';
@@ -61,5 +61,29 @@ test('sans option, tout est inclus', () => {
     assert.deepEqual(listThemeFiles(dir), ['assets/doom/doom1.wad', 'style.css']);
   } finally {
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('refuse les secrets et les sauvegardes au lieu de les publier', () => {
+  for (const name of ['.env', '.env.production', 'private.key', 'backup.sql', 'functions.php.bak', 'wp-config.php']) {
+    const dir = makeTheme(['style.css', name]);
+    try {
+      assert.throws(() => listThemeFiles(dir), /Fichier privé interdit/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+});
+
+test('ne suit pas les liens de dossier extérieurs au thème', () => {
+  const outside = makeTheme(['private.txt']);
+  const dir = makeTheme(['style.css']);
+  try {
+    symlinkSync(outside, join(dir, 'linked'), process.platform === 'win32' ? 'junction' : 'dir');
+    assert.throws(() => listThemeFiles(dir), /Lien symbolique interdit/);
+  } finally {
+    rmSync(join(dir, 'linked'), { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
   }
 });

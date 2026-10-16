@@ -1,8 +1,9 @@
-import { readdirSync, statSync } from 'node:fs';
+import { readdirSync, lstatSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
-const EXCLUDED_DIRS = new Set(['node_modules', 'src', '.git']);
-const EXCLUDED_FILES = [/\.map$/, /^\.DS_Store$/, /^Thumbs\.db$/];
+const EXCLUDED_DIRS = new Set(['node_modules', 'src']);
+const EXCLUDED_FILES = [/\.map$/, /^Thumbs\.db$/];
+const PRIVATE_FILES = /(?:^\.env(?:\.|$)|\.(?:pem|key|p12|pfx|sql|bak|old|orig|swp)$|~$|^wp-config\.php$)/i;
 
 /**
  * Fichiers à mettre dans le zip d'un thème.
@@ -11,17 +12,23 @@ const EXCLUDED_FILES = [/\.map$/, /^\.DS_Store$/, /^Thumbs\.db$/];
  * @returns {string[]} chemins relatifs, séparés par « / », triés
  */
 export function listThemeFiles(themeDir, { exclude = [] } = {}) {
+  if (lstatSync(themeDir).isSymbolicLink()) throw new Error(`Lien symbolique interdit : ${themeDir}`);
   const files = [];
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
       const full = join(dir, name);
-      if (statSync(full).isDirectory()) {
+      const rel = relative(themeDir, full).split(sep).join('/');
+      const stat = lstatSync(full);
+      if (stat.isSymbolicLink()) throw new Error(`Lien symbolique interdit : ${full}`);
+      if (PRIVATE_FILES.test(name)) throw new Error(`Fichier privé interdit dans le thème : ${full}`);
+      if (name.startsWith('.')) continue;
+      if (exclude.some((prefix) => rel.startsWith(prefix))) continue;
+      if (stat.isDirectory()) {
         if (!EXCLUDED_DIRS.has(name)) walk(full);
         continue;
       }
+      if (!stat.isFile()) throw new Error(`Fichier non régulier interdit : ${full}`);
       if (EXCLUDED_FILES.some((re) => re.test(name))) continue;
-      const rel = relative(themeDir, full).split(sep).join('/');
-      if (exclude.some((prefix) => rel.startsWith(prefix))) continue;
       files.push(rel);
     }
   };
