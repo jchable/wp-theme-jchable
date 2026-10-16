@@ -22,6 +22,13 @@
 - Pas de Vite ni de Vitest dans cette étape : le parent n'a rien à compiler. Ils arrivent avec la couche bureau (étape 3). Le reste du socle prévu au §2 est livré ici.
 - Commits fréquents ; messages en français ; terminer chaque message par `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
+### Écarts assumés par rapport à la spec (§3)
+
+- **Pas de modèles de blocs (patterns) pour les cartes d'articles.** Un modèle inséré dans le bloc « Modèle d'article » d'une boucle de requête ne reçoit pas le contexte `postId` : le titre et la date seraient vides. Le balisage de la carte est donc écrit directement dans `home.html`, `archive.html` et `search.html`. La barre latérale est un morceau de gabarit, ce qui revient au même.
+- **Pas de gabarit `category.html` :** `archive.html` couvre les catégories par la hiérarchie des gabarits WordPress.
+- **Polices système dans le parent :** aucun fichier woff2 à héberger ici, et toujours aucun appel à Google Fonts. Les polices hébergées arrivent avec le premier thème enfant (Chivo pour Bureau).
+- **Chargement du manifeste Vite et filtre `jchable_sitemap_url` :** reportés aux étapes 2 et 3, qui en ont besoin.
+
 ## Review Focus
 
 1. **Recherche ou URL contenant du HTML** (`?s=<b>x</b>`, `/<script>…`) : le texte doit s'afficher tel quel, échappé, sans jamais injecter de balise. Tests : Task 6, `blocks.spec.ts` (« échappe la recherche » et « échappe le chemin de la 404 »).
@@ -114,7 +121,17 @@ Run : `npm install -D @wordpress/env @playwright/test @axe-core/playwright archi
 Puis : `npx playwright install chromium`
 Expected : `package.json` contient les 4 paquets dans `devDependencies` ; `package-lock.json` est créé.
 
-- [ ] **Step 4 : écrire `.gitignore` et `.editorconfig`**
+- [ ] **Step 4 : écrire `.gitattributes`, `.gitignore` et `.editorconfig`**
+
+`.gitattributes` (sous Windows, Git convertit sinon les fins de ligne en CRLF dans les fichiers du thème, ce qui donne des zips incohérents) :
+
+```
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary
+*.zip binary
+```
 
 `.gitignore` :
 
@@ -151,7 +168,6 @@ indent_size = 2
   "core": "https://wordpress.org/wordpress-7.1.3.zip",
   "phpVersion": "8.2",
   "port": 8888,
-  "testsPort": 8889,
   "plugins": [
     "https://downloads.wordpress.org/plugin/jetpack.latest-stable.zip",
     "https://downloads.wordpress.org/plugin/theme-check.latest-stable.zip"
@@ -202,7 +218,7 @@ Expected : `7.1.3`.
 - [ ] **Step 8 : commit**
 
 ```bash
-git add package.json package-lock.json .gitignore .editorconfig .wp-env.json themes/jchable/style.css
+git add package.json package-lock.json .gitattributes .gitignore .editorconfig .wp-env.json themes/jchable/style.css
 git commit -m "chore: dépôt npm et WordPress local (wp-env)"
 ```
 
@@ -243,7 +259,8 @@ if ( get_option( 'jchable_seeded' ) ) {
 }
 
 WP_CLI::runcommand( 'language core install fr_FR --activate' );
-WP_CLI::runcommand( 'rewrite structure "/%postname%/" --hard' );
+// Pas de --hard : l'image Docker de WordPress fournit déjà le .htaccess, et WP-CLI ne sait pas détecter mod_rewrite.
+WP_CLI::runcommand( 'rewrite structure "/%postname%/"' );
 
 // Le thème n'est activable qu'une fois templates/index.html écrit (Task 3).
 $jchable_theme = wp_get_theme( 'jchable' );
@@ -291,6 +308,10 @@ function jchable_seed_post( array $p, int $cat_id ): int {
 	);
 	if ( is_wp_error( $id ) ) {
 		WP_CLI::error( $id );
+	}
+	// Une date encore à venir (exécution le 16/10/2026 avant 10 h) donnerait un article « planifié » : on le publie quand même.
+	if ( 'future' === get_post_status( $id ) ) {
+		wp_publish_post( $id );
 	}
 	if ( ! empty( $p['lang'] ) ) {
 		update_post_meta( $id, 'jchable_lang', $p['lang'] );
@@ -574,7 +595,7 @@ test.describe('accueil', () => {
   test('a un titre de niveau 1 et une barre latérale', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Derniers articles');
-    await expect(page.locator('.site-sidebar')).toContainText('Archives');
+    await expect(page.locator('.site-columns > aside')).toContainText('Archives');
   });
 
   test('la page 2 liste les articles restants sans « à la une »', async ({ page }) => {
@@ -759,7 +780,9 @@ add_action(
 	min-width: 0;
 }
 
-.site-sidebar {
+/* La classe vient de l'attribut className du morceau de gabarit ; le second sélecteur sert de filet de sécurité. */
+.site-sidebar,
+.site-columns > aside {
 	flex: 1 1 280px;
 	min-width: 0;
 }
@@ -2085,7 +2108,6 @@ WP_CLI::success( 'Theme Check : aucune exigence bloquante.' );
 
 ```
 === jchable ===
-Contributors: julienchable
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
@@ -2115,7 +2137,12 @@ jchable is distributed under the terms of the GNU GPL v2 or later.
 Run : `npm run check`
 Expected : `Success: Theme Check : aucune exigence bloquante.`
 
-Corriger chaque ligne REQUIRED signalée, puis relancer. Les avertissements (WARNING, RECOMMENDED) sont à lire, sans obligation de les corriger. L'absence de `screenshot.png` est attendue à ce stade : la capture viendra avec le thème Bureau.
+Corriger chaque ligne REQUIRED signalée, puis relancer. Les avertissements (WARNING, RECOMMENDED) sont à lire, sans obligation de les corriger.
+
+Theme Check exige une capture d'écran. Si `screenshot.png` est signalé, la générer depuis le WordPress local (1200 × 900, format attendu par WordPress) :
+
+Run : `npx playwright screenshot --viewport-size=1200,900 http://localhost:8888/ themes/jchable/screenshot.png`
+Puis relancer `npm run check`, et ajouter `themes/jchable/screenshot.png` au commit.
 
 Si le script s'arrête sur « ne fournit pas run_themechecks_against_theme() » : activer le plugin (`npx wp-env run cli wp plugin activate theme-check`), lancer la vérification depuis Apparence › Theme Check, corriger les REQUIRED, et noter dans le README que la vérification se fait depuis l'admin.
 
