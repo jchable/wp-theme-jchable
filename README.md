@@ -137,6 +137,7 @@ Le code du bureau est en TypeScript (Vite). `npm run build:js` doit être relanc
 | `npm run test:e2e` | tests Playwright du thème parent (active `jchable`) |
 | `npm run test:e2e:bureau` | tests Playwright du thème Bureau (active `jchable-bureau`) |
 | `npm run check -- <thème>` | Theme Check (`jchable` ou `jchable-bureau`) ; `npm run check:all` pour les deux |
+| `npm run demo:video` | filme le bureau (Terminal, DOOM, Démineur, écrans de veille, 404) et écrit `dist/demo/bureau-demo.mp4` ; demande WordPress local démarré et ffmpeg |
 | `npm run zip` | compile le JS puis génère `dist/<thème>.zip` pour chaque thème ; `npm run zip -- --no-doom` fabrique `jchable-bureau-sans-doom.zip` (léger) |
 
 ## Tests

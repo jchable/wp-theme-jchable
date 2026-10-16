@@ -27,6 +27,7 @@
     "test:security:php": "wp-env run cli wp eval-file wp-content/jchable-tools/check/security.php",
     "check": "wp-env run cli wp eval-file wp-content/jchable-tools/check/theme-check.php",
     "zip": "npm run build:js && node tools/zip/zip.mjs",
+    "demo:video": "node tools/demo-video/record.cjs",
     "test:e2e:bureau": "playwright test -c playwright.bureau.config.ts",
     "fonts": "node tools/fonts/copy-fonts.mjs",
     "check:all": "npm run check -- jchable && npm run check -- jchable-bureau",
