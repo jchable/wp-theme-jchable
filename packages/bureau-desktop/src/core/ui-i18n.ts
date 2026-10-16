@@ -5,6 +5,7 @@ export const messages = {
   fr: {
     'win.minimize': 'Réduire',
     'win.maximize': 'Agrandir',
+    'win.restore': 'Restaurer',
     'win.close': 'Fermer',
     'win.loading': 'Chargement…',
     'win.crashed': '{title} a cessé de fonctionner.',
@@ -31,6 +32,7 @@ export const messages = {
     'menu.lang.en': 'English',
     'menu.rss': 'Flux RSS',
     'menu.properties': 'Propriétés',
+    'menu.preferences': 'Préférences…',
 
     'bsod.title': 'jchable Bureau',
     'bsod.default': 'Une erreur fatale est survenue. Le blog va tenter de continuer.',
@@ -50,11 +52,13 @@ export const messages = {
     'app.trash': 'Corbeille',
     'app.doom': 'DOOM.EXE',
     'app.properties': 'Propriétés système',
+    'app.settings': 'Préférences',
     'app.doomUnsupported': 'DOOM.EXE demande un clavier : ouvrez ce blog sur un ordinateur pour jouer.',
   },
   en: {
     'win.minimize': 'Minimize',
     'win.maximize': 'Maximize',
+    'win.restore': 'Restore',
     'win.close': 'Close',
     'win.loading': 'Loading…',
     'win.crashed': '{title} has stopped working.',
@@ -81,6 +85,7 @@ export const messages = {
     'menu.lang.en': 'English',
     'menu.rss': 'RSS feed',
     'menu.properties': 'Properties',
+    'menu.preferences': 'Settings…',
 
     'bsod.title': 'jchable Desktop',
     'bsod.default': 'A fatal error has occurred. The blog will try to carry on.',
@@ -100,6 +105,7 @@ export const messages = {
     'app.trash': 'Recycle Bin',
     'app.doom': 'DOOM.EXE',
     'app.properties': 'System Properties',
+    'app.settings': 'Settings',
     'app.doomUnsupported': 'DOOM.EXE needs a keyboard: open this blog on a computer to play.',
   },
 };

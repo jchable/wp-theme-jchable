@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-bureau/taskbar-links",
+  "title": "Liens de la barre des tâches",
+  "category": "theme",
+  "description": "Petites icônes de la barre des tâches, à côté de l'heure : plan du site et flux RSS.",
+  "textdomain": "jchable-bureau",
+  "supports": { "html": false, "autoRegister": true },
+  "render": "file:./render.php"
+}

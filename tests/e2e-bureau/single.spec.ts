@@ -40,3 +40,29 @@ test.describe('article Bureau', () => {
     await expect(page.locator('textarea#comment')).toHaveCount(0);
   });
 });
+
+test.describe('retouches de présentation', () => {
+  test('la barre des tâches n’affiche plus « Propulsé par WordPress »', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.taskbar')).not.toContainText('WordPress');
+    await expect(page.locator('.taskbar')).not.toContainText('Propulsé');
+    await expect(page.locator('.taskbar a[href*="wordpress.org"]')).toHaveCount(0);
+  });
+
+  test('le texte d’un article ou d’une page occupe la fenêtre, avec juste un peu de marge', async ({ page }, info) => {
+    test.skip(info.project.name === 'mobile');
+    for (const path of [POSTS.latest.path, '/a-propos/']) {
+      await page.goto(path);
+      const gaps = await page.locator('.single-window').evaluate((win) => {
+        const box = win.getBoundingClientRect();
+        const title = win.querySelector('.wp-block-post-title')!.getBoundingClientRect();
+        const content = win.querySelector('.wp-block-post-content')!.getBoundingClientRect();
+        return [title.left - box.left, box.right - title.right, content.left - box.left, box.right - content.right];
+      });
+      for (const gap of gaps) {
+        expect(gap, path).toBeGreaterThan(8); // « un peu » : pas collé au bord
+        expect(gap, path).toBeLessThanOrEqual(64); // et plus les ~125 px d'avant
+      }
+    }
+  });
+});

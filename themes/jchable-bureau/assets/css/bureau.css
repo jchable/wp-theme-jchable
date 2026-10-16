@@ -40,23 +40,19 @@ body {
 	padding-block: var(--wp--preset--spacing--50);
 }
 
-/* ---------- Barre de menu ---------- */
+/* ---------- En-tête du site ---------- */
 
+/* Pas de bandeau en haut : le nom du site est dans la barre des tâches et dans la fenêtre d'accueil.
+   L'en-tête reste dans la page, masqué à l'écran, pour les lecteurs d'écran. */
 .menubar {
-	background: var(--bureau-paper);
-	border-bottom: 2px solid var(--bureau-ink);
-	padding-block: 0.375rem;
-	font-family: var(--wp--preset--font-family--mono);
-	font-size: 0.8125rem;
-}
-
-.menubar .wp-block-site-title {
+	position: absolute;
+	width: 1px;
+	height: 1px;
 	margin: 0;
-	font-weight: 700;
-}
-
-.menubar .wp-block-site-title a {
-	text-decoration: none;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
 }
 
 /* ---------- Colonnes : icônes | contenu | barre latérale ---------- */
@@ -197,6 +193,12 @@ body {
 
 .window-body {
 	padding: clamp(1rem, 2.5vw, 1.75rem);
+}
+
+/* Articles et pages : le texte occupe toute la largeur de la fenêtre (les 720 px du thème laissaient de grandes marges
+   de chaque côté), avec juste un peu d'air. */
+.single-window {
+	--wp--style--global--content-size: 100%;
 }
 
 .window--paper > .window-titlebar {
@@ -571,12 +573,45 @@ body:not(.paged) .post-feed .wp-block-post-template > li:first-child .wp-block-p
 	margin: 0;
 }
 
-.taskbar .taskbar-credit a {
-	color: var(--bureau-ink);
+.taskbar .taskbar-links {
+	display: flex;
+	gap: 0.375rem;
+	margin-left: auto;
+}
+
+.taskbar .taskbar-link {
+	position: relative;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 2.25rem;
+	height: 2.25rem;
+	border: 2px solid var(--bureau-ink);
+	background: #fff;
+}
+
+.taskbar .taskbar-link:hover,
+.taskbar .taskbar-link:focus-visible {
+	background: var(--wp--preset--color--yellow);
+}
+
+.taskbar .taskbar-link img {
+	display: block;
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+/* Libellé pour les lecteurs d'écran seulement. */
+.taskbar .taskbar-link-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
 }
 
 .taskbar .taskbar-clock {
-	margin-left: auto;
 	background: #fff;
 }
 

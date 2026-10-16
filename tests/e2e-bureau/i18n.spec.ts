@@ -30,7 +30,7 @@ test.describe('interface en anglais (navigateur anglais)', () => {
     await expect(page.locator('.welcome .window-title')).toHaveText('welcome.txt');
     await expect(page.locator('.site-sidebar .window-titlebar')).toHaveText(['Search…', 'Archives', 'About']);
     await expect(page.locator('.retro-pagination')).toContainText('Older posts');
-    await expect(page.locator('.taskbar')).toContainText('Powered by');
+    await expect(page.locator('.taskbar')).not.toContainText('Powered by');
   });
 
   test('le contenu des articles n’est jamais traduit', async ({ page }) => {
@@ -44,9 +44,11 @@ test.describe('interface en anglais (navigateur anglais)', () => {
   test('les icônes du bureau et le menu Démarrer sont en anglais', async ({ page }, info) => {
     test.skip(!isDesktop(info.project.name));
     await page.goto('/');
-    for (const label of ['Home', 'About', 'Site map', 'Search', 'Terminal', 'Minesweeper.exe', 'Recycle Bin']) {
+    for (const label of ['Home', 'About', 'Search', 'Terminal', 'Minesweeper.exe', 'Recycle Bin']) {
       await expect(page.locator('#bureau-desktop .bicon', { hasText: label }).first()).toBeVisible();
     }
+    await expect(page.locator('.taskbar .taskbar-link--sitemap')).toHaveAccessibleName('Site map');
+    await expect(page.locator('.taskbar .taskbar-link--rss')).toHaveAccessibleName('RSS feed');
     await page.locator('.start-button').click();
     const menu = page.locator('.bmenu');
     await expect(menu).toHaveAttribute('aria-label', 'Start menu');

@@ -1,0 +1,48 @@
+import { makeT } from '../../core/i18n';
+
+export const messages = {
+  fr: {
+    title: 'Préférences',
+    saver: 'Écran de veille',
+    saverAuto: 'Lancer l’écran de veille automatiquement',
+    saverDelay: 'Après une inactivité de',
+    minutes: '{n} minutes',
+    minute: '{n} minute',
+    preview: 'Aperçu',
+    previewHint: 'Aperçu plein écran : bougez la souris pour revenir.',
+    language: 'Langue de l’interface',
+    'lang.auto': 'Automatique (celle du navigateur)',
+    'lang.fr': 'Français',
+    'lang.en': 'English',
+    sound: 'Son',
+    soundOn: 'Activer les sons du bureau',
+    desktop: 'Bureau',
+    reset: 'Réorganiser les icônes',
+    close: 'Fermer',
+    save: 'Enregistrer',
+    saved: 'Préférences enregistrées.',
+  },
+  en: {
+    title: 'Settings',
+    saver: 'Screensaver',
+    saverAuto: 'Start the screensaver automatically',
+    saverDelay: 'After being idle for',
+    minutes: '{n} minutes',
+    minute: '{n} minute',
+    preview: 'Preview',
+    previewHint: 'Full-screen preview: move the mouse to return.',
+    language: 'Interface language',
+    'lang.auto': 'Automatic (browser language)',
+    'lang.fr': 'Français',
+    'lang.en': 'English',
+    sound: 'Sound',
+    soundOn: 'Turn on the desktop sounds',
+    desktop: 'Desktop',
+    reset: 'Arrange icons',
+    close: 'Close',
+    save: 'Save',
+    saved: 'Settings saved.',
+  },
+};
+
+export const t = makeT(messages);

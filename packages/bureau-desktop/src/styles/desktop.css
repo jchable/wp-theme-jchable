@@ -239,6 +239,23 @@ html.bureau-desktop-on .sidebar-windows .window {
 	background: var(--b-yellow);
 }
 
+.bwin-btn svg {
+	width: 14px;
+	height: 14px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.6;
+}
+
+/* Le carré de devant masque celui de derrière (double carré = restaurer). */
+.bwin-btn svg rect:last-child {
+	fill: var(--b-paper);
+}
+
+.bwin-btn:hover svg rect:last-child {
+	fill: var(--b-yellow);
+}
+
 .bwin-body {
 	flex: 1 1 auto;
 	min-height: 0;
@@ -527,4 +544,116 @@ html:not(.bureau-desktop-on) .bwin-handle {
 	.window--dragging {
 		opacity: 1;
 	}
+}
+
+/* Fenêtre Préférences. */
+.bset {
+	display: grid;
+	gap: 0.75rem;
+	padding: 1rem 1.25rem;
+}
+
+.bset-section {
+	margin: 0;
+	padding: 0.5rem 0.75rem 0.75rem;
+	border: 2px solid var(--b-ink);
+}
+
+.bset-section legend {
+	padding: 0 0.4rem;
+	font-weight: 700;
+}
+
+.bset-scenes {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.bset-choice {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.6rem;
+	padding: 0.3rem 0.25rem;
+	cursor: pointer;
+}
+
+.bset-choice input {
+	flex: none;
+	margin-top: 0.25rem;
+	accent-color: var(--b-ink);
+}
+
+.bset-text {
+	display: grid;
+}
+
+.bset-label {
+	font-weight: 700;
+}
+
+.bset-desc {
+	font-size: 0.85em;
+	opacity: 0.8;
+}
+
+.bset-delay-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.3rem 0.25rem;
+}
+
+.bset-delay {
+	padding: 0.25rem 0.4rem;
+	border: 2px solid var(--b-ink);
+	background: var(--b-paper);
+	color: var(--b-ink);
+	font: inherit;
+}
+
+.bset-btn {
+	margin: 0.35rem 0.25rem 0;
+	padding: 0.4rem 1rem;
+	border: 2px solid var(--b-ink);
+	background: var(--b-paper);
+	box-shadow: 3px 3px 0 var(--b-ink);
+	color: var(--b-ink);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.bset-btn:focus-visible,
+.bset-choice input:focus-visible,
+.bset-delay:focus-visible {
+	outline: 3px solid var(--b-ink);
+	outline-offset: 2px;
+}
+
+.bset-actions {
+	position: sticky;
+	bottom: 0;
+	z-index: 1;
+	margin: 0 -1.25rem -1rem;
+	padding: 0.5rem 1.25rem 0.75rem;
+	border-top: 2px solid var(--b-ink);
+	background: var(--b-paper);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.25rem;
+}
+
+.bset-status {
+	flex: 1 1 auto;
+	margin: 0.35rem 0.25rem 0;
+	font-size: 0.9em;
+}
+
+.bset-btn:disabled {
+	opacity: 0.5;
+	box-shadow: none;
+	cursor: default;
 }

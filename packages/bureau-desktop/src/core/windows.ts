@@ -25,6 +25,10 @@ export interface WindowManagerOptions {
   leftInset: () => number;
   playSound: (name: SoundName) => void;
   openBsod: (message?: string) => void;
+  /** Capacités transmises aux applis qui en ont besoin (Préférences). */
+  settings?: AppContext['settings'];
+  previewScreensaver?: AppContext['previewScreensaver'];
+  resetIcons?: AppContext['resetIcons'];
 }
 
 interface OpenWindow {
@@ -36,6 +40,27 @@ interface OpenWindow {
   opener: Element | null;
   maximized: boolean;
   restoreBox: { left: string; top: string; width: string; height: string } | null;
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/** L'icône du bouton d'agrandissement : un carré pour agrandir, deux carrés superposés pour restaurer la taille. */
+function sizeIcon(restore: boolean): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 12 12');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  const square = (x: number, y: number, size: number): SVGRectElement => {
+    const rect = document.createElementNS(SVG_NS, 'rect');
+    rect.setAttribute('x', String(x));
+    rect.setAttribute('y', String(y));
+    rect.setAttribute('width', String(size));
+    rect.setAttribute('height', String(size));
+    return rect;
+  };
+  if (restore) svg.append(square(3.5, 1, 7.5), square(1, 3.5, 7.5));
+  else svg.append(square(1.5, 1.5, 9));
+  return svg;
 }
 
 /** Fenêtres des applis : ouverture, déplacement, réduction, fermeture, empilement. */
@@ -195,6 +220,12 @@ export class WindowManager {
       win.maximized = true;
       win.el.classList.add('bwin--maximized');
     }
+    // Agrandie, la fenêtre propose de rétrécir (double carré), pas de se réduire dans la barre des tâches.
+    const button = win.el.querySelector<HTMLElement>('[data-action="maximize"]');
+    if (button) {
+      button.setAttribute('aria-label', win.maximized ? t('win.restore') : t('win.maximize'));
+      button.replaceChildren(sizeIcon(win.maximized));
+    }
     this.notify();
   }
 
@@ -243,7 +274,7 @@ export class WindowManager {
     controls.className = 'bwin-controls';
     for (const [action, label, glyph] of [
       ['minimize', t('win.minimize'), '_'],
-      ['maximize', t('win.maximize'), '□'],
+      ['maximize', t('win.maximize'), ''],
       ['close', t('win.close'), '×'],
     ] as const) {
       const button = document.createElement('button');
@@ -251,10 +282,14 @@ export class WindowManager {
       button.className = 'bwin-btn';
       button.dataset['action'] = action;
       button.setAttribute('aria-label', label);
-      const glyphEl = document.createElement('span');
-      glyphEl.setAttribute('aria-hidden', 'true');
-      glyphEl.textContent = glyph;
-      button.append(glyphEl);
+      if (action === 'maximize') {
+        button.append(sizeIcon(false));
+      } else {
+        const glyphEl = document.createElement('span');
+        glyphEl.setAttribute('aria-hidden', 'true');
+        glyphEl.textContent = glyph;
+        button.append(glyphEl);
+      }
       controls.append(button);
     }
     titlebar.append(titleEl, controls);
@@ -353,9 +388,12 @@ export class WindowManager {
   }
 
   private buildContext(win: OpenWindow, args: Record<string, unknown>): AppContext {
-    const { config, storage } = this.options;
+    const { config, storage, settings, previewScreensaver, resetIcons } = this.options;
     const id = win.app.id;
     return {
+      ...(settings ? { settings } : {}),
+      ...(previewScreensaver ? { previewScreensaver } : {}),
+      ...(resetIcons ? { resetIcons } : {}),
       config,
       args,
       storage: createAppStorage(id, storage),

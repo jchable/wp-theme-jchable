@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createScreensaver } from './overlay';
+import type { SceneFactory } from './scenes/types';
 
 interface Call {
   name: string;
@@ -28,7 +29,12 @@ function fakeContext() {
 
 const ACTIVITY = ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'wheel'] as const;
 const overlay = () => document.querySelector<HTMLElement>('.bscr-overlay');
-const jcDraws = (calls: Call[]) => calls.filter((c) => c.name === 'fillText' && c.args[0] === 'JC').length;
+const sceneDraws = (calls: Call[]) => calls.filter((c) => c.name === 'fillText' && c.args[0] === 'MARK').length;
+const flush = async (): Promise<void> => {
+  for (let i = 0; i < 5; i++) await Promise.resolve();
+};
+/** Une scène minimale : écrit « MARK » à chaque image. */
+const markScene: SceneFactory = () => ({ step: () => undefined, draw: (ctx) => ctx.fillText('MARK', 0, 0), resize: () => undefined });
 
 describe('createScreensaver', () => {
   let ctxRec: ReturnType<typeof fakeContext>;
@@ -51,7 +57,12 @@ describe('createScreensaver', () => {
   });
 
   const make = (reduced = false) =>
-    createScreensaver({ reducedMotion: () => reduced, requestFrame: requestFrame as never, cancelFrame: cancelFrame as never });
+    createScreensaver({
+      reducedMotion: () => reduced,
+      requestFrame: requestFrame as never,
+      cancelFrame: cancelFrame as never,
+      loadScene: async () => markScene,
+    });
 
   it('start() ajoute l overlay accessible, stop() le retire', () => {
     const s = make();
@@ -88,13 +99,14 @@ describe('createScreensaver', () => {
     s.stop();
   });
 
-  it('anime avec requestFrame et arrête la boucle au stop()', () => {
+  it('anime avec requestFrame et arrête la boucle au stop()', async () => {
     const s = make();
     s.start();
+    await flush();
     expect(requestFrame).toHaveBeenCalledTimes(1);
     frames.shift()!(1000);
     frames.shift()!(1016);
-    expect(jcDraws(ctxRec.calls)).toBeGreaterThanOrEqual(2);
+    expect(sceneDraws(ctxRec.calls)).toBeGreaterThanOrEqual(2);
     expect(requestFrame.mock.calls.length).toBeGreaterThanOrEqual(3);
     s.stop();
     expect(cancelFrame).toHaveBeenCalled();
@@ -132,11 +144,12 @@ describe('createScreensaver', () => {
     expect(s.isRunning()).toBe(false);
   });
 
-  it('mouvement réduit : une seule image, pas de boucle', () => {
+  it('mouvement réduit : une seule image, pas de boucle', async () => {
     const s = make(true);
     s.start();
+    await flush();
     expect(requestFrame).not.toHaveBeenCalled();
-    expect(jcDraws(ctxRec.calls)).toBe(1);
+    expect(sceneDraws(ctxRec.calls)).toBe(1);
     expect(overlay()).not.toBeNull();
     s.stop();
   });
@@ -156,12 +169,13 @@ describe('createScreensaver', () => {
     s.stop();
   });
 
-  it('mouvement réduit : redessine une image au redimensionnement', () => {
+  it('mouvement réduit : redessine une image au redimensionnement', async () => {
     const s = make(true);
     s.start();
-    const before = jcDraws(ctxRec.calls);
+    await flush();
+    const before = sceneDraws(ctxRec.calls);
     window.dispatchEvent(new Event('resize'));
-    expect(jcDraws(ctxRec.calls)).toBe(before + 1);
+    expect(sceneDraws(ctxRec.calls)).toBe(before + 1);
     expect(requestFrame).not.toHaveBeenCalled();
     s.stop();
   });

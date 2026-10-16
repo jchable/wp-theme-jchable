@@ -80,10 +80,20 @@ export const APPS: readonly BureauApp[] = [
     mobile: 'fullscreen',
     load: () => import('../apps/properties/index'),
   },
+  {
+    id: 'settings',
+    get title() {
+      return t('app.settings');
+    },
+    icon: 'properties',
+    defaultSize: { w: 520, h: 600 },
+    mobile: 'fullscreen',
+    load: () => import('../apps/settings/index'),
+  },
 ];
 
-/** Applis visibles comme icônes du bureau et dans le menu Démarrer (« Propriétés » n'y est pas). */
-export const LISTED_APPS: readonly BureauApp[] = APPS.filter((app) => app.id !== 'properties');
+/** Applis visibles comme icônes du bureau et dans le menu Démarrer (« Propriétés » et « Préférences » ont leur propre entrée). */
+export const LISTED_APPS: readonly BureauApp[] = APPS.filter((app) => app.id !== 'properties' && app.id !== 'settings');
 
 /** Fenêtre de lecture d'une page du site (À propos…) : une fenêtre par page. */
 export function pageApp(slug: string): BureauApp {

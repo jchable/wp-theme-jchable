@@ -23,7 +23,6 @@ const CHROME_EN: Readonly<Record<string, string>> = {
   'Archives par mois': 'Archives by month',
   'Catégories': 'Categories',
   '✦ Démarrer': '✦ Start',
-  'Propulsé par': 'Powered by',
   'Page introuvable': 'Page not found',
   'Une erreur fatale est survenue à l’adresse :': 'A fatal error occurred at address:',
   "Une erreur fatale est survenue à l'adresse :": 'A fatal error occurred at address:',
@@ -34,6 +33,7 @@ const CHROME_EN: Readonly<Record<string, string>> = {
   'Aucun article dans cette archive.': 'No posts in this archive.',
   "Aucun résultat pour cette recherche. Essayez d'autres mots :": 'No results for this search. Try other words:',
   'Flux RSS': 'RSS feed',
+  'Raccourcis': 'Shortcuts',
 };
 
 /** Parties de la page qui appartiennent au thème : le contenu des articles n'est jamais traduit. */

@@ -56,7 +56,7 @@ Apparence › Thèmes › activer **Twenty Eleven** (ou le thème précédent). 
 
 ## 6. Respect de la vie privée
 
-Le bureau écrit dans le **localStorage du navigateur du visiteur** : position des icônes et des fenêtres, langue, son, écran de veille, brouillon du WordPad. Ces données servent uniquement à une fonction demandée par le visiteur, restent sur son appareil et ne sont jamais envoyées au serveur, sans suivi ni partage : à notre avis, cela entre dans l'exemption de consentement de la directive ePrivacy (ce n'est pas un avis juridique). Une phrase dans votre page de confidentialité suffit.
+Le bureau écrit dans le **localStorage du navigateur du visiteur** : position des icônes et des fenêtres, langue, son, écran de veille (scène et délai), brouillon du WordPad. Ces données servent uniquement à une fonction demandée par le visiteur, restent sur son appareil et ne sont jamais envoyées au serveur, sans suivi ni partage : à notre avis, cela entre dans l'exemption de consentement de la directive ePrivacy (ce n'est pas un avis juridique). Une phrase dans votre page de confidentialité suffit.
 
 ## 7. Licences à connaître
 
@@ -134,6 +134,11 @@ et **9 assertions PHP** réussis. Les suites Chromium passent : **162 tests pare
 Bureau** ; 156 scénarios non applicables à la taille d'écran sont ignorés explicitement.
 Compilation, vérification TypeScript, syntaxe PHP et Theme Check des deux thèmes passent.
 Ces résultats ne couvrent pas Firefox/Safari ni la configuration du serveur de production.
+
+Après intégration des évolutions parallèles de `dev`, les vérifications passent également :
+526 tests unitaires, 8 tests d'outillage, 9 assertions PHP, 162 tests Chromium parent et
+295 tests Chromium Bureau (191 scénarios non applicables ignorés), types et compilation.
+L'audit npm ne signale toujours aucune vulnérabilité.
 
 ### Avant la production
 

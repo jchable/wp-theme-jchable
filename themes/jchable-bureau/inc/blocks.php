@@ -47,7 +47,7 @@ function jchable_bureau_page_label(): string {
 add_action(
 	'init',
 	static function (): void {
-		foreach ( [ 'start-button', 'clock', 'taskbar-tab', 'home-link' ] as $jchable_bureau_block ) {
+		foreach ( [ 'start-button', 'clock', 'taskbar-tab', 'home-link', 'taskbar-links' ] as $jchable_bureau_block ) {
 			register_block_type_from_metadata( get_stylesheet_directory() . '/blocks/' . $jchable_bureau_block );
 		}
 	}
