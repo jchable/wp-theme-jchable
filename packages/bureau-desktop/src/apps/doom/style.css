@@ -164,8 +164,3 @@
   font-size: 12px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .bapp-doom-progress {
-    transition: none;
-  }
-}

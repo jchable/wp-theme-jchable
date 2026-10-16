@@ -1,0 +1,56 @@
+DOOM1.WAD — DOOM shareware v1.9 (épisode 1 « Knee-Deep in the Dead »)
+=====================================================================
+
+Fichier : doom1.wad
+Taille  : 4 196 020 octets
+SHA-1   : 5b2e249b9c5133ec987b3ea77596381dc0d6bc1d
+SHA-256 : 1d7d43be501e67d927e415e0b8f3e29c3bf33075e859721816f652a526cac771
+MD5     : f0cefca49926d00903cf57551d901abe
+
+Ce fichier n'est PAS un logiciel libre. Il est © 1993 id Software, Inc.
+(aujourd'hui id Software LLC, filiale de ZeniMax Media / Microsoft).
+DOOM, le logo DOOM et les représentations de DOOM sont des marques d'id Software.
+
+Provenance
+----------
+Extrait SANS MODIFICATION de l'archive officielle de la version shareware 1.9
+publiée par id Software le 1er février 1995 :
+
+  idgames : idstuff/doom/doom19s.zip
+  SHA-1 de doom19s.zip : 8d0fbbbeba5ecb692a99f97e55dfb5365cfe5b77
+  (miroir utilisé : https://youfailit.net/pub/idgames/idstuff/doom/doom19s.zip)
+
+doom19s.zip contient DOOMS_19.1 + DOOMS_19.2 (archive auto-extractible) ;
+leur concaténation est une archive ZIP d'où DOOM1.WAD a été extrait tel quel.
+
+Conditions d'utilisation
+------------------------
+La version shareware de DOOM a été diffusée par id Software pour être copiée
+et redistribuée librement et gratuitement (modèle « shareware » de
+l'Association of Shareware Professionals, dont id Software était membre ;
+voir l'« OMBUDSMAN STATEMENT » de README.TXT), à condition qu'elle ne soit pas
+modifiée. L'archive 1.9 ne contient pas de contrat de licence séparé ; les
+seules mentions d'id Software qu'elle contient à ce sujet sont, mot pour mot
+(README.TXT de doom19s.zip) :
+
+  « id Software respectfully requests that you do not modify the
+    levels for the shareware version of DOOM.  We feel that the
+    distribution of new levels that work with the shareware version
+    of DOOM will lessen a potential user's incentive to purchase the
+    registered version.
+
+    If you would like to work with modified levels of DOOM, we
+    encourage you to purchase the registered version of the game. »
+
+  « DOOM, the DOOM logo and DOOM likenesses are trademarks of id
+    Software, inc.,(C)1993. »
+
+En pratique, pour ce thème :
+  * le fichier est servi tel quel (somme SHA-1 ci-dessus), jamais modifié ;
+  * il est fourni gratuitement, sans contrepartie ;
+  * aucun niveau modifié (PWAD) n'est chargé avec lui ;
+  * les droits d'id Software sont rappelés ici et dans README.md.
+
+Si ces conditions ne vous conviennent pas (ou si l'ayant droit le demande),
+remplacez doom1.wad par l'IWAD libre Freedoom (licence BSD à 3 clauses,
+https://freedoom.github.io/) : voir README.md, section « Remplacer le WAD ».

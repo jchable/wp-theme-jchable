@@ -80,6 +80,7 @@ class DoomSession {
   private readonly downloads = new AbortController();
   private readonly audioContexts = new Set<AudioContext>();
   private readonly log: string[] = [];
+  private nativeResume: (() => Promise<void>) | null = null;
   private iframe: HTMLIFrameElement | null = null;
   private frameWin: FrameWindow | null = null;
   private canvas: HTMLCanvasElement | null = null;
@@ -234,16 +235,23 @@ class DoomSession {
   private wireFrame(win: FrameWindow, canvas: HTMLCanvasElement): void {
     const signal = this.listeners.signal;
     // Le son ne part qu'après un geste : chaque AudioContext créé par le moteur est suivi (et mis en pause).
+    // Le moteur (SDL2) appelle lui-même resume() à chaque tampon audio : on filtre ces appels.
     const adopt = (audio: AudioContext): void => {
       this.audioContexts.add(audio);
       this.syncAudio();
     };
+    const mayPlay = (): boolean => this.audioAllowed();
     const Native = win.AudioContext;
     if (typeof Native === 'function') {
+      this.nativeResume = Native.prototype.resume;
       win.AudioContext = class extends Native {
         constructor(options?: AudioContextOptions) {
           super(options);
           adopt(this);
+        }
+
+        override resume(): Promise<void> {
+          return mayPlay() ? super.resume() : Promise.resolve();
         }
       };
     }
@@ -322,14 +330,23 @@ class DoomSession {
     this.syncAudio();
   }
 
+  private audioAllowed(): boolean {
+    return this.armed && !this.muted && !this.disposed && !this.failed;
+  }
+
   private syncAudio(): void {
     const contexts = new Set(this.audioContexts);
     const sdl = this.engine?.SDL2?.audioContext;
     if (sdl) contexts.add(sdl);
-    const play = this.armed && !this.muted && !this.disposed;
+    const play = this.audioAllowed();
+    const resume = this.nativeResume;
     for (const audio of contexts) {
       if (audio.state === 'closed') continue;
-      void (play ? audio.resume() : audio.suspend()).catch(() => {});
+      let pending: Promise<void>;
+      if (!play) pending = audio.suspend();
+      else if (resume) pending = resume.call(audio);
+      else pending = audio.resume();
+      void pending.catch(() => {});
     }
   }
 

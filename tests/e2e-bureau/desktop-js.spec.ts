@@ -300,6 +300,34 @@ test.describe('applis', () => {
   });
 });
 
+test.describe('DOOM', () => {
+  test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
+
+  test('le moteur se charge, affiche un écran, ne fait pas défiler la page et se ferme', async ({ page }) => {
+    test.setTimeout(120_000);
+    const files: string[] = [];
+    page.on('request', (request) => {
+      if (/\/assets\/doom\//.test(request.url())) files.push(request.url().split('/').pop()!.split('?')[0]!);
+    });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    expect(files).toEqual([]);
+    await openApp(page, 'DOOM.EXE');
+    const win = page.locator('.bwin[data-app="doom"]');
+    const frame = win.locator('iframe');
+    await expect(frame).toBeVisible();
+    // Un écran noir donne un PNG minuscule ; l'écran titre du jeu est bien plus lourd.
+    await expect.poll(async () => (await frame.screenshot()).length, { timeout: 90_000 }).toBeGreaterThan(8000);
+    expect(files).toEqual(expect.arrayContaining(['websockets-doom.wasm', 'doom1.wad']));
+    await win.locator('.bapp-doom-hint').click();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Space');
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await win.locator('.bwin-controls').getByRole('button', { name: 'Fermer' }).click();
+    await expect(win).toHaveCount(0);
+  });
+});
+
 test.describe('écran de veille', () => {
   test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
 
