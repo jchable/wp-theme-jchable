@@ -49,3 +49,18 @@ body:not(.paged) .post-feed .wp-block-post-template > li:first-child {
 body:not(.paged) .post-feed .wp-block-post-template > li:first-child .wp-block-post-title {
 	font-size: var(--wp--preset--font-size--x-large);
 }
+
+/* Article et page. */
+.post-meta {
+	gap: var(--wp--preset--spacing--30);
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.post-comments {
+	margin-top: var(--wp--preset--spacing--60);
+}
+
+.post-nav {
+	margin-top: var(--wp--preset--spacing--50);
+}
