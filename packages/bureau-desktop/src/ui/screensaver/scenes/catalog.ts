@@ -18,7 +18,7 @@ export const messages = {
     'scene.voxel': 'Bureau en voxels',
     'scene.classic': 'Badge JC',
     'scene.tunnel.desc': 'Un vol dans un tunnel de grilles néon, avec un « JC » en 3D au bout.',
-    'scene.windows.desc': 'Des fenêtres du bureau, avec tes derniers articles, qui dérivent dans l’espace.',
+    'scene.windows.desc': 'Des fenêtres du bureau, avec les derniers articles, qui dérivent dans l’espace.',
     'scene.graph.desc': 'Un graphe 3D de sujets et d’articles qui pulse, vu en orbite.',
     'scene.planet.desc': 'Un globe tapissé de code et de markdown, avec ses satellites.',
     'scene.voxel.desc': 'Un petit bureau en cubes qui tourne et dont l’écran s’allume.',

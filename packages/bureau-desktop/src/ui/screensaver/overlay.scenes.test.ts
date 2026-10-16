@@ -193,6 +193,15 @@ describe('createScreensaver : scènes 3D', () => {
     s.stop();
   });
 
+  it('sans contexte 2D, ne télécharge pas de scène et ne boucle pas pour rien', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation((() => null) as never);
+    const s = make();
+    expect(() => s.start()).not.toThrow();
+    expect(loadScene).not.toHaveBeenCalled();
+    expect(requestFrame).not.toHaveBeenCalled();
+    s.stop();
+  });
+
   it('la scène « classic » reste synchrone et ne charge rien', () => {
     const s = make({ scene: () => 'classic' });
     s.start();

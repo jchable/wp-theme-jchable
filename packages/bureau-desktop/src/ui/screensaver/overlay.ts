@@ -240,6 +240,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       window.addEventListener('resize', onResize, RESIZE);
 
       render();
+      if (!ctx) return; // pas de canevas 2D : un fond uni, sans rien charger ni animer
       if (animated) frame = requestFrame(loop);
       if (id !== 'classic') void switchTo(id, ++generation);
     },
