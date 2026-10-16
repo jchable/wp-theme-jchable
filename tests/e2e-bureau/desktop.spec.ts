@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { PAGES } from '../e2e/fixtures';
 
-test.describe('icônes du bureau', () => {
+test.describe('icônes du bureau (menu d’origine, sans JavaScript)', () => {
+  test.use({ javaScriptEnabled: false });
+
   test('5 icônes : 3 du menu du site et 2 outils', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.desktop-icons a.wp-block-navigation-item__content')).toHaveCount(5);

@@ -93,3 +93,18 @@ describe('fitBox', () => {
     expect(got.h).toBeGreaterThan(0);
   });
 });
+
+describe('clampPosition : la bande d’icônes reste libre', () => {
+  it('une fenêtre ne passe jamais à gauche de la limite donnée', () => {
+    const got = clampPosition({ x: -300, y: 50 }, { w: 400, h: 300 }, { w: 1000, h: 800 }, 40, 230);
+    expect(got.x).toBe(230);
+  });
+
+  it('sans limite, le comportement d’avant est inchangé', () => {
+    expect(clampPosition({ x: -500, y: 0 }, { w: 400, h: 300 }, { w: 1000, h: 800 }, 40).x).toBe(-360);
+  });
+
+  it('fitBox respecte aussi la limite', () => {
+    expect(fitBox({ x: 10, y: 10, w: 400, h: 300 }, { w: 1000, h: 700 }, 56, 230).x).toBe(230);
+  });
+});

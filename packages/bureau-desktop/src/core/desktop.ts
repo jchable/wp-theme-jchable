@@ -37,6 +37,7 @@ export function bootstrap(): void {
   const prefs = createPrefs(storage);
   const sound = createSound(() => prefs.get().sound);
   const mq = window.matchMedia(DESKTOP_QUERY);
+  const leftInset = (): number => parseFloat(getComputedStyle(root).getPropertyValue('--bureau-band')) || 0;
   const isMobile = (): boolean => !mq.matches;
 
   const windowsLayer = document.createElement('div');
@@ -57,6 +58,7 @@ export function bootstrap(): void {
     prefs,
     storage,
     isMobile,
+    leftInset,
     playSound: (name) => sound.play(name),
     openBsod: (message) => showBsod(message),
   });
@@ -71,7 +73,7 @@ export function bootstrap(): void {
   if (siteBlocks) siteBlocks.after(desktopHost);
   else document.body.append(desktopHost);
 
-  const sidebar = new SidebarWindows(prefs);
+  const sidebar = new SidebarWindows(prefs, document, leftInset);
   const items: IconItem[] = [
     ...readMenuIcons(document, config.assetsUrl, config.feedUrl),
     ...LISTED_APPS.map(

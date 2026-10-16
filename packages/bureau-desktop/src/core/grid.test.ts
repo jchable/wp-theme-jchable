@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CELL_SIZE, cellKey, clampCell, layoutIcons, nearestFreeCell, pointToCell, cellToPoint } from './grid';
+import { CELL_SIZE, bandLayout, cellKey, clampCell, layoutIcons, nearestFreeCell, pointToCell, cellToPoint } from './grid';
 
 describe('conversion point / case', () => {
   it('aligne un point sur la case la plus proche', () => {
@@ -71,5 +71,53 @@ describe('layoutIcons', () => {
     const got = layoutIcons(['a', 'b', 'c'], { a: { col: 1, row: 1 }, b: { col: 1, row: 1 } }, 5, 5);
     const keys = new Set(Object.values(got).map(cellKey));
     expect(keys.size).toBe(3);
+  });
+});
+
+describe('bandLayout : la bande d’icônes s’adapte à l’écran', () => {
+  it('deux colonnes équilibrées sur un écran large et peu haut (11 icônes, 1440×900)', () => {
+    const band = bandLayout(11, 1440, 900);
+    expect(band.cols).toBe(2);
+    expect(band.rows).toBe(6); // 6 + 5 : jamais 8 + 3
+  });
+
+  it('une seule colonne quand tout tient en hauteur', () => {
+    const band = bandLayout(11, 1920, 1300);
+    expect(band.cols).toBe(1);
+    expect(band.rows).toBe(11);
+  });
+
+  it('une seule colonne sur un écran étroit, même si la bande doit défiler', () => {
+    const band = bandLayout(11, 1000, 900);
+    expect(band.cols).toBe(1);
+    expect(band.rows).toBe(11);
+  });
+
+  it('trois colonnes au maximum sur un très grand écran peu haut', () => {
+    const band = bandLayout(11, 2200, 500);
+    expect(band.cols).toBe(3);
+    expect(band.rows).toBe(4);
+  });
+
+  it('la largeur de la bande suit le nombre de colonnes', () => {
+    expect(bandLayout(11, 1440, 900).widthPx).toBeGreaterThan(bandLayout(11, 1920, 1300).widthPx);
+  });
+
+  it('la place offerte suffit toujours pour toutes les icônes', () => {
+    for (const [vw, vh] of [[900, 400], [1100, 700], [1440, 900], [1920, 1080], [3000, 300]] as const) {
+      for (const n of [1, 5, 11, 20]) {
+        const { cols, rows } = bandLayout(n, vw, vh);
+        expect(cols * rows).toBeGreaterThanOrEqual(n);
+        expect(cols).toBeGreaterThanOrEqual(1);
+      }
+    }
+  });
+
+  it('les icônes se répartissent 6 puis 5 avec ces dimensions', () => {
+    const { cols, rows } = bandLayout(11, 1440, 900);
+    const ids = Array.from({ length: 11 }, (_, i) => `i${i}`);
+    const placed = layoutIcons(ids, {}, cols, rows);
+    const perColumn = [0, 1].map((c) => Object.values(placed).filter((cell) => cell.col === c).length);
+    expect(perColumn).toEqual([6, 5]);
   });
 });

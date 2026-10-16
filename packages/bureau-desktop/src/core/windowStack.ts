@@ -71,8 +71,8 @@ export interface Size {
  * Garde une fenêtre atteignable : au moins `grab` pixels restent visibles sur les côtés et en bas,
  * et la barre de titre ne sort jamais par le haut.
  */
-export function clampPosition(position: Point, size: Size, area: Size, grab: number): Point {
-  const minX = -(size.w - grab);
+export function clampPosition(position: Point, size: Size, area: Size, grab: number, minLeft = -Infinity): Point {
+  const minX = Math.max(-(size.w - grab), minLeft);
   const maxX = Math.max(area.w - grab, minX);
   const maxY = Math.max(area.h - grab, 0);
   return {
@@ -84,9 +84,9 @@ export function clampPosition(position: Point, size: Size, area: Size, grab: num
 export interface Box extends Point, Size {}
 
 /** Recadre une fenêtre dans l'écran quand celui-ci rétrécit : taille bornée, position atteignable. */
-export function fitBox(box: Point & { w: number; h: number }, area: Size, grab: number): Box {
-  const w = Math.max(1, Math.min(box.w, area.w - 24));
+export function fitBox(box: Point & { w: number; h: number }, area: Size, grab: number, minLeft = 0): Box {
+  const w = Math.max(1, Math.min(box.w, area.w - minLeft - 24));
   const h = Math.max(1, Math.min(box.h, area.h - 24));
-  const at = clampPosition({ x: box.x, y: box.y }, { w, h }, area, grab);
+  const at = clampPosition({ x: box.x, y: box.y }, { w, h }, area, grab, minLeft === 0 ? undefined : minLeft);
   return { x: at.x, y: at.y, w, h };
 }

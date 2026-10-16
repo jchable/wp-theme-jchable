@@ -9,28 +9,58 @@
 	--b-mono: var(--wp--preset--font-family--mono, ui-monospace, "Cascadia Code", Menlo, Consolas, monospace);
 }
 
-/* ---------- Bureau (grand écran) : les icônes se posent derrière le contenu ---------- */
+/* ---------- Bureau (grand écran) : une bande réservée aux icônes ---------- */
 
 #bureau-desktop {
 	display: none;
 }
 
+/* La bande est fixée à gauche de l'écran ; sa largeur (--bureau-band) s'adapte à la hauteur et à la largeur. */
 html.bureau-desktop-on #bureau-desktop {
 	display: block;
 	position: fixed;
-	inset: 0;
+	top: 0;
+	bottom: 56px; /* au-dessus de la barre des tâches */
+	left: 0;
 	z-index: 0;
+	width: var(--bureau-band, 0px);
+	overflow-x: hidden;
+	overflow-y: auto;
+	scrollbar-width: thin;
 }
 
-/* Le contenu passe devant les icônes, mais laisse passer la souris dans les vides. */
-html.bureau-desktop-on .wp-site-blocks {
-	pointer-events: none;
-}
-
+/* Le contenu occupe tout le reste de la largeur et ne passe jamais sous les icônes. */
 html.bureau-desktop-on .wp-site-blocks > header,
 html.bureau-desktop-on .wp-site-blocks > .site-body {
 	position: relative;
 	z-index: 1;
+}
+
+html.bureau-desktop-on .wp-site-blocks > .site-body {
+	box-sizing: border-box;
+	max-width: none;
+	padding-left: calc(var(--bureau-band, 0px) + clamp(12px, 1.5vw, 28px));
+}
+
+html.bureau-desktop-on .site-body > .site-columns {
+	max-width: none;
+	pointer-events: auto;
+}
+
+/* Le bloc du contenu s'étend sur toute la largeur : il laisse passer la souris au-dessus de la bande d'icônes. */
+html.bureau-desktop-on .wp-site-blocks > .site-body {
+	pointer-events: none;
+}
+
+/* Le menu d'origine (colonne de gauche) cède la place à la bande d'icônes. */
+html.bureau-desktop-on .site-body .site-columns > :first-child {
+	display: none;
+}
+
+@media (min-width: 900px) {
+	html.bureau-desktop-on .site-body .site-columns {
+		grid-template-columns: minmax(0, 1fr) clamp(260px, 20vw, 340px);
+	}
 }
 
 /* La barre des tâches reste collée en bas de l'écran, au-dessus des fenêtres. */
@@ -42,27 +72,6 @@ html.bureau-desktop-on .wp-site-blocks > footer {
 
 html.bureau-desktop-on .taskbar {
 	flex-wrap: nowrap;
-}
-
-html.bureau-desktop-on .wp-site-blocks > header,
-html.bureau-desktop-on .wp-site-blocks > footer,
-html.bureau-desktop-on .wp-site-blocks .window,
-html.bureau-desktop-on .wp-site-blocks .retro-pagination,
-html.bureau-desktop-on .wp-site-blocks .post-nav,
-html.bureau-desktop-on .wp-site-blocks .feed-title {
-	pointer-events: auto;
-}
-
-/* Deux colonnes d'icônes à gauche : le contenu se décale pour ne pas les recouvrir. */
-@media (min-width: 900px) {
-	html.bureau-desktop-on .site-body .site-columns {
-		grid-template-columns: 206px minmax(0, 1fr) 280px;
-	}
-}
-
-/* Le menu d'origine reste dans la page (lecture sans JavaScript) mais cède la place aux icônes. */
-html.bureau-desktop-on .desktop-icons {
-	visibility: hidden;
 }
 
 html.bureau-desktop-on .sidebar-windows .window {
@@ -119,7 +128,7 @@ html.bureau-desktop-on .sidebar-windows .window {
 	color: var(--b-ink);
 	font-family: var(--b-mono);
 	font-size: 0.75rem;
-	white-space: nowrap;
+	max-width: calc(var(--bureau-band, 216px) - 24px);
 	pointer-events: none;
 }
 

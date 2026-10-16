@@ -19,7 +19,7 @@ test.describe('bureau : grand écran', () => {
   test('11 icônes : 5 du menu du site et 6 applis ; le menu d’origine est masqué', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
-    await expect(page.locator('.desktop-icons')).toHaveCSS('visibility', 'hidden');
+    await expect(page.locator('.desktop-icons')).toBeHidden();
     for (const label of ['Accueil', 'Terminal', 'Démineur.exe', 'WORDPAD.EXE', 'Oh-Oh! Messenger', 'Corbeille', 'DOOM.EXE']) {
       await expect(page.locator('#bureau-desktop .bicon', { hasText: label })).toBeVisible();
     }
@@ -99,24 +99,24 @@ test.describe('bureau : grand écran', () => {
     expect(Math.abs(again!.y - moved!.y)).toBeLessThan(2);
   });
 
-  test('on déplace une icône ; sa place est mémorisée et « Réorganiser » la remet', async ({ page }) => {
+  test('on déplace une icône dans la bande ; sa place est mémorisée et « Réorganiser » la remet', async ({ page }) => {
     await page.goto('/');
-    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' });
+    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Démineur.exe' });
     const start = await icon.boundingBox();
     await page.mouse.move(start!.x + 40, start!.y + 30);
     await page.mouse.down();
-    await page.mouse.move(start!.x + 40 + 300, start!.y + 30 + 100, { steps: 8 });
+    await page.mouse.move(start!.x + 40, start!.y + 30 + 480, { steps: 8 });
     await page.mouse.up();
     const moved = await icon.boundingBox();
-    expect(moved!.x - start!.x).toBeGreaterThan(250);
+    expect(Math.round(moved!.y - start!.y)).toBe(480);
     await page.reload();
-    const reloaded = await page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' }).boundingBox();
+    const reloaded = await page.locator('#bureau-desktop .bicon', { hasText: 'Démineur.exe' }).boundingBox();
     expect(Math.abs(reloaded!.x - moved!.x)).toBeLessThan(2);
     expect(Math.abs(reloaded!.y - moved!.y)).toBeLessThan(2);
 
     await page.mouse.click(30, 820, { button: 'right' });
     await page.getByRole('menuitem', { name: 'Réorganiser les icônes' }).click();
-    const reset = await page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' }).boundingBox();
+    const reset = await page.locator('#bureau-desktop .bicon', { hasText: 'Démineur.exe' }).boundingBox();
     expect(Math.abs(reset!.x - start!.x)).toBeLessThan(2);
     expect(Math.abs(reset!.y - start!.y)).toBeLessThan(2);
   });
@@ -574,14 +574,14 @@ test.describe('correctifs de la revue finale', () => {
 
   test('un geste rapide déplace quand même l’icône', async ({ page }) => {
     await page.goto('/');
-    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' });
+    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Démineur.exe' });
     const start = await icon.boundingBox();
     await page.mouse.move(start!.x + 40, start!.y + 30);
     await page.mouse.down();
-    await page.mouse.move(start!.x + 40 + 400, start!.y + 30 + 40, { steps: 2 });
+    await page.mouse.move(start!.x + 40, start!.y + 30 + 480, { steps: 2 });
     await page.mouse.up();
     const moved = await icon.boundingBox();
-    expect(moved!.x - start!.x).toBeGreaterThan(300);
+    expect(Math.round(moved!.y - start!.y)).toBe(480);
   });
 
   test('DOOM : un panneau « À propos » donne les licences et le lien vers le code source', async ({ page }) => {
@@ -666,5 +666,75 @@ test.describe('« À propos » s’ouvre dans une fenêtre', () => {
     await win.getByText('clic').click();
     expect(await page.evaluate(() => (window as unknown as { __pwn?: number }).__pwn)).toBeUndefined();
     await expect(win.locator('script, [onerror]')).toHaveCount(0);
+  });
+});
+
+test.describe('bande d’icônes : jamais cachée, adaptée à la largeur', () => {
+  test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
+
+  const columns = async (page: Page): Promise<number[]> => {
+    const lefts = await page.locator('#bureau-desktop .bicon').evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().left)));
+    const distinct = [...new Set(lefts)].sort((x, y) => x - y);
+    return distinct.map((left) => lefts.filter((l) => l === left).length);
+  };
+
+  test('deux colonnes avec le même nombre d’icônes (6 et 5), jamais 8 et 3', async ({ page }) => {
+    await page.goto('/');
+    expect(await columns(page)).toEqual([6, 5]);
+  });
+
+  test('une seule colonne sur un écran très haut ou étroit', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1300 });
+    await page.goto('/');
+    expect(await columns(page)).toEqual([11]);
+    await page.setViewportSize({ width: 1000, height: 900 });
+    await expect.poll(async () => (await columns(page)).length).toBe(1);
+  });
+
+  test('le contenu est plus large qu’avant et occupe tout l’espace restant', async ({ page }) => {
+    await page.goto('/');
+    expect((await page.locator('main').boundingBox())!.width).toBeGreaterThanOrEqual(800);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await expect.poll(async () => (await page.locator('main').boundingBox())!.width).toBeGreaterThanOrEqual(1200);
+  });
+
+  test('le contenu ne passe jamais sous les icônes', async ({ page }) => {
+    await page.goto('/');
+    const band = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bureau-band')));
+    expect(band).toBeGreaterThan(100);
+    const main = await page.locator('main').boundingBox();
+    expect(main!.x).toBeGreaterThanOrEqual(band);
+  });
+
+  test('aucune fenêtre ne recouvre une icône, même tirée tout à gauche', async ({ page }) => {
+    await page.goto('/');
+    for (const title of ['Terminal', 'Démineur.exe', 'WORDPAD.EXE']) await openApp(page, title);
+    const win = page.locator('.bwin[data-app="terminal"]');
+    const bar = await win.locator('.bwin-titlebar').boundingBox();
+    await page.mouse.move(bar!.x + 80, bar!.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(2, bar!.y + 200, { steps: 8 });
+    await page.mouse.up();
+    const covered = await page.locator('#bureau-desktop .bicon').evaluateAll((icons) =>
+      icons.filter((icon) => {
+        const r = icon.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return hit?.closest('.bicon') !== icon;
+      }).map((icon) => (icon as HTMLElement).dataset['id']),
+    );
+    expect(covered).toEqual([]);
+  });
+
+  test('une icône lâchée sur le contenu revient dans la bande', async ({ page }) => {
+    await page.goto('/');
+    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' });
+    const start = await icon.boundingBox();
+    await page.mouse.move(start!.x + 40, start!.y + 30);
+    await page.mouse.down();
+    await page.mouse.move(900, 400, { steps: 8 });
+    await page.mouse.up();
+    const band = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bureau-band')));
+    const moved = await icon.boundingBox();
+    expect(moved!.x + moved!.width).toBeLessThanOrEqual(band);
   });
 });

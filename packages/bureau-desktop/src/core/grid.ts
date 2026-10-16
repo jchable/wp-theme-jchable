@@ -2,6 +2,11 @@
 
 export const CELL_SIZE = 96;
 
+/** Marge à gauche des icônes, hauteur réservée en haut (barre de menu) et en bas. */
+export const BAND_PAD_X = 12;
+export const BAND_TOP = 52;
+export const BAND_BOTTOM = 60; // la barre des tâches (≈ 54 px) reste libre
+
 export interface Cell {
   col: number;
   row: number;
@@ -82,4 +87,24 @@ export function layoutIcons(
     occupied.add(cellKey(free));
   }
   return placed;
+}
+
+export interface BandLayout {
+  cols: number;
+  rows: number;
+  /** Largeur de la bande en pixels (marges comprises). */
+  widthPx: number;
+}
+
+/**
+ * La bande d'icônes s'adapte à l'écran : autant de colonnes que nécessaire pour que tout tienne en hauteur
+ * (au plus 3, et une seule sur écran étroit), les icônes réparties à parts égales entre les colonnes.
+ */
+export function bandLayout(count: number, viewportW: number, viewportH: number): BandLayout {
+  const n = Math.max(1, count);
+  const rowsFit = Math.max(1, Math.floor((viewportH - BAND_TOP - BAND_BOTTOM) / CELL_SIZE));
+  const maxCols = viewportW >= 2000 ? 3 : viewportW >= 1100 ? 2 : 1;
+  const cols = Math.min(maxCols, Math.max(1, Math.ceil(n / rowsFit)));
+  const rows = Math.ceil(n / cols);
+  return { cols, rows, widthPx: BAND_PAD_X * 2 + cols * CELL_SIZE };
 }

@@ -1,4 +1,4 @@
-import { CELL_SIZE, cellKey, cellToPoint, clampCell, layoutIcons, nearestFreeCell, pointToCell } from '../core/grid';
+import { BAND_PAD_X, BAND_TOP, CELL_SIZE, bandLayout, cellKey, cellToPoint, clampCell, layoutIcons, nearestFreeCell, pointToCell } from '../core/grid';
 import type { Cell } from '../core/grid';
 import type { PrefsApi } from '../core/prefs';
 
@@ -22,8 +22,8 @@ export interface DesktopIconsOptions {
   onContextMenu: (x: number, y: number) => void;
 }
 
-const ORIGIN_X = 24;
-const ORIGIN_Y = 52;
+const ORIGIN_X = BAND_PAD_X;
+const ORIGIN_Y = BAND_TOP;
 const DRAG_THRESHOLD = 5;
 
 /**
@@ -74,6 +74,7 @@ export class DesktopIcons {
   }
 
   destroy(): void {
+    document.documentElement.style.removeProperty('--bureau-band');
     this.abort?.abort();
     this.abort = null;
     window.clearTimeout(this.resizeTimer);
@@ -87,10 +88,12 @@ export class DesktopIcons {
     this.layout();
   }
 
+  /** La bande s'adapte à l'écran ; sa largeur est publiée pour que le contenu et les fenêtres la laissent libre. */
   private measure(): void {
-    const { host } = this.options;
-    this.cols = Math.max(1, Math.floor((host.clientWidth - ORIGIN_X) / CELL_SIZE));
-    this.rows = Math.max(1, Math.floor((host.clientHeight - ORIGIN_Y - 16) / CELL_SIZE));
+    const band = bandLayout(this.options.items.length, window.innerWidth, window.innerHeight);
+    this.cols = band.cols;
+    this.rows = band.rows;
+    document.documentElement.style.setProperty('--bureau-band', `${band.widthPx}px`);
   }
 
   private layout(): void {

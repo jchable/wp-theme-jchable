@@ -20,6 +20,8 @@ export interface WindowManagerOptions {
   prefs: PrefsApi;
   storage: Storage | null;
   isMobile: () => boolean;
+  /** Largeur de la bande d'icônes : les fenêtres ne passent jamais dessus. */
+  leftInset: () => number;
   playSound: (name: SoundName) => void;
   openBsod: (message?: string) => void;
 }
@@ -167,7 +169,7 @@ export class WindowManager {
       const y = parseFloat(win.el.style.top) || 0;
       const w = parseFloat(win.el.style.width) || win.app.defaultSize.w;
       const h = parseFloat(win.el.style.height) || win.app.defaultSize.h;
-      const next = fitBox({ x, y, w, h }, area, GRAB);
+      const next = fitBox({ x, y, w, h }, area, GRAB, this.options.leftInset());
       Object.assign(win.el.style, { left: `${next.x}px`, top: `${next.y}px`, width: `${next.w}px`, height: `${next.h}px` });
     }
   }
@@ -295,13 +297,14 @@ export class WindowManager {
     const saved = this.options.prefs.get().windows[win.app.id];
     const size = win.app.defaultSize;
     const area = { w: window.innerWidth, h: window.innerHeight };
-    const width = Math.min(size.w, area.w - 24);
+    const width = Math.min(size.w, area.w - this.options.leftInset() - 24);
     const height = Math.min(size.h, area.h - 24);
     // Les fenêtres s'ouvrent à droite des deux colonnes d'icônes, en cascade.
-    const fallback = { x: 250 + this.cascade * 28, y: 70 + this.cascade * 28 };
+    const inset = this.options.leftInset();
+    const fallback = { x: Math.max(250, inset + 24) + this.cascade * 28, y: 70 + this.cascade * 28 };
     this.cascade = (this.cascade + 1) % 8;
     const start = saved ? { x: saved.x, y: saved.y } : fallback;
-    const at = clampPosition(start, { w: width, h: height }, area, GRAB);
+    const at = clampPosition(start, { w: width, h: height }, area, GRAB, inset);
     Object.assign(win.el.style, { left: `${at.x}px`, top: `${at.y}px`, width: `${width}px`, height: `${height}px` });
   }
 
@@ -330,6 +333,7 @@ export class WindowManager {
           { w: rect.width, h: rect.height },
           { w: window.innerWidth, h: window.innerHeight },
           GRAB,
+          this.options.leftInset(),
         );
         win.el.style.left = `${next.x}px`;
         win.el.style.top = `${next.y}px`;
