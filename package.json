@@ -24,6 +24,7 @@
     "env:reset": "wp-env reset all && npm run env:seed",
     "test:e2e": "playwright test",
     "test:tools": "node --test \"tools/**/*.test.mjs\"",
+    "test:security:php": "wp-env run cli wp eval-file wp-content/jchable-tools/check/security.php",
     "check": "wp-env run cli wp eval-file wp-content/jchable-tools/check/theme-check.php",
     "zip": "npm run build:js && node tools/zip/zip.mjs",
     "test:e2e:bureau": "playwright test -c playwright.bureau.config.ts",
