@@ -42,3 +42,5 @@ Le site est en français. Pour un article écrit dans une autre langue, ajouter 
 
 1. `npm run zip`
 2. Dans l'admin : Apparence › Thèmes › Ajouter › Téléverser un thème, puis choisir `dist/jchable.zip`.
+3. Activer le thème, puis ouvrir Apparence › Éditeur › Navigation et **choisir ou créer le menu principal** (Accueil, À propos…). Sans menu choisi, WordPress en fabrique un automatiquement à partir des pages, et sa structure de listes peut être invalide pour l'accessibilité.
+4. Vérifier un article avec commentaires (le formulaire Jetpack remplace-t-il bien celui de WordPress ?), l'accueil, une recherche et une page 404.

@@ -94,3 +94,29 @@ body:not(.paged) .post-feed.is-archive-feed .wp-block-post-template > li:first-c
 .wp-block-search__inside-wrapper {
 	min-width: 0;
 }
+
+/* Autres textes qui peuvent contenir un mot interminable (commentaires, catégories, menu, titre du site…). */
+.wp-block-comment-content,
+.wp-block-comment-author-name,
+.wp-block-post-terms,
+.wp-block-archives,
+.wp-block-categories,
+.wp-block-site-title,
+.wp-block-site-tagline,
+.wp-block-navigation-item__label,
+.post-nav {
+	overflow-wrap: anywhere;
+}
+
+.wp-block-post-content :is(iframe, embed, object, video) {
+	max-width: 100%;
+}
+
+/* Les entrées de menu sont des éléments flex : sans ces règles, elles ne rétrécissent pas. */
+.site-header .wp-block-navigation,
+.site-header .wp-block-navigation__container,
+.site-header .wp-block-navigation-item,
+.site-header .wp-block-navigation-item__content {
+	min-width: 0;
+	max-width: 100%;
+}
