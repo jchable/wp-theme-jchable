@@ -11,7 +11,7 @@ test.describe('écran bleu (404)', () => {
     expect(background).toBe('rgb(0, 0, 170)');
     const link = page.getByRole('link', { name: /Appuyez sur une touche/ });
     await link.click();
-    await expect(page).toHaveURL(/localhost:8888\/$/);
+    await expect(page).toHaveURL('/');
   });
 
   test('pas d’icônes ni de fenêtres sur l’écran bleu', async ({ page }) => {

@@ -31,7 +31,7 @@ test.describe('bureau : grand écran', () => {
     await expect(page).toHaveURL(/\/a-propos\/$/);
     await expect(page.locator('#bureau-desktop .bicon--selected')).toHaveCount(1);
     await page.locator('#bureau-desktop .bicon', { hasText: 'Accueil' }).dblclick();
-    await expect(page).toHaveURL(/localhost:8888\/$/);
+    await expect(page).toHaveURL('/');
   });
 
   test('une bulle explique le double-clic au premier simple clic, une seule fois', async ({ page }) => {
@@ -612,7 +612,7 @@ test.describe('« À propos » s’ouvre dans une fenêtre', () => {
     await expect(win.getByRole('heading', { level: 1 })).toHaveText('À propos');
     await expect(win).toContainText('Open Knowledge Format');
     await expect(win.getByRole('link', { name: /Ouvrir la page/ })).toHaveAttribute('href', /\/a-propos\/$/);
-    await expect(page).toHaveURL(/localhost:8888\/$/);
+    await expect(page).toHaveURL('/');
     await win.getByRole('button', { name: 'Fermer' }).click();
     await expect(win).toHaveCount(0);
   });
@@ -628,7 +628,7 @@ test.describe('« À propos » s’ouvre dans une fenêtre', () => {
     test.skip(!isDesktop(info.project.name));
     await page.goto('/a-propos/');
     await openApp(page, 'Accueil');
-    await expect(page).toHaveURL(/localhost:8888\/$/);
+    await expect(page).toHaveURL('/');
   });
 
   test('le menu Démarrer ouvre aussi « À propos » dans une fenêtre', async ({ page }, info) => {
@@ -636,7 +636,7 @@ test.describe('« À propos » s’ouvre dans une fenêtre', () => {
     await page.goto('/');
     await openFromStartMenu(page, 'À propos');
     await expect(page.locator('.bwin[data-app="page-a-propos"]')).toBeVisible();
-    await expect(page).toHaveURL(/localhost:8888\/$/);
+    await expect(page).toHaveURL('/');
   });
 
   test('si l’API échoue, la page s’ouvre normalement', async ({ page }, info) => {
