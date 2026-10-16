@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schemas.wp.org/wp/6.6/theme.json",
+  "version": 3,
+  "settings": {
+    "layout": { "contentSize": "720px", "wideSize": "1320px" },
+    "color": {
+      "palette": [
+        { "slug": "base", "name": "Papier", "color": "#F2F0EA" },
+        { "slug": "contrast", "name": "Encre", "color": "#101010" },
+        { "slug": "muted", "name": "Encre atténuée", "color": "#3D3D38" },
+        { "slug": "surface", "name": "Blanc", "color": "#FFFFFF" },
+        { "slug": "accent", "name": "Bleu", "color": "#2D3FC8" },
+        { "slug": "desk", "name": "Bureau", "color": "#2E6F6C" },
+        { "slug": "yellow", "name": "Jaune", "color": "#FFE14D" },
+        { "slug": "sky", "name": "Bleu ciel", "color": "#9AD0FF" }
+      ]
+    },
+    "typography": {
+      "fontFamilies": [
+        { "slug": "body", "name": "Chivo", "fontFamily": "Chivo, system-ui, -apple-system, 'Segoe UI', sans-serif" },
+        { "slug": "mono", "name": "Chivo Mono", "fontFamily": "'Chivo Mono', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace" }
+      ]
+    }
+  },
+  "styles": {
+    "color": { "background": "var:preset|color|desk", "text": "var:preset|color|contrast" },
+    "typography": { "fontFamily": "var:preset|font-family|body", "fontSize": "1.0625rem" },
+    "elements": {
+      "link": {
+        "color": { "text": "var:preset|color|contrast" },
+        "typography": { "textDecoration": "underline" },
+        ":hover": { "color": { "text": "var:preset|color|contrast" } }
+      },
+      "heading": { "typography": { "fontWeight": "900", "lineHeight": "1.08" } }
+    }
+  }
+}

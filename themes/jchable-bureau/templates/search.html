@@ -1,0 +1,65 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
+<div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
+<div class="wp-block-group site-columns"><!-- wp:template-part {"slug":"desktop-icons"} /-->
+
+<!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main">
+<!-- wp:group {"tagName":"section","className":"window window--sky explorer","layout":{"type":"default"}} -->
+<section class="wp-block-group window window--sky explorer"><!-- wp:group {"tagName":"header","className":"window-titlebar","layout":{"type":"default"}} -->
+<header class="wp-block-group window-titlebar"><!-- wp:paragraph {"className":"window-title"} -->
+<p class="window-title">Explorateur</p>
+<!-- /wp:paragraph --></header>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"window-body","layout":{"type":"default"}} -->
+<div class="wp-block-group window-body"><!-- wp:jchable/archive-path {"className":"explorer-address"} /-->
+
+<!-- wp:query-title {"type":"search","level":1} /-->
+
+<!-- wp:query {"queryId":3,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"className":"post-feed is-archive-feed"} -->
+<div class="wp-block-query post-feed is-archive-feed"><!-- wp:html -->
+<div class="explorer-head" aria-hidden="true"><span>Nom</span><span>Date</span><span>Catégorie</span></div>
+<!-- /wp:html -->
+
+<!-- wp:post-template {"layout":{"type":"default"}} -->
+<!-- wp:group {"className":"explorer-row","layout":{"type":"default"}} -->
+<div class="wp-block-group explorer-row"><!-- wp:group {"className":"explorer-name","layout":{"type":"default"}} -->
+<div class="wp-block-group explorer-name"><!-- wp:jchable/post-filename /-->
+
+<!-- wp:post-title {"level":2,"isLink":true} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:post-date {"format":"d.m.Y"} /-->
+
+<!-- wp:post-terms {"term":"category"} /--></div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+
+<!-- wp:query-pagination {"className":"retro-pagination","layout":{"type":"flex","justifyContent":"space-between"}} -->
+<!-- wp:query-pagination-previous {"label":"Articles plus récents"} /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next {"label":"Articles plus anciens"} /-->
+<!-- /wp:query-pagination -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>Aucun résultat pour cette recherche. Essayez d'autres mots :</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:search {"label":"Recherche","buttonText":"Chercher"} /-->
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"sidebar","tagName":"aside","className":"site-sidebar"} /--></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-bureau/home-link",
+  "title": "Lien vers l'accueil",
+  "category": "theme",
+  "description": "Lien vers la page d'accueil du site.",
+  "textdomain": "jchable-bureau","attributes":{"label":{"type":"string","default":"Retour à l'accueil"}},
+  "supports": { "html": false, "autoRegister": true },
+  "render": "file:./render.php"
+}

@@ -24,6 +24,7 @@ if ( $jchable_theme->exists() && ! $jchable_theme->errors() ) {
 update_option( 'blogname', 'Julien Chable' );
 update_option( 'blogdescription', 'SharePoint, Office 365 and .NET … what else ?' );
 update_option( 'timezone_string', 'Europe/Paris' );
+update_option( 'date_format', 'j F Y' );
 update_option( 'posts_per_page', 10 );
 
 // Contenu par défaut de WordPress.

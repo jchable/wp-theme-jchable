@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-bureau/clock",
+  "title": "Horloge",
+  "category": "theme",
+  "description": "Affiche l'année courante (sans JavaScript).",
+  "textdomain": "jchable-bureau",
+  "supports": { "html": false, "autoRegister": true },
+  "render": "file:./render.php"
+}

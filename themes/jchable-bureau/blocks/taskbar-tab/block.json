@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-bureau/taskbar-tab",
+  "title": "Onglet de la page",
+  "category": "theme",
+  "description": "Affiche le titre de la page en cours dans la barre des tâches.",
+  "textdomain": "jchable-bureau",
+  "supports": { "html": false, "autoRegister": true },
+  "render": "file:./render.php"
+}

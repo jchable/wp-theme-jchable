@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-bureau/start-button",
+  "title": "Bouton Démarrer",
+  "category": "theme",
+  "description": "Lien vers le plan du site, façon bouton Démarrer.",
+  "textdomain": "jchable-bureau",
+  "supports": { "html": false, "autoRegister": true },
+  "render": "file:./render.php"
+}

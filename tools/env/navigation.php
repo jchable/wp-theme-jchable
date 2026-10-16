@@ -16,9 +16,9 @@ foreach ( get_posts(
 }
 
 $jchable_links = [
-	[ 'Accueil', home_url( '/' ) ],
-	[ 'À propos', home_url( '/a-propos/' ) ],
-	[ 'Plan du site', home_url( '/plan-du-site/' ) ],
+	[ 'Accueil', home_url( '/' ), 'icon-folder' ],
+	[ 'À propos', home_url( '/a-propos/' ), 'icon-text' ],
+	[ 'Plan du site', home_url( '/plan-du-site/' ), 'icon-folder-blue' ],
 ];
 
 $jchable_menu = '';
@@ -28,7 +28,8 @@ foreach ( $jchable_links as $jchable_link ) {
 			'label' => $jchable_link[0],
 			'type'  => 'custom',
 			'url'   => $jchable_link[1],
-			'kind'  => 'custom',
+			'kind'      => 'custom',
+			'className' => $jchable_link[2],
 		],
 		JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
 	) . " /-->\n";
