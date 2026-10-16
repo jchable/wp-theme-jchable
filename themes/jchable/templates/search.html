@@ -1,0 +1,41 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
+<div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
+<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:query-title {"type":"search"} /-->
+
+<!-- wp:query {"queryId":3,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"className":"post-feed is-archive-feed"} -->
+<div class="wp-block-query post-feed is-archive-feed"><!-- wp:post-template {"layout":{"type":"grid","minimumColumnWidth":"18rem"}} -->
+<!-- wp:group {"tagName":"article","className":"post-card","layout":{"type":"default"}} -->
+<article class="wp-block-group post-card"><!-- wp:post-date {"format":"j F Y"} /-->
+
+<!-- wp:post-title {"level":2,"isLink":true} /-->
+
+<!-- wp:post-excerpt {"excerptLength":30} /--></article>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+
+<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"space-between"}} -->
+<!-- wp:query-pagination-previous {"label":"Articles plus récents"} /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next {"label":"Articles plus anciens"} /-->
+<!-- /wp:query-pagination -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>Aucun résultat pour cette recherche. Essayez d'autres mots :</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:search {"label":"Recherche","buttonText":"Rechercher"} /-->
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"sidebar","tagName":"aside","className":"site-sidebar"} /--></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

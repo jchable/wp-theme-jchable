@@ -64,3 +64,12 @@ body:not(.paged) .post-feed .wp-block-post-template > li:first-child .wp-block-p
 .post-nav {
 	margin-top: var(--wp--preset--spacing--50);
 }
+
+/* Archives et recherche : pas d'article « à la une ». */
+body:not(.paged) .post-feed.is-archive-feed .wp-block-post-template > li:first-child {
+	grid-column: auto;
+}
+
+body:not(.paged) .post-feed.is-archive-feed .wp-block-post-template > li:first-child .wp-block-post-title {
+	font-size: var(--wp--preset--font-size--large);
+}
