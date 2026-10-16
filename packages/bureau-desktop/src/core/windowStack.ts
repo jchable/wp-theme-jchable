@@ -80,3 +80,13 @@ export function clampPosition(position: Point, size: Size, area: Size, grab: num
     y: Math.min(Math.max(position.y, 0), maxY),
   };
 }
+
+export interface Box extends Point, Size {}
+
+/** Recadre une fenêtre dans l'écran quand celui-ci rétrécit : taille bornée, position atteignable. */
+export function fitBox(box: Point & { w: number; h: number }, area: Size, grab: number): Box {
+  const w = Math.max(1, Math.min(box.w, area.w - 24));
+  const h = Math.max(1, Math.min(box.h, area.h - 24));
+  const at = clampPosition({ x: box.x, y: box.y }, { w, h }, area, grab);
+  return { x: at.x, y: at.y, w, h };
+}

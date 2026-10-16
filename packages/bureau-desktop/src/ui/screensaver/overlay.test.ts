@@ -112,11 +112,21 @@ describe('createScreensaver', () => {
     expect(overlay()).toBeNull();
   });
 
-  it('ne consomme pas l évènement', () => {
+  it('la touche qui réveille est consommée (rien ne se déclenche sur la page dessous)', () => {
     const s = make();
     s.start();
     vi.advanceTimersByTime(400);
     const e = new KeyboardEvent('keydown', { key: 'a', cancelable: true, bubbles: true });
+    window.dispatchEvent(e);
+    expect(e.defaultPrevented).toBe(true);
+    expect(s.isRunning()).toBe(false);
+  });
+
+  it('un simple mouvement de souris réveille sans être consommé', () => {
+    const s = make();
+    s.start();
+    vi.advanceTimersByTime(400);
+    const e = new Event('pointermove', { cancelable: true, bubbles: true });
     window.dispatchEvent(e);
     expect(e.defaultPrevented).toBe(false);
     expect(s.isRunning()).toBe(false);

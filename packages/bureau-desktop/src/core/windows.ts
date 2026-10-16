@@ -2,7 +2,7 @@ import { createAppStorage } from './prefs';
 import type { PrefsApi } from './prefs';
 import { findApp } from './registry';
 import type { AppContext, AppModule, BureauApp, BureauConfig, SoundName } from './types';
-import { WindowStack, clampPosition } from './windowStack';
+import { WindowStack, clampPosition, fitBox } from './windowStack';
 
 const BASE_Z = 1000;
 const GRAB = 56;
@@ -42,7 +42,14 @@ export class WindowManager {
   private readonly listeners = new Set<() => void>();
   private cascade = 0;
 
-  constructor(private readonly options: WindowManagerOptions) {}
+  private fitTimer: number | undefined;
+
+  constructor(private readonly options: WindowManagerOptions) {
+    window.addEventListener('resize', () => {
+      window.clearTimeout(this.fitTimer);
+      this.fitTimer = window.setTimeout(() => this.fit(), 120);
+    });
+  }
 
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
@@ -96,15 +103,16 @@ export class WindowManager {
     this.notify();
     const opener = win.opener;
     if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true });
-    else this.focusTop();
+    else if (this.stack.top()) this.focusTop();
+    else document.querySelector<HTMLElement>('.start-button')?.focus({ preventScroll: true });
   }
 
   minimize(id: string): void {
     const win = this.windows.get(id);
     if (!win) return;
+    this.savePosition(id); // avant de masquer : un élément masqué n'a plus de position mesurable
     this.stack.setMinimized(id, true);
     win.el.hidden = true;
-    this.savePosition(id);
     this.notify();
     this.focusTop();
   }
@@ -119,6 +127,39 @@ export class WindowManager {
     this.savePosition(id);
     this.notify();
     win.el.focus({ preventScroll: true });
+  }
+
+  /**
+   * Échap, quand le focus est sur la page et non dans une fenêtre : ferme la fenêtre du dessus,
+   * sauf si le focus est dans un champ de la page ou dans une appli qui garde toutes les touches (DOOM).
+   */
+  closeTopOnEscape(target: EventTarget | null): boolean {
+    const top = this.stack.top();
+    if (!top) return false;
+    const win = this.windows.get(top);
+    if (!win) return false;
+    const el = target instanceof HTMLElement ? target : null;
+    if (win.app.capturesKeyboard && el && win.el.contains(el)) return false;
+    const inPageField =
+      el !== null && !el.closest('#bureau-windows, #bureau-desktop') && el.matches('input, textarea, select, [contenteditable="true"]');
+    if (inPageField) return false;
+    this.close(top);
+    return true;
+  }
+
+  /** Recadre les fenêtres quand le navigateur rétrécit : elles restent atteignables. */
+  fit(): void {
+    if (this.options.isMobile()) return;
+    const area = { w: window.innerWidth, h: window.innerHeight };
+    for (const win of this.windows.values()) {
+      if (win.maximized) continue;
+      const x = parseFloat(win.el.style.left) || 0;
+      const y = parseFloat(win.el.style.top) || 0;
+      const w = parseFloat(win.el.style.width) || win.app.defaultSize.w;
+      const h = parseFloat(win.el.style.height) || win.app.defaultSize.h;
+      const next = fitBox({ x, y, w, h }, area, GRAB);
+      Object.assign(win.el.style, { left: `${next.x}px`, top: `${next.y}px`, width: `${next.w}px`, height: `${next.h}px` });
+    }
   }
 
   focus(id: string): void {
@@ -252,15 +293,14 @@ export class WindowManager {
     const start = saved ? { x: saved.x, y: saved.y } : fallback;
     const at = clampPosition(start, { w: width, h: height }, area, GRAB);
     Object.assign(win.el.style, { left: `${at.x}px`, top: `${at.y}px`, width: `${width}px`, height: `${height}px` });
-    if (saved?.minimized) this.minimize(win.app.id);
   }
 
   private savePosition(id: string): void {
     const win = this.windows.get(id);
-    if (!win || this.options.isMobile() || win.maximized) return;
+    if (!win || this.options.isMobile() || win.maximized || win.el.hidden) return;
     const rect = win.el.getBoundingClientRect();
     this.options.prefs.update((p) => {
-      p.windows[id] = { x: Math.round(rect.left), y: Math.round(rect.top), minimized: Boolean(win.el.hidden) };
+      p.windows[id] = { x: Math.round(rect.left), y: Math.round(rect.top), minimized: false };
     });
   }
 

@@ -6,6 +6,8 @@ export interface StartMenuOptions {
   config: BureauConfig;
   prefs: PrefsApi;
   apps: readonly BureauApp[];
+  /** Pages du menu du site (Accueil, À propos…) et flux RSS. */
+  links: ReadonlyArray<{ label: string; href: string }>;
   openApp: (id: string) => void;
   resetIcons: () => void;
   startScreensaver: () => void;
@@ -28,6 +30,8 @@ export class StartMenu {
   private menu: HTMLElement | null = null;
   private documents: HTMLElement | null = null;
   private documentsLoaded = false;
+  private docs: Array<{ label: string; href: string }> | null = null;
+  private loading: Promise<void> | null = null;
 
   constructor(private readonly options: StartMenuOptions) {}
 
@@ -98,6 +102,7 @@ export class StartMenu {
     if (!this.documentsLoaded) void this.loadDocuments();
   }
 
+
   private group(title: string): HTMLElement {
     const group = document.createElement('div');
     group.className = 'bmenu-group';
@@ -154,32 +159,40 @@ export class StartMenu {
   private buildDocuments(): HTMLElement {
     const group = this.group('Documents');
     this.documents = group;
-    const loading = document.createElement('p');
-    loading.className = 'bmenu-note';
-    loading.textContent = 'Chargement…';
-    group.append(loading);
-    if (this.documentsLoaded) void this.loadDocuments();
+    if (this.docs) this.fillDocuments(group, this.docs);
+    else this.note(group, 'Chargement…');
     return group;
   }
 
-  private async loadDocuments(): Promise<void> {
+  private loadDocuments(): Promise<void> {
+    // Une seule requête à la fois : rouvrir le menu avant la réponse ne double pas les documents.
+    this.loading ??= this.fetchDocuments().finally(() => (this.loading = null));
+    return this.loading;
+  }
+
+  private async fetchDocuments(): Promise<void> {
     const { config, fetchJson } = this.options;
     try {
       const posts = await fetchJson<PostSummary[]>(`${config.restUrl}wp/v2/posts?per_page=5&_fields=title,link`);
-      this.documentsLoaded = true;
-      const group = this.documents;
-      if (!group) return;
-      group.querySelector('.bmenu-note')?.remove();
-      for (const post of posts) {
+      const docs: Array<{ label: string; href: string }> = [];
+      for (const post of Array.isArray(posts) ? posts : []) {
         const link = post.link;
-        if (typeof link !== 'string' || !/^https?:/.test(link)) continue;
-        group.append(this.link(decode(post.title?.rendered ?? link), link));
+        if (typeof link === 'string' && /^https?:/.test(link)) docs.push({ label: decode(post.title?.rendered ?? link), href: link });
       }
-      if (!group.querySelector('[role="menuitem"]')) this.note(group, 'Aucun document.');
+      this.docs = docs;
+      this.documentsLoaded = true;
+      if (this.documents) this.fillDocuments(this.documents, docs);
     } catch {
-      this.documents?.querySelector('.bmenu-note')?.remove();
-      if (this.documents) this.note(this.documents, 'Documents indisponibles.');
+      if (this.documents) this.fillDocuments(this.documents, null);
     }
+  }
+
+  /** Remplit le groupe « Documents » ; `null` : le chargement a échoué. */
+  private fillDocuments(group: HTMLElement, docs: ReadonlyArray<{ label: string; href: string }> | null): void {
+    group.querySelectorAll('.bmenu-note, [role="menuitem"]').forEach((node) => node.remove());
+    if (docs === null) this.note(group, 'Documents indisponibles.');
+    else if (docs.length === 0) this.note(group, 'Aucun document.');
+    else for (const doc of docs) group.append(this.link(doc.label, doc.href));
   }
 
   private note(group: HTMLElement, text: string): void {
@@ -190,13 +203,8 @@ export class StartMenu {
   }
 
   private buildLinks(): HTMLElement {
-    const { config } = this.options;
     const group = this.group('Blog');
-    group.append(
-      this.link('Accueil', config.homeUrl),
-      this.link('Plan du site', config.sitemapUrl),
-      this.link('Flux RSS', config.feedUrl),
-    );
+    for (const { label, href } of this.options.links) group.append(this.link(label, href));
     return group;
   }
 

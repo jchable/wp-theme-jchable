@@ -1,3 +1,4 @@
+import { focusAnchor } from './anchor';
 import { LISTED_APPS } from './registry';
 import { readConfig } from './config';
 import { createPrefs } from './prefs';
@@ -66,7 +67,9 @@ export function bootstrap(): void {
   document.body.append(windowsLayer);
 
   const fetchJson = async <T>(url: string): Promise<T> => {
-    const response = await fetch(url, { headers: { Accept: 'application/json' } });
+    const target = new URL(url, location.href);
+    if (target.origin !== location.origin) throw new Error('Adresse refusée : hors du site');
+    const response = await fetch(target, { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return (await response.json()) as T;
   };
@@ -86,7 +89,10 @@ export function bootstrap(): void {
   desktopHost.id = 'bureau-desktop';
   desktopHost.setAttribute('role', 'group');
   desktopHost.setAttribute('aria-label', 'Icônes du bureau');
-  document.body.prepend(desktopHost);
+  // Placé après le contenu : la première tabulation tombe sur le lien d'évitement, pas sur les icônes.
+  const siteBlocks = document.querySelector('.wp-site-blocks');
+  if (siteBlocks) siteBlocks.after(desktopHost);
+  else document.body.append(desktopHost);
 
   const sidebar = new SidebarWindows(prefs);
   const items: IconItem[] = [
@@ -102,17 +108,20 @@ export function bootstrap(): void {
     ),
   ];
 
+  // WordPad ouvert depuis un article part de cet article.
+  const launch = (id: string): void => {
+    const title = document.querySelector('h1')?.textContent?.trim();
+    const onArticle = document.body.classList.contains('single') && Boolean(title);
+    manager.open(id, id === 'wordpad' && onArticle ? { title, url: location.href } : {});
+  };
+
   const icons = new DesktopIcons({
     host: desktopHost,
     items,
     prefs,
-    openApp: (id) => manager.open(id),
+    openApp: launch,
     navigate: (url) => location.assign(url),
-    onAnchor: (hash) => {
-      const target = document.querySelector<HTMLElement>(hash);
-      target?.scrollIntoView({ block: 'center' });
-      target?.querySelector<HTMLElement>('input, button')?.focus();
-    },
+    onAnchor: focusAnchor,
     onContextMenu: (x, y) =>
       showContextMenu(x, y, [
         { label: 'Réorganiser les icônes', action: () => resetAll() },
@@ -134,7 +143,8 @@ export function bootstrap(): void {
     },
   });
   const saverEligible = isScreensaverEligiblePage(document.body);
-  if (saverEligible) idle.start();
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (saverEligible && !reducedMotion) idle.start(); // « moins d'animations » : jamais tout seul
 
   // --- Barre des tâches et menu Démarrer ---
   const taskbarRoot = document.querySelector<HTMLElement>('.taskbar');
@@ -150,7 +160,11 @@ export function bootstrap(): void {
         config,
         prefs,
         apps: LISTED_APPS,
-        openApp: (id) => manager.open(id),
+        openApp: launch,
+        links: [
+          ...items.filter((item) => item.kind === 'link' && item.href).map((item) => ({ label: item.label, href: item.href as string })),
+          { label: 'Flux RSS', href: config.feedUrl },
+        ],
         resetIcons: () => resetAll(),
         startScreensaver: () => saver.start(),
         shutdown: () => showShutdown(),
@@ -160,6 +174,11 @@ export function bootstrap(): void {
       });
     }
   }
+
+  // Échap, quand le focus est sur la page : ferme la fenêtre du dessus.
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !event.defaultPrevented && manager.closeTopOnEscape(event.target)) event.preventDefault();
+  });
 
   // --- Grand écran / petit écran ---
   let desktopOn = false;

@@ -9,6 +9,11 @@ const GRAB = 56;
  */
 export class SidebarWindows {
   private cleanups: Array<() => void> = [];
+  private fitTimer: number | undefined;
+  private readonly onResize = (): void => {
+    window.clearTimeout(this.fitTimer);
+    this.fitTimer = window.setTimeout(() => this.fit(), 120);
+  };
 
   constructor(
     private readonly prefs: PrefsApi,
@@ -20,6 +25,7 @@ export class SidebarWindows {
   }
 
   mount(): void {
+    window.addEventListener('resize', this.onResize);
     this.windows().forEach((el, index) => {
       const id = `side-${index}`;
       const saved = this.prefs.get().windows[id];
@@ -34,6 +40,24 @@ export class SidebarWindows {
         handle.classList.remove('bwin-handle');
       });
     });
+    this.fit();
+  }
+
+  /** Ramène dans l'écran les fenêtres déplacées trop loin (écran plus petit). */
+  fit(): void {
+    for (const el of this.windows()) {
+      const offset = this.currentOffset(el);
+      const rect = el.getBoundingClientRect();
+      const absolute = clampPosition(
+        { x: rect.left, y: rect.top },
+        { w: rect.width, h: rect.height },
+        { w: window.innerWidth, h: window.innerHeight },
+        GRAB,
+      );
+      if (absolute.x !== rect.left || absolute.y !== rect.top) {
+        this.apply(el, offset.x + absolute.x - rect.left, offset.y + absolute.y - rect.top);
+      }
+    }
   }
 
   /** Remet les fenêtres à leur place d'origine et oublie leur position. */
@@ -47,6 +71,8 @@ export class SidebarWindows {
   }
 
   destroy(): void {
+    window.removeEventListener('resize', this.onResize);
+    window.clearTimeout(this.fitTimer);
     this.cleanups.forEach((cleanup) => cleanup());
     this.cleanups = [];
     this.windows().forEach((el) => (el.style.transform = ''));

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WindowStack, clampPosition } from './windowStack';
+import { WindowStack, clampPosition, fitBox } from './windowStack';
 
 describe('WindowStack', () => {
   it('ouvre au premier plan et attribue des z-index croissants', () => {
@@ -72,5 +72,24 @@ describe('clampPosition', () => {
     const got = clampPosition({ x: 300, y: 300 }, { w: 400, h: 300 }, { w: 200, h: 100 }, 40);
     expect(got.x).toBeLessThanOrEqual(160);
     expect(got.y).toBeLessThanOrEqual(60);
+  });
+});
+
+describe('fitBox', () => {
+  it('ramène une fenêtre qui sort de l’écran quand le navigateur rétrécit', () => {
+    const got = fitBox({ x: 1298, y: 400, w: 700, h: 520 }, { w: 1000, h: 700 }, 56);
+    expect(got.x).toBeLessThanOrEqual(1000 - 56);
+    expect(got.w).toBeLessThanOrEqual(1000 - 24);
+    expect(got.h).toBeLessThanOrEqual(700 - 24);
+  });
+
+  it('laisse intacte une fenêtre qui tient', () => {
+    expect(fitBox({ x: 100, y: 80, w: 400, h: 300 }, { w: 1000, h: 700 }, 56)).toEqual({ x: 100, y: 80, w: 400, h: 300 });
+  });
+
+  it('ne renvoie jamais une taille négative sur un écran minuscule', () => {
+    const got = fitBox({ x: 0, y: 0, w: 700, h: 500 }, { w: 20, h: 10 }, 56);
+    expect(got.w).toBeGreaterThan(0);
+    expect(got.h).toBeGreaterThan(0);
   });
 });

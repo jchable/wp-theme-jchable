@@ -36,6 +36,7 @@ export class DesktopIcons {
   private cols = 1;
   private rows = 1;
   private resizeTimer: number | undefined;
+  private abort: AbortController | null = null;
   private readonly onResize = (): void => {
     window.clearTimeout(this.resizeTimer);
     this.resizeTimer = window.setTimeout(() => this.layout(), 120);
@@ -51,19 +52,30 @@ export class DesktopIcons {
       this.buttons.set(item.id, button);
       host.append(button);
     }
-    host.addEventListener('pointerdown', (event) => {
-      if (event.target === host) this.select(null);
-    });
-    host.addEventListener('contextmenu', (event) => {
-      event.preventDefault();
-      this.options.onContextMenu(event.clientX, event.clientY);
-    });
-    window.addEventListener('resize', this.onResize);
+    this.abort = new AbortController();
+    const { signal } = this.abort;
+    host.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (event.target === host) this.select(null);
+      },
+      { signal },
+    );
+    host.addEventListener(
+      'contextmenu',
+      (event) => {
+        event.preventDefault();
+        this.options.onContextMenu(event.clientX, event.clientY);
+      },
+      { signal },
+    );
+    window.addEventListener('resize', this.onResize, { signal });
     this.layout();
   }
 
   destroy(): void {
-    window.removeEventListener('resize', this.onResize);
+    this.abort?.abort();
+    this.abort = null;
     window.clearTimeout(this.resizeTimer);
     this.options.host.replaceChildren();
     this.buttons.clear();
@@ -112,6 +124,23 @@ export class DesktopIcons {
     });
   }
 
+  /** Au tout premier simple clic : une bulle rappelle qu'il faut double-cliquer. Une seule fois. */
+  private showHint(button: HTMLElement): void {
+    const { prefs, host } = this.options;
+    if (prefs.get().seen['iconHint']) return;
+    prefs.update((p) => {
+      p.seen['iconHint'] = true;
+    });
+    const hint = document.createElement('div');
+    hint.className = 'bicon-hint';
+    hint.setAttribute('role', 'status');
+    hint.textContent = 'Double-cliquez pour ouvrir';
+    hint.style.left = `${button.offsetLeft}px`;
+    hint.style.top = `${button.offsetTop + button.offsetHeight + 4}px`;
+    host.append(hint);
+    window.setTimeout(() => hint.remove(), 3500);
+  }
+
   private select(id: string | null): void {
     for (const [other, button] of this.buttons) button.classList.toggle('bicon--selected', other === id);
   }
@@ -149,6 +178,7 @@ export class DesktopIcons {
       this.select(item.id);
       // detail === 0 : activation au clavier (Entrée, Espace). Au doigt, un appui suffit.
       if (event.detail === 0 || pointerType === 'touch') this.activate(item);
+      else this.showHint(button);
     });
     button.addEventListener('dblclick', () => this.activate(item));
 

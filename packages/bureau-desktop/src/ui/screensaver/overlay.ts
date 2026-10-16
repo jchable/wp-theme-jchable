@@ -17,8 +17,11 @@ export interface Screensaver {
 const GRACE_MS = 300;
 const MAX_DT_MS = 100;
 const LIVE_TEXT = 'Écran de veille. Bougez la souris ou appuyez sur une touche pour revenir.';
-const ACTIVITY_EVENTS = ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'wheel'] as const;
+const ACTIVITY_EVENTS = ['pointermove', 'touchstart', 'wheel'] as const;
 const LISTEN: AddEventListenerOptions = { passive: true, capture: true };
+// Touche et clic qui réveillent l'écran : consommés, pour ne rien déclencher sur la page dessous.
+const CONSUME: AddEventListenerOptions = { capture: true };
+const CONSUMED_EVENTS = ['keydown', 'pointerdown'] as const;
 const RESIZE: AddEventListenerOptions = { passive: true };
 
 function draw(ctx: CanvasRenderingContext2D, scene: Scene, dpr: number): void {
@@ -103,6 +106,13 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
     api.stop();
   };
 
+  const onConsumedActivity = (event: Event): void => {
+    if (Date.now() - startedAt < GRACE_MS) return;
+    event.preventDefault();
+    event.stopPropagation();
+    api.stop();
+  };
+
   const api: Screensaver = {
     start() {
       if (destroyed || root) return;
@@ -130,6 +140,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       startedAt = Date.now();
       lastTime = null;
       for (const type of ACTIVITY_EVENTS) window.addEventListener(type, onActivity, LISTEN);
+      for (const type of CONSUMED_EVENTS) window.addEventListener(type, onConsumedActivity, CONSUME);
       window.addEventListener('resize', onResize, RESIZE);
 
       render();
@@ -142,6 +153,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
         frame = null;
       }
       for (const type of ACTIVITY_EVENTS) window.removeEventListener(type, onActivity, LISTEN as EventListenerOptions);
+      for (const type of CONSUMED_EVENTS) window.removeEventListener(type, onConsumedActivity, CONSUME as EventListenerOptions);
       window.removeEventListener('resize', onResize, RESIZE);
       root?.remove();
       root = canvas = ctx = scene = null;

@@ -94,6 +94,20 @@ html.bureau-desktop-on .sidebar-windows .window {
 	outline: 1px dotted #fff;
 }
 
+.bicon-hint {
+	position: absolute;
+	z-index: 6;
+	padding: 0.25rem 0.5rem;
+	border: 2px solid var(--b-ink);
+	background: var(--b-yellow);
+	box-shadow: 3px 3px 0 var(--b-ink);
+	color: var(--b-ink);
+	font-family: var(--b-mono);
+	font-size: 0.75rem;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
 .bicon--dragging {
 	z-index: 5;
 	opacity: 0.75;
@@ -134,8 +148,13 @@ html.bureau-desktop-on .sidebar-windows .window {
 	display: none;
 }
 
-.bwin:focus {
+.bwin:focus:not(:focus-visible) {
 	outline: none;
+}
+
+.bwin:focus-visible {
+	outline: 3px dashed var(--b-yellow);
+	outline-offset: -8px;
 }
 
 .bwin-titlebar {

@@ -34,6 +34,15 @@ test.describe('bureau : grand écran', () => {
     await expect(page).toHaveURL(/localhost:8888\/$/);
   });
 
+  test('une bulle explique le double-clic au premier simple clic, une seule fois', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#bureau-desktop .bicon', { hasText: 'Corbeille' }).click();
+    await expect(page.locator('.bicon-hint')).toHaveText('Double-cliquez pour ouvrir');
+    await page.reload();
+    await page.locator('#bureau-desktop .bicon', { hasText: 'Corbeille' }).click();
+    await expect(page.locator('.bicon-hint')).toHaveCount(0);
+  });
+
   test('ouvrir, déplacer, réduire, restaurer et fermer une fenêtre', async ({ page }) => {
     await page.goto('/');
     await openApp(page, 'Corbeille');
@@ -374,5 +383,126 @@ test.describe('accessibilité du bureau interactif', () => {
       .filter((v) => v.impact === 'serious' || v.impact === 'critical')
       .map((v) => `${v.id} : ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
     expect(blocking).toEqual([]);
+  });
+});
+
+test.describe('correctifs issus de la relecture indépendante', () => {
+  test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
+
+  test('une fenêtre réduite se rouvre normalement après un rechargement', async ({ page }) => {
+    await page.goto('/');
+    await openApp(page, 'Corbeille');
+    const win = page.locator('.bwin[data-app="trash"]');
+    await win.getByRole('button', { name: 'Réduire' }).click();
+    await page.reload();
+    await openApp(page, 'Corbeille');
+    await expect(win).toBeVisible();
+    const box = await win.boundingBox();
+    expect(box!.x).toBeGreaterThan(20);
+    expect(box!.y).toBeGreaterThan(20);
+  });
+
+  test('une fenêtre reste atteignable quand le navigateur rétrécit', async ({ page }) => {
+    await page.goto('/');
+    await openApp(page, 'Corbeille');
+    const win = page.locator('.bwin[data-app="trash"]');
+    const bar = await win.locator('.bwin-titlebar').boundingBox();
+    await page.mouse.move(bar!.x + 60, bar!.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(1300, 300, { steps: 6 });
+    await page.mouse.up();
+    await page.setViewportSize({ width: 1000, height: 700 });
+    await expect.poll(async () => (await win.boundingBox())!.x, { timeout: 3000 }).toBeLessThanOrEqual(1000 - 56);
+  });
+
+  test('Échap qui réveille l’écran de veille ne ferme pas la fenêtre dessous', async ({ page }) => {
+    await page.clock.install();
+    await page.goto('/');
+    await openApp(page, 'Terminal');
+    const win = page.locator('.bwin[data-app="terminal"]');
+    await win.locator('input').focus();
+    await page.clock.fastForward(3 * 60 * 1000 + 1000);
+    await expect(page.locator('.bscr-overlay')).toBeVisible();
+    await page.clock.fastForward(500);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.bscr-overlay')).toHaveCount(0);
+    await expect(win).toBeVisible();
+  });
+
+  test('avec « moins d’animations », l’écran de veille ne se déclenche pas tout seul', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.clock.install();
+    await page.goto('/');
+    await page.clock.fastForward(10 * 60 * 1000);
+    await expect(page.locator('.bscr-overlay')).toHaveCount(0);
+  });
+
+  test('la première tabulation tombe sur le lien d’évitement, pas sur les icônes', async ({ page }) => {
+    await page.goto('/');
+    await page.keyboard.press('Tab');
+    await expect(page.locator(':focus')).toHaveClass(/skip-link/);
+  });
+
+  test('basculer entre grand et petit écran ne multiplie pas les écouteurs', async ({ page }) => {
+    await page.goto('/');
+    for (const width of [800, 1440, 800, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(page.locator('html')).toHaveClass(width >= 900 ? /bureau-desktop-on/ : /^((?!bureau-desktop-on).)*$/);
+    }
+    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
+    await page.mouse.click(30, 820, { button: 'right' });
+    await expect(page.locator('.bctx')).toHaveCount(1);
+  });
+
+  test('rouvrir vite le menu Démarrer n’ajoute pas de documents en double', async ({ page }) => {
+    await page.route('**/wp-json/wp/v2/posts*', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      await route.continue();
+    });
+    await page.goto('/');
+    const start = page.locator('.start-button');
+    await start.click();
+    await page.keyboard.press('Escape');
+    await start.click();
+    const docs = page.locator('.bmenu [role="group"][aria-label="Documents"] [role="menuitem"]');
+    await expect(docs).toHaveCount(5);
+    await page.waitForTimeout(900);
+    await expect(docs).toHaveCount(5);
+  });
+
+  test('Échap ferme la fenêtre du dessus même quand le focus est sur la page', async ({ page }) => {
+    await page.goto('/');
+    await openApp(page, 'Corbeille');
+    const win = page.locator('.bwin[data-app="trash"]');
+    await expect(win).toBeVisible();
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press('Escape');
+    await expect(win).toHaveCount(0);
+  });
+
+  test('le menu Démarrer propose les pages du menu du site, dont À propos', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.start-button').click();
+    const menu = page.locator('.bmenu');
+    await expect(menu.getByRole('menuitem', { name: 'À propos' })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: 'Flux RSS' })).toBeVisible();
+  });
+
+  test('WordPad ouvert sur un article parle de cet article', async ({ page }) => {
+    await page.goto(POSTS.release.path);
+    await openApp(page, 'WORDPAD.EXE');
+    await expect(page.locator('.bwin[data-app="wordpad"]').getByRole('textbox', { name: 'Document' })).toContainText(
+      'OKF4net 0.6.0',
+    );
+  });
+
+  test('une icône dont le lien est « # » ne plante pas', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      const link = document.querySelector<HTMLAnchorElement>('.desktop-icons a[href="#recherche"]');
+      link?.setAttribute('href', '#');
+    });
+    await page.reload();
+    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
   });
 });

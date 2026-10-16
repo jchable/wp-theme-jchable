@@ -1,8 +1,9 @@
 # Thèmes WordPress de julien.chable.net
 
-Thèmes blocs pour https://julien.chable.net : un parent `jchable` et un enfant par design (`jchable-bureau`, puis `jchable-swiss`, `jchable-pixel`, `jchable-arcade`, `jchable-console`).
+Thèmes blocs pour https://julien.chable.net : un parent `jchable` et un enfant par design. Le premier design livré est **Bureau** (`jchable-bureau`) : le blog habillé en bureau d'ordinateur rétro, avec des fenêtres, des icônes déplaçables, une barre des tâches et des applis (Terminal, Démineur, WordPad, messagerie « Oh-Oh! », Corbeille, DOOM).
 
-Conception : `docs/superpowers/specs/2026-10-16-jchable-themes-bureau-design.md`.
+- Conception : `docs/superpowers/specs/2026-10-16-jchable-themes-bureau-design.md`
+- Mise en production : `docs/deploiement.md`
 
 ## Prérequis
 
@@ -19,28 +20,42 @@ PHP n'est pas nécessaire sur la machine : WP-CLI et PHP tournent dans le conten
 | `npm run env:seed` | crée le contenu de test (une seule fois) |
 | `npm run env:reset` | remet WordPress à zéro et recrée le contenu de test |
 | `npm run env:stop` | arrête WordPress |
-| `npm run test:e2e` | tests Playwright (desktop, tablette, mobile) |
+| `npm run build:js` | compile le bureau interactif vers `themes/jchable-bureau/assets/dist/` |
+| `npm run typecheck` | vérifie les types TypeScript |
+| `npm run test:unit` | tests unitaires (Vitest) du bureau et des applis |
 | `npm run test:tools` | tests des scripts Node |
-| `npm run check` | Theme Check sur le thème parent |
-| `npm run zip` | génère `dist/<thème>.zip` pour chaque thème |
+| `npm run test:e2e` | tests Playwright du thème parent (active `jchable`) |
+| `npm run test:e2e:bureau` | tests Playwright du thème Bureau (active `jchable-bureau`) |
+| `npm run check -- <thème>` | Theme Check (`jchable` ou `jchable-bureau`) ; `npm run check:all` pour les deux |
+| `npm run zip` | compile le JS puis génère `dist/<thème>.zip` pour chaque thème |
+
+Les deux suites Playwright partagent le même WordPress local : on ne les lance pas en même temps. Chacune active son thème avant de tourner ; à la fin, le thème de la dernière suite lancée reste actif.
 
 ## Organisation
 
 ```
-themes/jchable/      thème parent : theme.json, gabarits, blocs dynamiques
-tools/env/           contenu de test
-tools/check/         Theme Check
-tools/zip/           génération des zips
-tests/e2e/           tests Playwright
+themes/jchable/             thème parent : theme.json, gabarits, blocs dynamiques
+themes/jchable-bureau/      thème enfant Bureau : gabarits, parties, blocs, CSS, polices, icônes
+  assets/dist/              JS compilé (généré, non versionné)
+  assets/doom/              moteur WebAssembly et données de DOOM (voir son README)
+packages/bureau-desktop/    code TypeScript du bureau interactif
+  src/core/                 préférences, grille des icônes, fenêtres, sons, registre des applis
+  src/ui/                   icônes du bureau, barre des tâches, menu Démarrer, écran de veille…
+  src/apps/<appli>/         une appli par dossier, chargée seulement à son lancement
+tools/                      contenu de test, Theme Check, polices, zips
+tests/e2e/                  tests Playwright du thème parent
+tests/e2e-bureau/           tests Playwright du thème Bureau
+docs/                       spec, plans et guide de déploiement
 ```
 
 ## Langue des articles
 
 Le site est en français. Pour un article écrit dans une autre langue, ajouter le champ personnalisé `jchable_lang` (par exemple `en`) : le contenu de l'article reçoit alors l'attribut `lang` correspondant.
 
-## Installer un thème sur le blog
+## Données du visiteur
 
-1. `npm run zip`
-2. Dans l'admin : Apparence › Thèmes › Ajouter › Téléverser un thème, puis choisir `dist/jchable.zip`.
-3. Activer le thème, puis ouvrir Apparence › Éditeur › Navigation et **choisir ou créer le menu principal** (Accueil, À propos…). Sans menu choisi, WordPress en fabrique un automatiquement à partir des pages, et sa structure de listes peut être invalide pour l'accessibilité.
-4. Vérifier un article avec commentaires (le formulaire Jetpack remplace-t-il bien celui de WordPress ?), l'accueil, une recherche et une page 404.
+Le bureau mémorise, dans le **localStorage du navigateur du visiteur** (clé `jchable-bureau:v1`), la position des icônes et des fenêtres, l'activation du son et de l'écran de veille, et le brouillon du WordPad. Rien n'est envoyé au serveur. Si le stockage est bloqué, tout fonctionne en mémoire.
+
+## Installer sur le blog
+
+Voir `docs/deploiement.md` (zips, menu, vérifications, retour en arrière).
