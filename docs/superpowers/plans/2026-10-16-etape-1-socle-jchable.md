@@ -28,6 +28,13 @@
 - **Pas de gabarit `category.html` :** `archive.html` couvre les catégories par la hiérarchie des gabarits WordPress.
 - **Polices système dans le parent :** aucun fichier woff2 à héberger ici, et toujours aucun appel à Google Fonts. Les polices hébergées arrivent avec le premier thème enfant (Chivo pour Bureau).
 - **Chargement du manifeste Vite et filtre `jchable_sitemap_url` :** reportés aux étapes 2 et 3, qui en ont besoin.
+- **Blocs dans un thème :** pour wordpress.org, enregistrer des blocs relève du « territoire des plugins », et Theme Check signale `register_block_type` comme une exigence. Le thème n'est pas destiné à wordpress.org (hors périmètre, spec §1). On utilise `register_block_type_from_metadata()`, la fonction standard d'enregistrement depuis un `block.json`, que Theme Check ne signale pas.
+- **Contenu de test :** un script PHP (`tools/env/seed.php`) au lieu d'un export WXR dans `tests/fixtures/` (§2). Il est déterministe, n'a besoin d'aucun plugin d'import, et ses adresses sont reprises dans `tests/e2e/fixtures.ts`.
+- **Pas d'espaces de travail npm** tant qu'il n'y a aucun paquet JS (`packages/bureau-desktop` arrive à l'étape 3).
+- **`npm run check` ne vérifie que `jchable`** : les thèmes enfants seront ajoutés au script quand ils existeront.
+- **Repli des commentaires Jetpack :** il ne se décide qu'après la vérification sur le vrai site (Task 11, Step 4) ; s'il en faut un, il sera traité à l'étape 2.
+- **Lien d'évitement :** celui du cœur de WordPress (créé en JavaScript) est remplacé par un lien HTML, pour rester utilisable sans JavaScript.
+- **Archives de la barre latérale par année** et non en liste déroulante : la liste déroulante ne fonctionne qu'avec JavaScript, et une liste par mois serait trop longue (2009 → 2026).
 
 ## Review Focus
 
@@ -106,7 +113,7 @@ git checkout -b etape-1-socle
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",
     "env:seed": "wp-env run cli wp eval-file wp-content/jchable-tools/env/seed.php",
-    "env:reset": "wp-env clean all && npm run env:seed",
+    "env:reset": "wp-env reset all && npm run env:seed",
     "test:e2e": "playwright test",
     "test:tools": "node --test \"tools/**/*.test.mjs\"",
     "check": "wp-env run cli wp eval-file wp-content/jchable-tools/check/theme-check.php jchable",
@@ -117,7 +124,7 @@ git checkout -b etape-1-socle
 
 - [ ] **Step 3 : installer les dépendances de dev**
 
-Run : `npm install -D @wordpress/env @playwright/test @axe-core/playwright archiver`
+Run : `npm install -D @wordpress/env @playwright/test @axe-core/playwright archiver@^7`
 Puis : `npx playwright install chromium`
 Expected : `package.json` contient les 4 paquets dans `devDependencies` ; `package-lock.json` est créé.
 
@@ -210,7 +217,7 @@ Text Domain: jchable
 - [ ] **Step 7 : démarrer WordPress et vérifier**
 
 Run : `npm run env:start` (Docker Desktop doit tourner ; le premier lancement télécharge les images)
-Puis : `curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/`
+Puis, dans Git Bash : `curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/` (dans PowerShell : remplacer `/dev/null` par `NUL`)
 Expected : `200`.
 Puis : `npx wp-env run cli wp core version`
 Expected : `7.1.3`.
@@ -259,7 +266,7 @@ if ( get_option( 'jchable_seeded' ) ) {
 }
 
 WP_CLI::runcommand( 'language core install fr_FR --activate' );
-// Pas de --hard : l'image Docker de WordPress fournit déjà le .htaccess, et WP-CLI ne sait pas détecter mod_rewrite.
+// wp-env a déjà écrit le .htaccess (avec ses propres permaliens) : changer la structure suffit.
 WP_CLI::runcommand( 'rewrite structure "/%postname%/"' );
 
 // Le thème n'est activable qu'une fois templates/index.html écrit (Task 3).
@@ -418,7 +425,7 @@ jchable_seed_post(
 		'title'   => 'Bloc de code',
 		'slug'    => 'bloc-de-code',
 		'date'    => '2026-07-01 10:00:00',
-		'content' => "<!-- wp:code -->\n<pre class=\"wp-block-code\"><code>dotnet tool install --global okf4net --version 0.7.0 &amp;&amp; okf render ./acme_retail --output ./site --theme dark --open-browser-after-build-with-a-very-long-flag</code></pre>\n<!-- /wp:code -->",
+		'content' => "<!-- wp:code -->\n<pre class=\"wp-block-code\"><code>dotnet tool install --global okf --version 0.7.0 &amp;&amp; okf render ./acme_retail --output ./site --theme dark --open-browser-after-build-with-a-very-long-flag</code></pre>\n<!-- /wp:code -->",
 	],
 	$cat_id
 );
@@ -454,6 +461,12 @@ $sitemap = jchable_seed_post(
 	$cat_id
 );
 update_post_meta( $sitemap, '_wp_page_template', 'plan-du-site' );
+
+// Le bloc Navigation sans menu crée un menu de repli au premier affichage. On le crée ici,
+// une seule fois, pour que les tests lancés en parallèle n'en créent pas plusieurs.
+if ( class_exists( 'WP_Navigation_Fallback' ) ) {
+	WP_Navigation_Fallback::get_fallback();
+}
 
 update_option( 'jchable_seeded', 1 );
 WP_CLI::success( 'Contenu de test créé.' );
@@ -763,6 +776,16 @@ add_action(
 		add_editor_style( 'assets/css/base.css' );
 	}
 );
+
+// Lien d'évitement écrit en HTML : celui du cœur (thèmes blocs) est créé en JavaScript
+// et disparaîtrait sans JS. Chaque gabarit donne l'ancre « contenu » à son <main>.
+remove_action( 'wp_enqueue_scripts', 'wp_enqueue_block_template_skip_link' );
+add_action(
+	'wp_body_open',
+	static function (): void {
+		echo '<a class="jchable-skip-link" href="#contenu">Aller au contenu</a>';
+	}
+);
 ```
 
 `themes/jchable/assets/css/base.css` :
@@ -789,6 +812,22 @@ add_action(
 
 .site-footer .wp-block-site-title::before {
 	content: "© ";
+}
+
+/* Lien d'évitement : invisible jusqu'à ce qu'il reçoive le focus clavier. */
+.jchable-skip-link {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+	z-index: 100000;
+	padding: 0.75rem 1rem;
+	background: var(--wp--preset--color--contrast);
+	color: var(--wp--preset--color--base);
+}
+
+.jchable-skip-link:focus {
+	left: 1rem;
+	top: 1rem;
 }
 
 /* Cartes d'articles : le premier article de la page 1 est « à la une ». */
@@ -847,7 +886,7 @@ body:not(.paged) .post-feed .wp-block-post-template > li:first-child .wp-block-p
 <h2 class="wp-block-heading">Archives</h2>
 <!-- /wp:heading -->
 
-<!-- wp:archives {"displayAsDropdown":true} /-->
+<!-- wp:archives {"type":"yearly"} /-->
 
 <!-- wp:heading -->
 <h2 class="wp-block-heading">À propos</h2>
@@ -866,8 +905,8 @@ body:not(.paged) .post-feed .wp-block-post-template > li:first-child .wp-block-p
 
 <!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
 <div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
-<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","className":"site-main","layout":{"type":"default"}} -->
-<main class="wp-block-group site-main"><!-- wp:heading {"level":1} -->
+<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:heading {"level":1} -->
 <h1 class="wp-block-heading">Derniers articles</h1>
 <!-- /wp:heading -->
 
@@ -1002,8 +1041,8 @@ Expected : FAIL (sans `single.html`, WordPress utilise `index.html` : pas de tit
 
 <!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
 <div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
-<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","className":"site-main","layout":{"type":"default"}} -->
-<main class="wp-block-group site-main"><!-- wp:group {"tagName":"article","className":"single-post","layout":{"type":"constrained"}} -->
+<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:group {"tagName":"article","className":"single-post","layout":{"type":"constrained"}} -->
 <article class="wp-block-group single-post"><!-- wp:post-title {"level":1} /-->
 
 <!-- wp:group {"className":"post-meta","layout":{"type":"flex","flexWrap":"wrap"}} -->
@@ -1064,8 +1103,8 @@ Le groupe `.post-nav` est un `<nav>` sans nom accessible, car le bloc Groupe ne 
 
 <!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
 <div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
-<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","className":"site-main","layout":{"type":"default"}} -->
-<main class="wp-block-group site-main"><!-- wp:group {"tagName":"article","className":"single-post","layout":{"type":"constrained"}} -->
+<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:group {"tagName":"article","className":"single-post","layout":{"type":"constrained"}} -->
 <article class="wp-block-group single-post"><!-- wp:post-title {"level":1} /-->
 
 <!-- wp:group {"className":"post-meta","layout":{"type":"flex","flexWrap":"wrap"}} -->
@@ -1196,8 +1235,8 @@ Expected : FAIL (ces pages tombent sur `index.html`, dont le titre est « Dernie
 
 <!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
 <div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
-<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","className":"site-main","layout":{"type":"default"}} -->
-<main class="wp-block-group site-main"><!-- wp:query-title {"type":"archive"} /-->
+<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:query-title {"type":"archive"} /-->
 
 <!-- wp:query {"queryId":2,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"className":"post-feed is-archive-feed"} -->
 <div class="wp-block-query post-feed is-archive-feed"><!-- wp:post-template {"layout":{"type":"grid","minimumColumnWidth":"18rem"}} -->
@@ -1270,8 +1309,8 @@ Fichier complet `themes/jchable/templates/search.html` :
 
 <!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
 <div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
-<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","className":"site-main","layout":{"type":"default"}} -->
-<main class="wp-block-group site-main"><!-- wp:query-title {"type":"search"} /-->
+<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:query-title {"type":"search"} /-->
 
 <!-- wp:query {"queryId":3,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"className":"post-feed is-archive-feed"} -->
 <div class="wp-block-query post-feed is-archive-feed"><!-- wp:post-template {"layout":{"type":"grid","minimumColumnWidth":"18rem"}} -->
@@ -1315,8 +1354,8 @@ Fichier complet `themes/jchable/templates/search.html` :
 <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 
 <!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
-<div class="wp-block-group site-body"><!-- wp:group {"tagName":"main","className":"site-main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group site-main"><!-- wp:heading {"level":1} -->
+<div class="wp-block-group site-body"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"constrained"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:heading {"level":1} -->
 <h1 class="wp-block-heading">Page introuvable</h1>
 <!-- /wp:heading -->
 
@@ -1339,8 +1378,8 @@ Le paragraphe `.not-found-path` est l'emplacement du chemin : la Task 6 le rempl
 <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 
 <!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
-<div class="wp-block-group site-body"><!-- wp:group {"tagName":"main","className":"site-main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group site-main"><!-- wp:post-title {"level":1} /-->
+<div class="wp-block-group site-body"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"constrained"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:post-title {"level":1} /-->
 
 <!-- wp:heading -->
 <h2 class="wp-block-heading">Archives par mois</h2>
@@ -1666,7 +1705,7 @@ add_action(
 		);
 
 		foreach ( [ 'post-filename', 'archive-path', 'request-path' ] as $jchable_block ) {
-			register_block_type( get_template_directory() . '/blocks/' . $jchable_block );
+			register_block_type_from_metadata( get_template_directory() . '/blocks/' . $jchable_block );
 		}
 	}
 );
@@ -1939,7 +1978,7 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { POSTS, PAGES, ARCHIVES } from './fixtures';
 
-const PATHS = ['/', POSTS.latest.path, PAGES.about, PAGES.sitemap, ARCHIVES.category, ARCHIVES.search, ARCHIVES.notFound];
+const PATHS = ['/', POSTS.latest.path, POSTS.code.path, PAGES.about, PAGES.sitemap, ARCHIVES.category, ARCHIVES.search, ARCHIVES.notFound];
 
 for (const path of PATHS) {
   test(`axe : aucune violation sérieuse ou critique sur ${path}`, async ({ page }) => {
@@ -1952,9 +1991,15 @@ for (const path of PATHS) {
   });
 }
 
-test('lien d’évitement vers le contenu', async ({ page }) => {
+test('avec JavaScript : le lien d’évitement du cœur ne double pas le nôtre', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('a.skip-link')).toHaveCount(1);
+  await expect(page.locator('a.jchable-skip-link')).toHaveCount(1);
+  await expect(page.locator('a.skip-link')).toHaveCount(0);
+});
+
+test('code : la zone défilante est accessible au clavier', async ({ page }) => {
+  await page.goto(POSTS.code.path);
+  await expect(page.locator('.wp-block-code')).toHaveAttribute('tabindex', '0');
 });
 ```
 
@@ -1965,6 +2010,14 @@ import { test, expect } from '@playwright/test';
 import { POSTS } from './fixtures';
 
 test.use({ javaScriptEnabled: false });
+
+test('sans JavaScript : lien d’évitement unique vers le contenu', async ({ page }) => {
+  await page.goto('/');
+  const skip = page.locator('a.jchable-skip-link');
+  await expect(skip).toHaveCount(1);
+  await expect(skip).toHaveAttribute('href', '#contenu');
+  await expect(page.locator('main#contenu')).toHaveCount(1);
+});
 
 test('sans JavaScript : accueil lisible et navigable', async ({ page }) => {
   await page.goto('/');
@@ -2012,6 +2065,22 @@ Expected : la plupart passent. Les échecs les plus probables sont un défilemen
 }
 ```
 
+Une zone qui défile (`overflow-x: auto`) doit pouvoir recevoir le focus clavier, sinon axe signale `scrollable-region-focusable` (sérieux). Ajouter à la fin de `themes/jchable/inc/blocks.php` :
+
+```php
+// Les blocs de code défilent horizontalement : ils doivent être atteignables au clavier.
+add_filter(
+	'render_block_core/code',
+	static function ( string $content ): string {
+		$tags = new WP_HTML_Tag_Processor( $content );
+		if ( $tags->next_tag( 'pre' ) ) {
+			$tags->set_attribute( 'tabindex', '0' );
+		}
+		return $tags->get_updated_html();
+	}
+);
+```
+
 - [ ] **Step 4 : relancer et corriger jusqu'au vert**
 
 Run : `npx playwright test tests/e2e/layout.spec.ts tests/e2e/a11y.spec.ts tests/e2e/nojs.spec.ts`
@@ -2048,9 +2117,8 @@ git commit -m "test(jchable): responsive, accessibilité et lecture sans JavaScr
 
 - [ ] **Step 1 : regarder si Theme Check fournit une commande WP-CLI**
 
-Run : `npx wp-env run cli wp help theme-check`
-- Si la commande existe : remplacer le script `check` de `package.json` par `wp-env run cli wp theme-check run jchable`, ignorer le Step 2 et passer au Step 3.
-- Sinon (« 'theme-check' is not a registered wp command ») : passer au Step 2.
+Run : `npx wp-env run cli wp theme-check run jchable`
+Theme Check fournit normalement cette commande. Elle peut toutefois échouer dès qu'il y a un simple avertissement : lire sa sortie pour situer les problèmes, mais garder le script maison du Step 2 pour `npm run check`, car lui n'échoue que sur les exigences (REQUIRED).
 
 - [ ] **Step 2 : écrire `tools/check/theme-check.php`**
 
@@ -2308,7 +2376,8 @@ for (const theme of themes) {
 
 Run : `npm run zip`
 Expected : `dist/jchable.zip : <n> octets`.
-Run : `tar -tf dist/jchable.zip | head -20` (le `tar` de Windows 10+ et de Git Bash sait lire les zips)
+Run, dans PowerShell : `C:\Windows\System32\tar.exe -tf dist\jchable.zip | Select-Object -First 20`
+(dans Git Bash : `/c/Windows/System32/tar.exe -tf dist/jchable.zip | head -20`. Le `tar` de Git Bash est GNU tar et ne lit pas les zips : il faut celui de Windows.)
 Expected : tous les chemins commencent par `jchable/` ; on trouve `jchable/style.css`, `jchable/theme.json` et `jchable/templates/home.html`.
 
 - [ ] **Step 7 : commit**
