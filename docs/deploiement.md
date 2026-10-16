@@ -13,12 +13,20 @@ npm install
 npm run zip
 ```
 
-Produit `dist/jchable.zip` (thème parent) et `dist/jchable-bureau.zip` (thème enfant, avec le JavaScript compilé et DOOM). Le thème Bureau a besoin du parent : installer les deux.
+Produit `dist/jchable.zip` (thème parent, environ 80 Ko) et `dist/jchable-bureau.zip` (thème enfant, avec le JavaScript compilé et DOOM, environ 3 Mo). Le thème Bureau a besoin du parent : installer les deux.
+
+Si votre hébergeur limite le téléversement à 2 Mo (voir Médias › Ajouter), fabriquer plutôt la version légère :
+
+```
+npm run zip -- --no-doom
+```
+
+Elle produit `dist/jchable-bureau-sans-doom.zip` (environ 270 Ko). DOOM n'y est alors pas inclus : après l'installation, copier par SFTP le dossier `themes/jchable-bureau/assets/doom/` du dépôt vers `wp-content/themes/jchable-bureau/assets/doom/` sur le serveur.
 
 ## 2. Installer sans activer
 
 1. Admin › Apparence › Thèmes › Ajouter › Téléverser un thème : `dist/jchable.zip`, puis `dist/jchable-bureau.zip`. **Ne pas activer.**
-2. Si WordPress refuse le téléversement (fichier trop gros), regarder la taille maximale dans Médias › Ajouter. Le zip Bureau pèse quelques Mo à cause de DOOM. Solution : téléverser par SFTP le dossier `jchable-bureau/` dans `wp-content/themes/`.
+2. Si WordPress refuse le téléversement (fichier trop gros), utiliser la version légère (§1) ou téléverser par SFTP le dossier `jchable-bureau/` dans `wp-content/themes/`.
 3. Sur la carte « jchable Bureau », cliquer **Aperçu en direct**. L'aperçu ne change rien pour les visiteurs.
 
 ## 3. Vérifications à faire dans l'aperçu (ce que le local ne peut pas tester)

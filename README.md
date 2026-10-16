@@ -27,7 +27,7 @@ PHP n'est pas nécessaire sur la machine : WP-CLI et PHP tournent dans le conten
 | `npm run test:e2e` | tests Playwright du thème parent (active `jchable`) |
 | `npm run test:e2e:bureau` | tests Playwright du thème Bureau (active `jchable-bureau`) |
 | `npm run check -- <thème>` | Theme Check (`jchable` ou `jchable-bureau`) ; `npm run check:all` pour les deux |
-| `npm run zip` | compile le JS puis génère `dist/<thème>.zip` pour chaque thème |
+| `npm run zip` | compile le JS puis génère `dist/<thème>.zip` pour chaque thème ; `npm run zip -- --no-doom` fabrique `jchable-bureau-sans-doom.zip` (léger) |
 
 Les deux suites Playwright partagent le même WordPress local : on ne les lance pas en même temps. Chacune active son thème avant de tourner ; à la fin, le thème de la dernière suite lancée reste actif.
 

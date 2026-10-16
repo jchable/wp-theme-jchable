@@ -45,3 +45,21 @@ test('exclut les sources, les dépendances et les fichiers parasites', () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('exclut les dossiers demandés (option sans DOOM)', () => {
+  const dir = makeTheme(['style.css', 'assets/doom/doom1.wad', 'assets/doom/README.md', 'assets/css/a.css']);
+  try {
+    assert.deepEqual(listThemeFiles(dir, { exclude: ['assets/doom/'] }), ['assets/css/a.css', 'style.css']);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('sans option, tout est inclus', () => {
+  const dir = makeTheme(['assets/doom/doom1.wad', 'style.css']);
+  try {
+    assert.deepEqual(listThemeFiles(dir), ['assets/doom/doom1.wad', 'style.css']);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

@@ -7,9 +7,10 @@ const EXCLUDED_FILES = [/\.map$/, /^\.DS_Store$/, /^Thumbs\.db$/];
 /**
  * Fichiers à mettre dans le zip d'un thème.
  * @param {string} themeDir
+ * @param {{ exclude?: string[] }} [options] préfixes de chemins relatifs à exclure (ex. « assets/doom/ »)
  * @returns {string[]} chemins relatifs, séparés par « / », triés
  */
-export function listThemeFiles(themeDir) {
+export function listThemeFiles(themeDir, { exclude = [] } = {}) {
   const files = [];
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
@@ -19,7 +20,9 @@ export function listThemeFiles(themeDir) {
         continue;
       }
       if (EXCLUDED_FILES.some((re) => re.test(name))) continue;
-      files.push(relative(themeDir, full).split(sep).join('/'));
+      const rel = relative(themeDir, full).split(sep).join('/');
+      if (exclude.some((prefix) => rel.startsWith(prefix))) continue;
+      files.push(rel);
     }
   };
   walk(themeDir);
