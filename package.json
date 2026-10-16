@@ -1,0 +1,26 @@
+{
+  "name": "jchable-themes",
+  "private": true,
+  "description": "Thèmes WordPress de julien.chable.net",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "env:seed": "wp-env run cli wp eval-file wp-content/jchable-tools/env/seed.php",
+    "env:reset": "wp-env reset all && npm run env:seed",
+    "test:e2e": "playwright test",
+    "test:tools": "node --test \"tools/**/*.test.mjs\"",
+    "check": "wp-env run cli wp eval-file wp-content/jchable-tools/check/theme-check.php jchable",
+    "zip": "node tools/zip/zip.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "@wordpress/env": "^11.17.0",
+    "archiver": "^7.0.1"
+  }
+}
