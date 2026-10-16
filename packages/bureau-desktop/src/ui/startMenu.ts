@@ -9,6 +9,8 @@ export interface StartMenuOptions {
   /** Pages du menu du site (Accueil, À propos…) et flux RSS. */
   links: ReadonlyArray<{ label: string; href: string }>;
   openApp: (id: string) => void;
+  /** Ouvre une page du blog (dans une fenêtre si elle a du contenu, sinon navigation normale). */
+  openPage: (href: string) => void;
   resetIcons: () => void;
   startScreensaver: () => void;
   shutdown: () => void;
@@ -204,7 +206,16 @@ export class StartMenu {
 
   private buildLinks(): HTMLElement {
     const group = this.group('Blog');
-    for (const { label, href } of this.options.links) group.append(this.link(label, href));
+    for (const { label, href } of this.options.links) {
+      const item = this.link(label, href);
+      item.addEventListener('click', (event) => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) return; // nouvel onglet : navigation normale
+        event.preventDefault();
+        this.close(false);
+        this.options.openPage(href);
+      });
+      group.append(item);
+    }
     return group;
   }
 

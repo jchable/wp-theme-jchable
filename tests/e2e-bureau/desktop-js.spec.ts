@@ -599,3 +599,72 @@ test.describe('correctifs de la revue finale', () => {
     expect(response.status()).toBe(200);
   });
 });
+
+test.describe('« À propos » s’ouvre dans une fenêtre', () => {
+  test('grand écran : le double-clic ouvre une fenêtre avec la page, sans quitter l’accueil', async ({ page }, info) => {
+    test.skip(!isDesktop(info.project.name));
+    await page.goto('/');
+    await openApp(page, 'À propos');
+    const win = page.locator('.bwin[data-app="page-a-propos"]');
+    await expect(win).toBeVisible();
+    await expect(win.locator('.bwin-title')).toHaveText('a-propos.md');
+    await expect(win.getByRole('heading', { level: 1 })).toHaveText('À propos');
+    await expect(win).toContainText('Open Knowledge Format');
+    await expect(win.getByRole('link', { name: /Ouvrir la page/ })).toHaveAttribute('href', /\/a-propos\/$/);
+    await expect(page).toHaveURL(/localhost:8888\/$/);
+    await win.getByRole('button', { name: 'Fermer' }).click();
+    await expect(win).toHaveCount(0);
+  });
+
+  test('une page sans contenu (Plan du site) s’ouvre normalement, pas dans une fenêtre', async ({ page }, info) => {
+    test.skip(!isDesktop(info.project.name));
+    await page.goto('/');
+    await openApp(page, 'Plan du site');
+    await expect(page).toHaveURL(/\/plan-du-site\/$/);
+  });
+
+  test('l’accueil reste une vraie navigation', async ({ page }, info) => {
+    test.skip(!isDesktop(info.project.name));
+    await page.goto('/a-propos/');
+    await openApp(page, 'Accueil');
+    await expect(page).toHaveURL(/localhost:8888\/$/);
+  });
+
+  test('le menu Démarrer ouvre aussi « À propos » dans une fenêtre', async ({ page }, info) => {
+    test.skip(info.project.name === 'tablet');
+    await page.goto('/');
+    await openFromStartMenu(page, 'À propos');
+    await expect(page.locator('.bwin[data-app="page-a-propos"]')).toBeVisible();
+    await expect(page).toHaveURL(/localhost:8888\/$/);
+  });
+
+  test('si l’API échoue, la page s’ouvre normalement', async ({ page }, info) => {
+    test.skip(!isDesktop(info.project.name));
+    await page.route('**/wp-json/wp/v2/pages*', (route) => route.abort());
+    await page.goto('/');
+    await openApp(page, 'À propos');
+    await expect(page).toHaveURL(/\/a-propos\/$/);
+  });
+
+  test('du contenu piégé venant de l’API reste inerte', async ({ page }, info) => {
+    test.skip(!isDesktop(info.project.name));
+    await page.route('**/wp-json/wp/v2/pages*', (route) =>
+      route.fulfill({
+        json: [
+          {
+            title: { rendered: 'Piège <img src=x onerror="window.__pwn=1">' },
+            link: 'https://localhost:8888/a-propos/',
+            content: { rendered: '<p>texte</p><img src="x" onerror="window.__pwn=1"><script>window.__pwn=1</script><a href="javascript:window.__pwn=1">clic</a>' },
+          },
+        ],
+      }),
+    );
+    await page.goto('/');
+    await openApp(page, 'À propos');
+    const win = page.locator('.bwin[data-app="page-a-propos"]');
+    await expect(win).toContainText('texte');
+    await win.getByText('clic').click();
+    expect(await page.evaluate(() => (window as unknown as { __pwn?: number }).__pwn)).toBeUndefined();
+    await expect(win.locator('script, [onerror]')).toHaveCount(0);
+  });
+});

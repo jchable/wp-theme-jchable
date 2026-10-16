@@ -1,0 +1,58 @@
+/* Lecteur de page : le contenu d'une page WordPress dans une fenêtre. */
+
+.bapp-page {
+	box-sizing: border-box;
+	padding: 1.25rem 1.5rem 1.5rem;
+	color: var(--wp--preset--color--contrast, #101010);
+	font-size: 1rem;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+
+.bapp-page:focus {
+	outline: none;
+}
+
+.bapp-page-title {
+	margin: 0 0 1rem;
+	font-size: 1.75rem;
+	line-height: 1.1;
+}
+
+.bapp-page-content > :first-child {
+	margin-top: 0;
+}
+
+.bapp-page-content img {
+	max-width: 100%;
+	height: auto;
+	border: 2px solid var(--wp--preset--color--contrast, #101010);
+}
+
+.bapp-page-content pre {
+	max-width: 100%;
+	overflow-x: auto;
+	padding: 0.75rem;
+	border: 2px solid var(--wp--preset--color--contrast, #101010);
+	background: #fff;
+}
+
+.bapp-page-content table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.bapp-page-content blockquote {
+	margin-inline: 0;
+	padding-left: 1rem;
+	border-left: 6px solid var(--wp--preset--color--accent, #2d3fc8);
+}
+
+.bapp-page-footer {
+	margin: 1.5rem 0 0;
+	padding-top: 0.75rem;
+	border-top: 1px solid rgba(16, 16, 16, 0.25);
+	font-family: var(--wp--preset--font-family--mono, ui-monospace, monospace);
+	font-size: 0.875rem;
+}

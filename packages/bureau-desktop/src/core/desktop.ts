@@ -1,5 +1,6 @@
 import { focusAnchor } from './anchor';
-import { LISTED_APPS } from './registry';
+import { hasReadableContent, slugOf } from './pages';
+import { LISTED_APPS, pageApp } from './registry';
 import { readConfig } from './config';
 import { createPrefs } from './prefs';
 import { createSound } from './sound';
@@ -84,6 +85,28 @@ export function bootstrap(): void {
     ),
   ];
 
+  // Une page avec du contenu (À propos…) s'ouvre dans une fenêtre ; tout le reste est une navigation normale.
+  const openPage = async (href: string): Promise<void> => {
+    const slug = href === config.feedUrl ? null : slugOf(href, location.origin);
+    if (!slug) {
+      location.assign(href);
+      return;
+    }
+    try {
+      const pages = await fetchJson<Array<{ content?: { rendered?: string } }>>(
+        `${config.restUrl}wp/v2/pages?slug=${encodeURIComponent(slug)}&_fields=title,content,link`,
+      );
+      const page = Array.isArray(pages) ? pages[0] : undefined;
+      if (page && hasReadableContent(page.content?.rendered)) {
+        manager.openApp(pageApp(slug), { slug, page });
+        return;
+      }
+    } catch {
+      /* l'API ne répond pas : on ouvre la page normalement */
+    }
+    location.assign(href);
+  };
+
   // WordPad ouvert depuis un article part de cet article.
   const launch = (id: string): void => {
     const title = document.querySelector('h1')?.textContent?.trim();
@@ -96,7 +119,7 @@ export function bootstrap(): void {
     items,
     prefs,
     openApp: launch,
-    navigate: (url) => location.assign(url),
+    navigate: (url) => void openPage(url),
     onAnchor: focusAnchor,
     onContextMenu: (x, y) =>
       showContextMenu(x, y, [
@@ -141,6 +164,7 @@ export function bootstrap(): void {
           ...items.filter((item) => item.kind === 'link' && item.href && item.href !== config.feedUrl).map((item) => ({ label: item.label, href: item.href as string })),
           { label: 'Flux RSS', href: config.feedUrl },
         ],
+        openPage: (href) => void openPage(href),
         resetIcons: () => resetAll(),
         startScreensaver: () => saver.start(),
         shutdown: () => showShutdown(),

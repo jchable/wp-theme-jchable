@@ -68,6 +68,18 @@ export const APPS: readonly BureauApp[] = [
 /** Applis visibles comme icônes du bureau et dans le menu Démarrer (« Propriétés » n'y est pas). */
 export const LISTED_APPS: readonly BureauApp[] = APPS.filter((app) => app.id !== 'properties');
 
+/** Fenêtre de lecture d'une page du site (À propos…) : une fenêtre par page. */
+export function pageApp(slug: string): BureauApp {
+  return {
+    id: `page-${slug}`,
+    title: `${slug}.md`,
+    icon: 'wordpad',
+    defaultSize: { w: 620, h: 480 },
+    mobile: 'fullscreen',
+    load: () => import('../apps/page/index'),
+  };
+}
+
 export function findApp(id: string): BureauApp | undefined {
   return APPS.find((app) => app.id === id);
 }

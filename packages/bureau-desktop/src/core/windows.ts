@@ -71,7 +71,12 @@ export class WindowManager {
   /** Ouvre l'appli, ou ramène sa fenêtre au premier plan si elle est déjà ouverte. */
   open(appId: string, args: Record<string, unknown> = {}): void {
     const app = findApp(appId);
-    if (!app) return;
+    if (app) this.openApp(app, args);
+  }
+
+  /** Comme `open`, pour une appli qui n'est pas dans le registre (fenêtre de page). */
+  openApp(app: BureauApp, args: Record<string, unknown> = {}): void {
+    const appId = app.id;
     const existing = this.windows.get(appId);
     if (existing) {
       this.restore(appId);
