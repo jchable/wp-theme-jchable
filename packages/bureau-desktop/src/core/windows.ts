@@ -25,6 +25,10 @@ export interface WindowManagerOptions {
   leftInset: () => number;
   playSound: (name: SoundName) => void;
   openBsod: (message?: string) => void;
+  /** Capacités transmises aux applis qui en ont besoin (Préférences). */
+  settings?: AppContext['settings'];
+  previewScreensaver?: AppContext['previewScreensaver'];
+  resetIcons?: AppContext['resetIcons'];
 }
 
 interface OpenWindow {
@@ -353,9 +357,12 @@ export class WindowManager {
   }
 
   private buildContext(win: OpenWindow, args: Record<string, unknown>): AppContext {
-    const { config, storage } = this.options;
+    const { config, storage, settings, previewScreensaver, resetIcons } = this.options;
     const id = win.app.id;
     return {
+      ...(settings ? { settings } : {}),
+      ...(previewScreensaver ? { previewScreensaver } : {}),
+      ...(resetIcons ? { resetIcons } : {}),
       config,
       args,
       storage: createAppStorage(id, storage),

@@ -58,9 +58,15 @@ Les textes du thème et des applis existent en français et en anglais, sans plu
 
 Pour ajouter ou corriger un texte : chaque appli a son fichier `i18n.ts` (`src/apps/<appli>/i18n.ts`), le cœur du bureau `src/core/ui-i18n.ts`, et les textes écrits dans les gabarits PHP/HTML sont traduits par `src/ui/chrome.ts`. Un test vérifie que chaque texte existe dans les deux langues.
 
+## Préférences et écrans de veille
+
+Menu Démarrer › **Préférences…** (ou clic droit sur le bureau) ouvre une fenêtre de réglages : écran de veille (choix de la scène avec aperçu plein écran, activation automatique, délai de 1 à 30 minutes), langue, son, rangement des icônes. Chaque changement s'applique tout de suite et est mémorisé dans le navigateur.
+
+Six écrans de veille, dessinés sur un canevas 2D avec une 3D logicielle maison (aucune dépendance, pas de WebGL) : **Tunnel néon** (par défaut), **Fenêtres flottantes** (titres de vos derniers articles), **Graphe de connaissances**, **Planète de code**, **Bureau en voxels** et le **Badge JC** d'origine. Chaque scène est un module `src/ui/screensaver/scenes/<id>.ts` chargé seulement quand on la choisit ; pour en ajouter une, il suffit d'exporter `create: SceneFactory`, de l'inscrire dans `catalog.ts` et `loader.ts`, et de la tester avec `expectSceneConforms`. L'écran de veille automatique ne se lance que sur l'accueil, les archives et la 404, jamais avec « moins d'animations », et une scène qui échoue retombe sur le badge JC.
+
 ## Données du visiteur
 
-Le bureau mémorise, dans le **localStorage du navigateur du visiteur** (clé `jchable-bureau:v1`), la position des icônes et des fenêtres, la langue, l'activation du son et de l'écran de veille, et le brouillon du WordPad. Rien n'est envoyé au serveur. Si le stockage est bloqué, tout fonctionne en mémoire.
+Le bureau mémorise, dans le **localStorage du navigateur du visiteur** (clé `jchable-bureau:v1`), la position des icônes et des fenêtres, la langue, le son, l'écran de veille choisi et son délai, et le brouillon du WordPad. Rien n'est envoyé au serveur. Si le stockage est bloqué, tout fonctionne en mémoire.
 
 ## Installer sur le blog
 

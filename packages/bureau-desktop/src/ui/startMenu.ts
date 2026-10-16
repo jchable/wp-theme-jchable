@@ -14,6 +14,8 @@ export interface StartMenuOptions {
   /** Ouvre une page du blog (dans une fenêtre si elle a du contenu, sinon navigation normale). */
   openPage: (href: string) => void;
   resetIcons: () => void;
+  /** Ouvre la fenêtre Préférences. */
+  openSettings: () => void;
   startScreensaver: () => void;
   shutdown: () => void;
   fetchJson: <T>(url: string) => Promise<T>;
@@ -247,9 +249,10 @@ export class StartMenu {
   }
 
   private buildSettings(): HTMLElement {
-    const { prefs, resetIcons, startScreensaver, shutdown, screensaverAvailable } = this.options;
+    const { prefs, resetIcons, openSettings, startScreensaver, shutdown, screensaverAvailable } = this.options;
     const group = this.group(t('menu.settings'));
     group.append(
+      this.action(t('menu.preferences'), openSettings),
       this.checkbox(t('menu.sound'), prefs.get().sound, (value) => prefs.update((p) => (p.sound = value))),
     );
     if (screensaverAvailable) {

@@ -3,23 +3,25 @@ import { getLang, resolveLang, setLang } from './i18n';
 import { hasReadableContent, slugOf } from './pages';
 import { LISTED_APPS, pageApp } from './registry';
 import { readConfig } from './config';
-import { createPrefs } from './prefs';
+import { SAVER_DELAYS, createPrefs } from './prefs';
 import { createSound } from './sound';
 import { t } from './ui-i18n';
 import { WindowManager } from './windows';
 import { showContextMenu } from '../ui/contextMenu';
 import { DesktopIcons } from '../ui/desktopIcons';
+import type { DesktopSettings } from './types';
 import type { IconItem } from '../ui/desktopIcons';
 import { showBsod, showShutdown } from '../ui/overlays';
 import { SidebarWindows } from '../ui/sidebarWindows';
 import { chromeLabel, translateChrome } from '../ui/chrome';
 import { readMenuIcons } from '../ui/menuIcons';
 import { IdleWatcher, createScreensaver, isScreensaverEligiblePage } from '../ui/screensaver';
+import { isSceneId } from '../ui/screensaver/scenes/catalog';
 import { StartMenu } from '../ui/startMenu';
 import { Taskbar } from '../ui/taskbar';
 
 const DESKTOP_QUERY = '(min-width: 900px)';
-const SCREENSAVER_DELAY_MS = 3 * 60 * 1000;
+const MINUTE_MS = 60 * 1000;
 
 function safeStorage(): Storage | null {
   try {
@@ -71,6 +73,15 @@ export function bootstrap(): void {
     leftInset,
     playSound: (name) => sound.play(name),
     openBsod: (message) => showBsod(message),
+    settings: {
+      get: (): DesktopSettings => {
+        const p = prefs.get();
+        return { lang: p.lang, sound: p.sound, screensaver: p.screensaver, saverScene: p.saver, saverDelayMin: p.saverDelay };
+      },
+      update: (patch) => applySettings(patch),
+    },
+    previewScreensaver: (sceneId) => saver.start(isSceneId(sceneId) ? sceneId : undefined),
+    resetIcons: () => resetAll(),
   });
 
   // --- Icônes du bureau (grand écran) et fenêtres déplaçables de la barre latérale ---
@@ -136,9 +147,23 @@ export function bootstrap(): void {
     onContextMenu: (x, y) =>
       showContextMenu(x, y, [
         { label: t('menu.reset'), action: () => resetAll() },
+        { label: t('menu.preferences'), action: () => manager.open('settings') },
         { label: t('menu.properties'), action: () => manager.open('properties') },
       ]),
   });
+
+  // Un réglage de la fenêtre Préférences : valeurs invalides ignorées, effet immédiat.
+  const applySettings = (patch: Partial<DesktopSettings>): void => {
+    prefs.update((p) => {
+      if (patch.sound !== undefined) p.sound = Boolean(patch.sound);
+      if (patch.screensaver !== undefined) p.screensaver = Boolean(patch.screensaver);
+      if (isSceneId(patch.saverScene)) p.saver = patch.saverScene;
+      if (typeof patch.saverDelayMin === 'number' && SAVER_DELAYS.includes(patch.saverDelayMin)) p.saverDelay = patch.saverDelayMin;
+      if (patch.lang === 'auto' || patch.lang === 'fr' || patch.lang === 'en') p.lang = patch.lang;
+    });
+    if (patch.saverDelayMin !== undefined) armIdle();
+    if (patch.lang !== undefined) location.reload();
+  };
 
   const resetAll = (): void => {
     icons.reset();
@@ -146,16 +171,24 @@ export function bootstrap(): void {
   };
 
   // --- Écran de veille : pages d'accueil, d'archives et 404 seulement ---
-  const saver = createScreensaver();
-  const idle = new IdleWatcher({
-    timeoutMs: SCREENSAVER_DELAY_MS,
-    onIdle: () => {
-      if (prefs.get().screensaver && !isMobile() && !document.querySelector('.bbsod, .bshutdown')) saver.start();
-    },
-  });
+  const saver = createScreensaver({ scene: () => prefs.get().saver });
   const saverEligible = isScreensaverEligiblePage(document.body);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (saverEligible && !reducedMotion) idle.start(); // « moins d'animations » : jamais tout seul
+  let idle: IdleWatcher | null = null;
+  // Le délai vient des préférences ; le changer remplace la minuterie.
+  function armIdle(): void {
+    idle?.stop();
+    idle = null;
+    if (!saverEligible || reducedMotion) return; // « moins d'animations » : jamais tout seul
+    idle = new IdleWatcher({
+      timeoutMs: prefs.get().saverDelay * MINUTE_MS,
+      onIdle: () => {
+        if (prefs.get().screensaver && !isMobile() && !document.querySelector('.bbsod, .bshutdown')) saver.start();
+      },
+    });
+    idle.start();
+  }
+  armIdle();
 
   // --- Barre des tâches et menu Démarrer ---
   const taskbarRoot = document.querySelector<HTMLElement>('.taskbar');
@@ -184,6 +217,7 @@ export function bootstrap(): void {
           location.reload();
         },
         resetIcons: () => resetAll(),
+        openSettings: () => manager.open('settings'),
         startScreensaver: () => saver.start(),
         shutdown: () => showShutdown(),
         fetchJson,

@@ -55,7 +55,7 @@ Apparence › Thèmes › activer **Twenty Eleven** (ou le thème précédent). 
 
 ## 6. Respect de la vie privée
 
-Le bureau écrit dans le **localStorage du navigateur du visiteur** : position des icônes et des fenêtres, langue, son, écran de veille, brouillon du WordPad. Ces données servent uniquement à une fonction demandée par le visiteur, restent sur son appareil et ne sont jamais envoyées au serveur, sans suivi ni partage : à notre avis, cela entre dans l'exemption de consentement de la directive ePrivacy (ce n'est pas un avis juridique). Une phrase dans votre page de confidentialité suffit.
+Le bureau écrit dans le **localStorage du navigateur du visiteur** : position des icônes et des fenêtres, langue, son, écran de veille (scène et délai), brouillon du WordPad. Ces données servent uniquement à une fonction demandée par le visiteur, restent sur son appareil et ne sont jamais envoyées au serveur, sans suivi ni partage : à notre avis, cela entre dans l'exemption de consentement de la directive ePrivacy (ce n'est pas un avis juridique). Une phrase dans votre page de confidentialité suffit.
 
 ## 7. Licences à connaître
 

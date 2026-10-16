@@ -528,3 +528,92 @@ html:not(.bureau-desktop-on) .bwin-handle {
 		opacity: 1;
 	}
 }
+
+/* Fenêtre Préférences. */
+.bset {
+	display: grid;
+	gap: 0.75rem;
+	padding: 1rem 1.25rem;
+}
+
+.bset-section {
+	margin: 0;
+	padding: 0.5rem 0.75rem 0.75rem;
+	border: 2px solid var(--b-ink);
+}
+
+.bset-section legend {
+	padding: 0 0.4rem;
+	font-weight: 700;
+}
+
+.bset-scenes {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.bset-choice {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.6rem;
+	padding: 0.3rem 0.25rem;
+	cursor: pointer;
+}
+
+.bset-choice input {
+	flex: none;
+	margin-top: 0.25rem;
+	accent-color: var(--b-ink);
+}
+
+.bset-text {
+	display: grid;
+}
+
+.bset-label {
+	font-weight: 700;
+}
+
+.bset-desc {
+	font-size: 0.85em;
+	opacity: 0.8;
+}
+
+.bset-delay-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.3rem 0.25rem;
+}
+
+.bset-delay {
+	padding: 0.25rem 0.4rem;
+	border: 2px solid var(--b-ink);
+	background: var(--b-paper);
+	color: var(--b-ink);
+	font: inherit;
+}
+
+.bset-btn {
+	margin: 0.35rem 0.25rem 0;
+	padding: 0.4rem 1rem;
+	border: 2px solid var(--b-ink);
+	background: var(--b-paper);
+	box-shadow: 3px 3px 0 var(--b-ink);
+	color: var(--b-ink);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.bset-btn:focus-visible,
+.bset-choice input:focus-visible,
+.bset-delay:focus-visible {
+	outline: 3px solid var(--b-ink);
+	outline-offset: 2px;
+}
+
+.bset-close {
+	justify-self: end;
+}

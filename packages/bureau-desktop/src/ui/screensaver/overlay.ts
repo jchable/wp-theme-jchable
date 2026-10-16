@@ -1,18 +1,35 @@
 import './style.css';
-import { createScene, resize, step, type Scene } from './physics';
+import { createScene, resize, step, type Scene as BadgeScene } from './physics';
 import { t } from './i18n';
+import { readSceneContext } from './scenes/context';
+import { loadScene as defaultLoadScene } from './scenes/loader';
+import type { SceneContext, SceneFactory, SceneId } from './scenes/types';
 
 export interface ScreensaverOptions {
   reducedMotion?: () => boolean;
   requestFrame?: (cb: (time: number) => void) => number;
   cancelFrame?: (handle: number) => void;
+  /** L'écran de veille choisi par le visiteur (le badge JC si absent). */
+  scene?: () => SceneId;
+  /** Charge une scène 3D à la demande. */
+  loadScene?: (id: Exclude<SceneId, 'classic'>) => Promise<SceneFactory>;
+  /** Le contexte d'une scène (titres, couleurs, langue) ; les dimensions sont ajoutées par l'écran de veille. */
+  context?: () => SceneContext;
 }
 
 export interface Screensaver {
-  start(): void;
+  /** Lance l'écran de veille ; `sceneId` (aperçu) l'emporte sur le choix du visiteur. */
+  start(sceneId?: SceneId): void;
   stop(): void;
   isRunning(): boolean;
   destroy(): void;
+}
+
+/** Ce que l'écran de veille fait tourner : le badge d'origine, une scène 3D, ou l'attente du chargement. */
+interface Renderer {
+  step(dtMs: number): void;
+  draw(ctx: CanvasRenderingContext2D, dpr: number): void;
+  resize(width: number, height: number): void;
 }
 
 const GRACE_MS = 300;
@@ -24,16 +41,20 @@ const CONSUME: AddEventListenerOptions = { capture: true };
 const CONSUMED_EVENTS = ['keydown', 'pointerdown'] as const;
 const RESIZE: AddEventListenerOptions = { passive: true };
 
-function draw(ctx: CanvasRenderingContext2D, scene: Scene, dpr: number): void {
-  const { width, height, badge } = scene;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.globalAlpha = 1;
-
+function paintSky(ctx: CanvasRenderingContext2D, width: number, height: number): void {
   const sky = ctx.createLinearGradient(0, 0, 0, height);
   sky.addColorStop(0, '#0000AA');
   sky.addColorStop(1, '#00002a');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, width, height);
+}
+
+function draw(ctx: CanvasRenderingContext2D, scene: BadgeScene, dpr: number): void {
+  const { width, height, badge } = scene;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.globalAlpha = 1;
+
+  paintSky(ctx, width, height);
 
   ctx.fillStyle = '#ffffff';
   for (const star of scene.stars) {
@@ -55,6 +76,43 @@ function draw(ctx: CanvasRenderingContext2D, scene: Scene, dpr: number): void {
   ctx.fillText('JC', badge.x + badge.w / 2, badge.y + badge.h / 2 + badge.h * 0.03);
 }
 
+const badgeRenderer = (width: number, height: number): Renderer => {
+  const scene = createScene(width, height, Math.random);
+  return {
+    step: (dtMs) => step(scene, dtMs),
+    draw: (ctx, dpr) => draw(ctx, scene, dpr),
+    resize: (w, h) => resize(scene, w, h),
+  };
+};
+
+/** Le ciel bleu, le temps que la scène choisie se charge. */
+const waitingRenderer = (width: number, height: number): Renderer => {
+  let w = width;
+  let h = height;
+  return {
+    step: () => undefined,
+    draw: (ctx, dpr) => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalAlpha = 1;
+      paintSky(ctx, w, h);
+    },
+    resize: (nw, nh) => {
+      w = nw;
+      h = nh;
+    },
+  };
+};
+
+const sceneRenderer = (scene: ReturnType<SceneFactory>): Renderer => ({
+  step: (dtMs) => scene.step(dtMs),
+  draw: (ctx, dpr) => {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.globalAlpha = 1;
+    scene.draw(ctx);
+  },
+  resize: (w, h) => scene.resize(w, h),
+});
+
 export function createScreensaver(options: ScreensaverOptions = {}): Screensaver {
   const reducedMotion =
     options.reducedMotion ?? (() => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -64,7 +122,8 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
   let root: HTMLDivElement | null = null;
   let canvas: HTMLCanvasElement | null = null;
   let ctx: CanvasRenderingContext2D | null = null;
-  let scene: Scene | null = null;
+  let renderer: Renderer | null = null;
+  let generation = 0;
   let frame: number | null = null;
   let lastTime: number | null = null;
   let startedAt = 0;
@@ -72,18 +131,36 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
   let destroyed = false;
   let animated = true;
 
+  const size = (): { w: number; h: number } => ({ w: Math.max(1, window.innerWidth), h: Math.max(1, window.innerHeight) });
+
+  /** Une scène qui plante ne doit jamais laisser un écran figé : on retombe sur le badge JC. */
+  const guarded = (action: (r: Renderer) => void): void => {
+    if (!renderer) return;
+    try {
+      action(renderer);
+    } catch {
+      const { w, h } = size();
+      renderer = badgeRenderer(w, h);
+      try {
+        action(renderer);
+      } catch {
+        /* le badge ne devrait pas échouer ; en tout cas on ne casse pas la page */
+      }
+    }
+  };
+
   const render = (): void => {
-    if (ctx && scene) draw(ctx, scene, dpr);
+    const target = ctx;
+    if (target) guarded((r) => r.draw(target, dpr));
   };
 
   const fit = (): void => {
     if (!canvas) return;
-    const w = Math.max(1, window.innerWidth);
-    const h = Math.max(1, window.innerHeight);
+    const { w, h } = size();
     dpr = Math.max(1, window.devicePixelRatio || 1);
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
-    if (scene) resize(scene, w, h);
+    guarded((r) => r.resize(w, h));
   };
 
   const onResize = (): void => {
@@ -93,10 +170,10 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
 
   const loop = (time: number): void => {
     frame = null;
-    if (!root || !scene) return;
+    if (!root || !renderer) return;
     const dt = lastTime === null ? 0 : Math.min(MAX_DT_MS, Math.max(0, time - lastTime));
     lastTime = time;
-    step(scene, dt);
+    guarded((r) => r.step(dt));
     render();
     frame = requestFrame(loop);
   };
@@ -113,8 +190,25 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
     api.stop();
   };
 
+  /** Charge la scène 3D puis prend sa place ; un arrêt ou un redémarrage entre-temps annule tout. */
+  const switchTo = async (id: Exclude<SceneId, 'classic'>, mine: number): Promise<void> => {
+    let next: Renderer;
+    try {
+      const factory = await (options.loadScene ?? defaultLoadScene)(id);
+      if (mine !== generation || !root) return;
+      const { w, h } = size();
+      next = sceneRenderer(factory({ ...(options.context ?? readSceneContext)(), width: w, height: h }));
+    } catch {
+      if (mine !== generation || !root) return;
+      const { w, h } = size();
+      next = badgeRenderer(w, h);
+    }
+    renderer = next;
+    render();
+  };
+
   const api: Screensaver = {
-    start() {
+    start(sceneId) {
       if (destroyed || root) return;
       animated = !reducedMotion();
 
@@ -132,7 +226,9 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       live.setAttribute('aria-live', 'polite');
 
       root.append(canvas, live);
-      scene = createScene(Math.max(1, window.innerWidth), Math.max(1, window.innerHeight), Math.random);
+      const { w, h } = size();
+      const id = sceneId ?? options.scene?.() ?? 'classic';
+      renderer = id === 'classic' ? badgeRenderer(w, h) : waitingRenderer(w, h);
       fit();
       document.body.append(root);
       live.textContent = t('liveText');
@@ -145,9 +241,11 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
 
       render();
       if (animated) frame = requestFrame(loop);
+      if (id !== 'classic') void switchTo(id, ++generation);
     },
 
     stop() {
+      generation++;
       if (frame !== null) {
         cancelFrame(frame);
         frame = null;
@@ -156,7 +254,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       for (const type of CONSUMED_EVENTS) window.removeEventListener(type, onConsumedActivity, CONSUME as EventListenerOptions);
       window.removeEventListener('resize', onResize, RESIZE);
       root?.remove();
-      root = canvas = ctx = scene = null;
+      root = canvas = ctx = renderer = null;
       lastTime = null;
     },
 

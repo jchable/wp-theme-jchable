@@ -16,6 +16,19 @@ export interface BureauConfig {
   doomBaseUrl: string;
 }
 
+/** Réglages du visiteur que la fenêtre Préférences peut lire et changer. */
+export interface DesktopSettings {
+  /** Langue de l'interface : « auto » suit le navigateur. */
+  lang: 'auto' | 'fr' | 'en';
+  sound: boolean;
+  /** Écran de veille automatique activé ? */
+  screensaver: boolean;
+  /** Identifiant de la scène (tunnel, windows, graph, planet, voxel, classic). */
+  saverScene: string;
+  /** Délai d'inactivité en minutes (1, 2, 3, 5, 10, 15 ou 30). */
+  saverDelayMin: number;
+}
+
 export type SoundName = 'ohoh' | 'recycle' | 'ding' | 'error';
 
 /** Stockage propre à une appli : clés préfixées, jamais d'exception, valeurs en mémoire si le navigateur refuse. */
@@ -41,6 +54,15 @@ export interface AppContext {
   openBsod(message?: string): void;
   /** Joue un son, seulement si le visiteur l'a activé et après une première interaction. */
   playSound(name: SoundName): void;
+  /** Lit et change les préférences du visiteur (enregistrées dans son navigateur). */
+  readonly settings?: {
+    get(): Readonly<DesktopSettings>;
+    update(patch: Partial<DesktopSettings>): void;
+  };
+  /** Lance l'aperçu plein écran d'un écran de veille. */
+  previewScreensaver?(sceneId: string): void;
+  /** Remet les icônes du bureau dans leur rangement d'origine. */
+  resetIcons?(): void;
   /** GET JSON sur l'API REST du site : rejette en cas d'erreur réseau ou HTTP. */
   fetchJson<T>(url: string): Promise<T>;
 }

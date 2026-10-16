@@ -1,4 +1,6 @@
 import type { LangPref } from './i18n';
+import { DEFAULT_SCENE, isSceneId } from '../ui/screensaver/scenes/catalog';
+import type { SceneId } from '../ui/screensaver/scenes/types';
 import type { AppStorage } from './types';
 
 /** Clé du localStorage. Une nouvelle version du format repart des valeurs par défaut. */
@@ -23,8 +25,14 @@ export interface Prefs {
   screensaver: boolean;
   /** Langue de l'interface : « auto » suit le navigateur. */
   lang: LangPref;
+  /** Écran de veille choisi et délai d'inactivité (en minutes). */
+  saver: SceneId;
+  saverDelay: number;
   seen: Record<string, string | boolean>;
 }
+
+/** Délais d'inactivité proposés (minutes). */
+export const SAVER_DELAYS: readonly number[] = [1, 2, 3, 5, 10, 15, 30];
 
 export const DEFAULT_PREFS: Prefs = {
   v: 1,
@@ -33,6 +41,8 @@ export const DEFAULT_PREFS: Prefs = {
   sound: true,
   screensaver: true,
   lang: 'auto',
+  saver: DEFAULT_SCENE,
+  saverDelay: 3,
   seen: {},
 };
 
@@ -96,6 +106,8 @@ export function sanitizePrefs(raw: unknown): Prefs {
     sound: typeof raw['sound'] === 'boolean' ? raw['sound'] : DEFAULT_PREFS.sound,
     screensaver: typeof raw['screensaver'] === 'boolean' ? raw['screensaver'] : DEFAULT_PREFS.screensaver,
     lang: raw['lang'] === 'fr' || raw['lang'] === 'en' ? raw['lang'] : 'auto',
+    saver: isSceneId(raw['saver']) ? raw['saver'] : DEFAULT_SCENE,
+    saverDelay: SAVER_DELAYS.includes(raw['saverDelay'] as number) ? (raw['saverDelay'] as number) : DEFAULT_PREFS.saverDelay,
     seen: cleanSeen(raw['seen']),
   };
 }
