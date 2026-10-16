@@ -114,7 +114,12 @@ export class WindowManager {
     this.stack.setMinimized(id, true);
     win.el.hidden = true;
     this.notify();
-    this.focusTop();
+    if (this.stack.top()) this.focusTop();
+    else {
+      // Plus aucune fenêtre visible : le focus va à son onglet de la barre des tâches.
+      const tab = document.querySelector<HTMLElement>(`.bwin-tab[data-id="${id}"]`) ?? document.querySelector<HTMLElement>('.start-button');
+      tab?.focus({ preventScroll: true });
+    }
   }
 
   restore(id: string): void {

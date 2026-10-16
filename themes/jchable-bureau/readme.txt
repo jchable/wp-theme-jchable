@@ -18,6 +18,8 @@ jchable Bureau, (C) 2026 Julien Chable.
 jchable Bureau is distributed under the terms of the GNU GPL v2 or later.
 
 Polices Chivo et Chivo Mono : SIL Open Font License 1.1, voir assets/fonts/LICENSE-OFL.txt.
+DOOM.EXE : moteur Chocolate Doom (portage doom-wasm de Cloudflare), GPL v2 ou ultérieure, avec SDL2 (zlib) et le code d'exécution Emscripten (MIT/NCSA) ; données doom1.wad (DOOM shareware, © id Software, redistribuable gratuitement et sans modification). Textes de licence, version exacte et lien vers le code source : voir assets/doom/README.md et assets/doom/LICENSE-*.txt.
+Code JavaScript du bureau (dossier assets/dist) : code du thème, sous la licence du thème. Aucun service externe n'est appelé.
 Pictogrammes SVG : créés pour ce thème, sous la même licence que le thème.
 
 == Changelog ==

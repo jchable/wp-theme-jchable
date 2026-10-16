@@ -534,3 +534,68 @@ test.describe('correctifs issus de la relecture indépendante', () => {
     await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
   });
 });
+
+test.describe('correctifs de la revue finale', () => {
+  test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
+
+  test('la barre des tâches reste visible en bas de l’écran, même en haut d’une longue page', async ({ page }) => {
+    await page.goto('/');
+    const bar = await page.locator('.taskbar').boundingBox();
+    expect(bar!.y + bar!.height).toBeLessThanOrEqual(900 + 1);
+    expect(bar!.y).toBeGreaterThan(700);
+    await expect(page.locator('.start-button')).toBeInViewport();
+  });
+
+  test('une fenêtre réduite se retrouve dans la barre des tâches visible, et le focus ne se perd pas', async ({ page }) => {
+    await page.goto('/');
+    await openApp(page, 'Corbeille');
+    await page.locator('.bwin[data-app="trash"]').getByRole('button', { name: 'Réduire' }).click();
+    await expect(page.locator('.bwin-tab')).toBeInViewport();
+    expect(await page.evaluate(() => document.activeElement?.tagName)).not.toBe('BODY');
+    await page.locator('.bwin-tab').click();
+    await expect(page.locator('.bwin[data-app="trash"]')).toBeVisible();
+  });
+
+  test('avec cinq fenêtres ouvertes, la barre des tâches reste sur une seule ligne', async ({ page }) => {
+    await page.goto('/');
+    for (const title of ['Terminal', 'Démineur.exe', 'WORDPAD.EXE', 'Oh-Oh! Messenger', 'Corbeille']) {
+      await openApp(page, title);
+    }
+    const bar = await page.locator('.taskbar').boundingBox();
+    expect(bar!.height).toBeLessThan(70);
+    await expect(page.locator('time.taskbar-clock')).toBeInViewport();
+  });
+
+  test('le menu Démarrer ne propose le flux RSS qu’une fois', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.start-button').click();
+    await expect(page.locator('.bmenu').getByRole('menuitem', { name: /RSS/ })).toHaveCount(1);
+  });
+
+  test('un geste rapide déplace quand même l’icône', async ({ page }) => {
+    await page.goto('/');
+    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' });
+    const start = await icon.boundingBox();
+    await page.mouse.move(start!.x + 40, start!.y + 30);
+    await page.mouse.down();
+    await page.mouse.move(start!.x + 40 + 400, start!.y + 30 + 40, { steps: 2 });
+    await page.mouse.up();
+    const moved = await icon.boundingBox();
+    expect(moved!.x - start!.x).toBeGreaterThan(300);
+  });
+
+  test('DOOM : un panneau « À propos » donne les licences et le lien vers le code source', async ({ page }) => {
+    await page.goto('/');
+    await openApp(page, 'DOOM.EXE');
+    const win = page.locator('.bwin[data-app="doom"]');
+    await win.getByRole('button', { name: 'À propos' }).click();
+    const panel = win.locator('.bapp-doom-about');
+    await expect(panel).toBeVisible();
+    await expect(panel.getByRole('link', { name: /code source/i })).toHaveAttribute('href', /github\.com\/cloudflare\/doom-wasm/);
+    await expect(panel.getByRole('link', { name: /GPL/ })).toBeVisible();
+    const readme = panel.getByRole('link', { name: /construction/i });
+    const href = await readme.getAttribute('href');
+    const response = await page.request.get(href!);
+    expect(response.status()).toBe(200);
+  });
+});

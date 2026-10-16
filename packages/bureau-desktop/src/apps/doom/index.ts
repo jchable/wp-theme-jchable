@@ -22,6 +22,7 @@ import {
   type DoomFile,
   type PartProgress,
 } from './loader';
+import { buildAbout } from './about';
 import './style.css';
 
 const MUTE_KEY = 'muted';
@@ -72,6 +73,7 @@ class DoomSession {
   private readonly stage = el('div', 'bapp-doom-stage');
   private readonly fullscreenBtn = el('button', 'bapp-doom-btn', 'Plein écran');
   private readonly soundBtn = el('button', 'bapp-doom-btn');
+  private readonly aboutBtn = el('button', 'bapp-doom-btn', 'À propos');
   private readonly closeBtn = el('button', 'bapp-doom-btn', 'Fermer');
   private readonly hint = el('button', 'bapp-doom-hint');
   /** Retire tous les écouteurs (page et iframe) d'un coup. */
@@ -103,10 +105,10 @@ class DoomSession {
     const strip = el('div', 'bapp-doom-strip');
     strip.setAttribute('role', 'toolbar');
     strip.setAttribute('aria-label', 'Commandes de DOOM');
-    for (const button of [this.fullscreenBtn, this.soundBtn, this.closeBtn]) button.type = 'button';
+    for (const button of [this.fullscreenBtn, this.soundBtn, this.aboutBtn, this.closeBtn]) button.type = 'button';
     this.fullscreenBtn.disabled = true;
     this.updateSoundButton();
-    strip.append(this.fullscreenBtn, this.soundBtn, this.closeBtn);
+    strip.append(this.fullscreenBtn, this.soundBtn, this.aboutBtn, this.closeBtn);
     this.root.append(this.stage, strip);
     this.host.replaceChildren(this.root);
 
@@ -114,6 +116,7 @@ class DoomSession {
     this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen(), { signal });
     this.soundBtn.addEventListener('click', () => this.toggleSound(), { signal });
     this.closeBtn.addEventListener('click', () => this.ctx.close(), { signal });
+    this.aboutBtn.addEventListener('click', () => this.toggleAbout(), { signal });
     this.hint.type = 'button';
     this.hint.append(
       el('span', 'bapp-doom-hint-main', 'Cliquez pour jouer — Échap : menu du jeu'),
@@ -122,6 +125,24 @@ class DoomSession {
     this.hint.addEventListener('click', () => this.focusGame(), { signal });
 
     void this.load().catch((error: unknown) => this.fail(error));
+  }
+
+  // ---------- À propos (licences, code source) ----------
+
+  private about: HTMLElement | null = null;
+
+  private toggleAbout(): void {
+    if (this.about) {
+      this.about.remove();
+      this.about = null;
+      this.aboutBtn.focus();
+      return;
+    }
+    const panel = buildAbout(this.ctx.config.doomBaseUrl);
+    panel.querySelector('.bapp-doom-about-close')?.addEventListener('click', () => this.toggleAbout(), { signal: this.listeners.signal });
+    this.root.append(panel);
+    this.about = panel;
+    panel.querySelector<HTMLElement>('a')?.focus();
   }
 
   // ---------- Chargement ----------

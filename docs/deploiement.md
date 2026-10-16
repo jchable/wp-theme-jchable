@@ -21,13 +21,13 @@ Si votre hébergeur limite le téléversement à 2 Mo (voir Médias › Ajouter)
 npm run zip -- --no-doom
 ```
 
-Elle produit `dist/jchable-bureau-sans-doom.zip` (environ 270 Ko). DOOM n'y est alors pas inclus : après l'installation, copier par SFTP le dossier `themes/jchable-bureau/assets/doom/` du dépôt vers `wp-content/themes/jchable-bureau/assets/doom/` sur le serveur.
+Elle produit `dist/jchable-bureau-sans-doom.zip` (environ 270 Ko). DOOM n'y est alors pas inclus : après l'installation, copier par SFTP le dossier `themes/jchable-bureau/assets/doom/` du dépôt vers `wp-content/themes/jchable-bureau/assets/doom/` sur le serveur (voir l'avertissement du §8 pour les mises à jour).
 
 ## 2. Installer sans activer
 
 1. Admin › Apparence › Thèmes › Ajouter › Téléverser un thème : `dist/jchable.zip`, puis `dist/jchable-bureau.zip`. **Ne pas activer.**
-2. Si WordPress refuse le téléversement (fichier trop gros), utiliser la version légère (§1) ou téléverser par SFTP le dossier `jchable-bureau/` dans `wp-content/themes/`.
-3. Sur la carte « jchable Bureau », cliquer **Aperçu en direct**. L'aperçu ne change rien pour les visiteurs.
+2. Si WordPress refuse le téléversement (fichier trop gros), utiliser la version légère (§1) ou téléverser par SFTP le dossier `jchable-bureau/` **extrait de `dist/jchable-bureau.zip`** (et non le dossier du dépôt, qui ne contient `assets/dist/` qu'après `npm run build:js`) dans `wp-content/themes/`.
+3. Sur la carte « jchable Bureau », cliquer **Aperçu en direct**. L'aperçu ne change rien pour les visiteurs (WordPress peut seulement créer un menu de navigation, voir §5).
 
 ## 3. Vérifications à faire dans l'aperçu (ce que le local ne peut pas tester)
 
@@ -49,7 +49,7 @@ Elle produit `dist/jchable-bureau-sans-doom.zip` (environ 270 Ko). DOOM n'y est 
 
 ## 5. Revenir en arrière
 
-Apparence › Thèmes › activer **Twenty Eleven** (ou le thème précédent). Rien d'autre n'est modifié sur le site : les thèmes n'écrivent aucune donnée en base (seuls les réglages d'apparence de WordPress sont propres à chaque thème). Les préférences du visiteur (positions des icônes…) restent dans son navigateur.
+Apparence › Thèmes › activer **Twenty Eleven** (ou le thème précédent). Rien d'autre n'est modifié sur le site. Une précision : à l'affichage, WordPress peut créer lui-même un « menu de navigation » (par exemple en convertissant votre menu classique) si aucun n'est encore choisi pour le thème ; c'est sans danger et ça se corrige dans Apparence › Éditeur › Navigation. Les préférences du visiteur (positions des icônes…) restent dans son navigateur.
 
 ## 6. Respect de la vie privée
 
@@ -65,3 +65,5 @@ Le bureau écrit dans le **localStorage du navigateur du visiteur** : position d
 ## 8. Mises à jour
 
 Pour changer le code : modifier le dépôt, `npm run test:unit && npm run test:e2e && npm run test:e2e:bureau`, puis `npm run zip` et téléverser le nouveau zip (Apparence › Thèmes › Téléverser : WordPress propose de remplacer la version installée).
+
+**Attention avec la version légère** (`jchable-bureau-sans-doom.zip`) : WordPress remplace tout le dossier du thème lors d'une mise à jour, ce qui **supprime** `assets/doom/` copié par SFTP. Il faut donc recopier ce dossier après chaque mise à jour faite avec la version légère. Avec le zip complet, rien à refaire.

@@ -138,7 +138,7 @@ Il reprend la maquette n°12.
 
 ### Barre des tâches (pied de page)
 
-- Bouton « ✦ Démarrer » : sans JavaScript, c'est un lien vers la page « Plan du site » (§3). Son adresse est réglable par le filtre `jchable_sitemap_url` ; par défaut, la page utilisant ce gabarit, et à défaut l'accueil.
+- Bouton « ✦ Démarrer » : sans JavaScript, c'est un lien vers la page « Plan du site » (§3). Son adresse est réglable par le filtre `jchable_bureau_sitemap_url` ; par défaut, la page utilisant ce gabarit, et à défaut l'accueil.
 - Onglet de la page en cours (titre de la page).
 - « © Julien Chable · WordPress ».
 - Horloge : sans JavaScript, elle affiche l'année.

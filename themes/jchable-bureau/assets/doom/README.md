@@ -124,3 +124,7 @@ Renommer `freedoom1.wad` en `doom1.wad` (le moteur reconnaît l'IWAD par son con
 il pèse environ 28 Mo (au lieu de 4 Mo) ; il faudrait alors ajouter `LICENSE-Freedoom-BSD-3.txt`
 et adapter `EXPECTED_SIZES.wad`. Le WAD peut aussi être servi ailleurs grâce au filtre
 `jchable_bureau_doom_data_url`.
+
+## Offre écrite de code source (GPL v2 §3)
+
+Le code source complet correspondant au moteur distribué ici est le dépôt amont `cloudflare/doom-wasm` au commit indiqué plus haut, auquel s'ajoutent les deux modifications décrites (les deux commandes `sed`). Toute personne qui a reçu ces fichiers peut en obtenir une copie sur demande auprès de l'éditeur du site (julien.chable.net, page de contact), pendant au moins trois ans à compter de leur mise à disposition, au simple coût du support.

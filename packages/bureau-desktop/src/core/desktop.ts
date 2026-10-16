@@ -9,6 +9,7 @@ import { DesktopIcons } from '../ui/desktopIcons';
 import type { IconItem } from '../ui/desktopIcons';
 import { showBsod, showShutdown } from '../ui/overlays';
 import { SidebarWindows } from '../ui/sidebarWindows';
+import { readMenuIcons } from '../ui/menuIcons';
 import { IdleWatcher, createScreensaver, isScreensaverEligiblePage } from '../ui/screensaver';
 import { StartMenu } from '../ui/startMenu';
 import { Taskbar } from '../ui/taskbar';
@@ -16,37 +17,12 @@ import { Taskbar } from '../ui/taskbar';
 const DESKTOP_QUERY = '(min-width: 900px)';
 const SCREENSAVER_DELAY_MS = 3 * 60 * 1000;
 
-const ICON_BY_CLASS: ReadonlyArray<readonly [string, string]> = [
-  ['icon-text', 'document'],
-  ['icon-folder-blue', 'folder-blue'],
-  ['icon-search', 'search'],
-  ['icon-rss', 'rss'],
-];
-
 function safeStorage(): Storage | null {
   try {
     return window.localStorage;
   } catch {
     return null;
   }
-}
-
-/** Icônes tirées du menu du site : le menu WordPress reste la source (gérée dans l'admin). */
-function readMenuIcons(assetsUrl: string): IconItem[] {
-  const links = document.querySelectorAll<HTMLAnchorElement>('.desktop-icons a.wp-block-navigation-item__content');
-  return [...links].map((link) => {
-    const item = link.closest('li');
-    const label = link.textContent?.trim() ?? '';
-    const icon = ICON_BY_CLASS.find(([cls]) => item?.classList.contains(cls))?.[1] ?? 'folder';
-    const href = link.getAttribute('href') ?? '';
-    return {
-      id: `nav:${label.toLowerCase()}`,
-      label,
-      iconUrl: `${assetsUrl}icons/${icon}.svg`,
-      kind: href.startsWith('#') ? 'anchor' : 'link',
-      href: href.startsWith('#') ? href : link.href,
-    } satisfies IconItem;
-  });
 }
 
 /** Démarre le bureau : préférences, fenêtres, icônes, barre des tâches, menu Démarrer, écran de veille. */
@@ -96,7 +72,7 @@ export function bootstrap(): void {
 
   const sidebar = new SidebarWindows(prefs);
   const items: IconItem[] = [
-    ...readMenuIcons(config.assetsUrl),
+    ...readMenuIcons(document, config.assetsUrl, config.feedUrl),
     ...LISTED_APPS.map(
       (app): IconItem => ({
         id: `app:${app.id}`,
@@ -162,7 +138,7 @@ export function bootstrap(): void {
         apps: LISTED_APPS,
         openApp: launch,
         links: [
-          ...items.filter((item) => item.kind === 'link' && item.href).map((item) => ({ label: item.label, href: item.href as string })),
+          ...items.filter((item) => item.kind === 'link' && item.href && item.href !== config.feedUrl).map((item) => ({ label: item.label, href: item.href as string })),
           { label: 'Flux RSS', href: config.feedUrl },
         ],
         resetIcons: () => resetAll(),

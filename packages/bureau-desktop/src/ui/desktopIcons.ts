@@ -211,13 +211,18 @@ export class DesktopIcons {
       const grabX = event.clientX - rect.left;
       const grabY = event.clientY - rect.top;
       let moving = false;
+      // Capture dès l'appui : un geste rapide qui sort du bouton avant le seuil déplace quand même l'icône.
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch {
+        /* pointeur déjà relâché */
+      }
 
       const move = (e: PointerEvent): void => {
         if (!moving && Math.hypot(e.clientX - startX, e.clientY - startY) < DRAG_THRESHOLD) return;
         if (!moving) {
           moving = true;
           dragged = true;
-          button.setPointerCapture(e.pointerId);
           button.classList.add('bicon--dragging');
           this.select(item.id);
         }

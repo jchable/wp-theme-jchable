@@ -24,9 +24,24 @@ html.bureau-desktop-on #bureau-desktop {
 
 /* Le contenu passe devant les icônes, mais laisse passer la souris dans les vides. */
 html.bureau-desktop-on .wp-site-blocks {
+	pointer-events: none;
+}
+
+html.bureau-desktop-on .wp-site-blocks > header,
+html.bureau-desktop-on .wp-site-blocks > .site-body {
 	position: relative;
 	z-index: 1;
-	pointer-events: none;
+}
+
+/* La barre des tâches reste collée en bas de l'écran, au-dessus des fenêtres. */
+html.bureau-desktop-on .wp-site-blocks > footer {
+	position: sticky;
+	bottom: 0;
+	z-index: 60;
+}
+
+html.bureau-desktop-on .taskbar {
+	flex-wrap: nowrap;
 }
 
 html.bureau-desktop-on .wp-site-blocks > header,
@@ -309,12 +324,17 @@ html:not(.bureau-desktop-on) .bwin-handle {
 /* ---------- Barre des tâches ---------- */
 
 .bwin-tabs {
-	display: contents;
+	display: flex;
+	flex: 0 1 auto;
+	gap: 0.5rem;
+	min-width: 0;
+	overflow-x: auto;
 }
 
 .bwin-tab {
 	box-sizing: border-box;
-	max-width: 12rem;
+	flex: 0 0 auto;
+	max-width: 10rem;
 	overflow: hidden;
 	padding: 0.375rem 0.75rem;
 	border: 2px solid var(--b-ink);

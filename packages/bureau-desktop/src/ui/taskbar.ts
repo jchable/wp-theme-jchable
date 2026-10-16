@@ -75,6 +75,7 @@ export class Taskbar {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'bwin-tab';
+        button.dataset['id'] = info.id;
         button.textContent = info.title;
         button.setAttribute('aria-pressed', String(info.active && !info.minimized));
         button.addEventListener('click', () => {
