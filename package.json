@@ -7,7 +7,17 @@
   "engines": {
     "node": ">=22"
   },
+  "overrides": {
+    "@wordpress/env": {
+      "simple-git": "4.0.2",
+      "js-yaml": {
+        "argparse": "2.0.1"
+      }
+    },
+    "qs": "6.16.1"
+  },
   "scripts": {
+    "postinstall": "node tools/deps/patch-wp-env.mjs",
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",
     "env:seed": "wp-env run cli wp eval-file wp-content/jchable-tools/env/seed.php",
@@ -28,7 +38,7 @@
     "@fontsource/chivo": "^5.3.0",
     "@fontsource/chivo-mono": "^5.3.0",
     "@playwright/test": "^1.64.1",
-    "@wordpress/env": "^11.17.0",
+    "@wordpress/env": "11.17.0",
     "archiver": "^7.0.1",
     "jsdom": "^29.1.1",
     "typescript": "^7.0.2",
