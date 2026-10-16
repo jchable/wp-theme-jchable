@@ -4,7 +4,7 @@ export const CELL_SIZE = 96;
 
 /** Marge à gauche des icônes, hauteur réservée en haut (barre de menu) et en bas. */
 export const BAND_PAD_X = 12;
-export const BAND_TOP = 52;
+export const BAND_TOP = 18;
 export const BAND_BOTTOM = 60; // la barre des tâches (≈ 54 px) reste libre
 
 export interface Cell {

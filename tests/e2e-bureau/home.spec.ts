@@ -52,3 +52,16 @@ test.describe('accueil Bureau', () => {
     await expect(page).toHaveURL(/\/page\/2\/$/);
   });
 });
+
+test.describe('pas de bandeau en haut de la page', () => {
+  test('le nom du site n’occupe plus une barre en haut : le contenu et les icônes remontent', async ({ page }, info) => {
+    await page.goto('/');
+    const bar = await page.locator('.menubar').boundingBox();
+    expect(bar === null || (bar.width <= 1 && bar.height <= 1)).toBe(true); // masqué à l'écran, lu par les lecteurs d'écran
+    await expect(page.locator('.menubar')).toHaveText('Julien Chable');
+    if (info.project.name === 'desktop') {
+      expect((await page.locator('main .window').first().boundingBox())!.y).toBeLessThan(90);
+      expect((await page.locator('#bureau-desktop .bicon').first().boundingBox())!.y).toBeLessThan(40);
+    }
+  });
+});

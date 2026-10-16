@@ -40,23 +40,19 @@ body {
 	padding-block: var(--wp--preset--spacing--50);
 }
 
-/* ---------- Barre de menu ---------- */
+/* ---------- En-tête du site ---------- */
 
+/* Pas de bandeau en haut : le nom du site est dans la barre des tâches et dans la fenêtre d'accueil.
+   L'en-tête reste dans la page, masqué à l'écran, pour les lecteurs d'écran. */
 .menubar {
-	background: var(--bureau-paper);
-	border-bottom: 2px solid var(--bureau-ink);
-	padding-block: 0.375rem;
-	font-family: var(--wp--preset--font-family--mono);
-	font-size: 0.8125rem;
-}
-
-.menubar .wp-block-site-title {
+	position: absolute;
+	width: 1px;
+	height: 1px;
 	margin: 0;
-	font-weight: 700;
-}
-
-.menubar .wp-block-site-title a {
-	text-decoration: none;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
 }
 
 /* ---------- Colonnes : icônes | contenu | barre latérale ---------- */
