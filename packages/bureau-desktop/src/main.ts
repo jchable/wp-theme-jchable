@@ -1,2 +1,6 @@
-// Point d'entrée du bureau (étape 3). Construit à partir d'ici : préférences, icônes, fenêtres, barre des tâches.
-export {};
+// Point d'entrée du bureau : charge le style et démarre le bureau quand la page est prête.
+import './styles/desktop.css';
+import { bootstrap } from './core/desktop';
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => bootstrap(), { once: true });
+else bootstrap();

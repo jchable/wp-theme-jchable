@@ -8,6 +8,7 @@ defined( 'ABSPATH' ) || exit;
 const JCHABLE_BUREAU_VERSION = '0.1.0';
 
 require_once __DIR__ . '/inc/blocks.php';
+require_once __DIR__ . '/inc/desktop.php';
 
 /**
  * Feuilles de style du thème, côté site et côté éditeur.

@@ -1,0 +1,29 @@
+.bscr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  margin: 0;
+  padding: 0;
+  cursor: none;
+  background: #00002a;
+  overflow: hidden;
+}
+
+.bscr-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bscr-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

@@ -44,7 +44,15 @@ test.describe('barre des tâches', () => {
     await page.goto('/');
     await expect(page.locator('.taskbar a.start-button')).toHaveAttribute('href', new RegExp(`${PAGES.sitemap}$`));
     await expect(page.locator('.taskbar .taskbar-tab')).toContainText('Accueil');
-    await expect(page.locator('.taskbar time.taskbar-clock')).toHaveText(String(new Date().getFullYear()));
+    await expect(page.locator('.taskbar time.taskbar-clock')).toHaveText(/^\d{2}:\d{2}$/);
+  });
+
+  test.describe('sans JavaScript', () => {
+    test.use({ javaScriptEnabled: false });
+    test('l’horloge affiche l’année', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('.taskbar time.taskbar-clock')).toHaveText(String(new Date().getFullYear()));
+    });
   });
 
   test('l’onglet reprend le titre de l’article', async ({ page }) => {

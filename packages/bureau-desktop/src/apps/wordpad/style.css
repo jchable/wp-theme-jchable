@@ -1,0 +1,149 @@
+.bapp-wordpad {
+  --bapp-wordpad-ink: var(--wp--preset--color--contrast, #101010);
+  --bapp-wordpad-paper: var(--wp--preset--color--base, #F2F0EA);
+  --bapp-wordpad-accent: var(--wp--preset--color--sky, #9AD0FF);
+  --bapp-wordpad-mono: var(--wp--preset--font-family--mono, ui-monospace, monospace);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bapp-wordpad-paper);
+  color: var(--bapp-wordpad-ink);
+  font-family: var(--bapp-wordpad-mono);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.bapp-wordpad *,
+.bapp-wordpad *::before,
+.bapp-wordpad *::after {
+  box-sizing: border-box;
+}
+
+.bapp-wordpad-toolbar,
+.bapp-wordpad-saveform {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bapp-wordpad-paper);
+  border-bottom: 2px solid var(--bapp-wordpad-ink);
+}
+
+.bapp-wordpad-saveform[hidden] {
+  display: none;
+}
+
+.bapp-wordpad-saveform {
+  gap: 6px 8px;
+  background: var(--bapp-wordpad-accent);
+}
+
+.bapp-wordpad-label {
+  font-weight: bold;
+}
+
+.bapp-wordpad-btn,
+.bapp-wordpad-select,
+.bapp-wordpad-input {
+  font: inherit;
+  color: var(--bapp-wordpad-ink);
+  background: var(--bapp-wordpad-paper);
+  border: 2px solid var(--bapp-wordpad-ink);
+  border-radius: 0;
+  padding: 2px 8px;
+  min-height: 28px;
+}
+
+.bapp-wordpad-btn {
+  cursor: pointer;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.25), inset 2px 2px 0 rgba(255, 255, 255, 0.7);
+}
+
+.bapp-wordpad-btn:active,
+.bapp-wordpad-btn[aria-pressed="true"] {
+  background: var(--bapp-wordpad-accent);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.bapp-wordpad-btn-bold {
+  font-weight: bold;
+  min-width: 28px;
+}
+
+.bapp-wordpad-btn-italic {
+  font-style: italic;
+  min-width: 28px;
+}
+
+.bapp-wordpad-btn-underline {
+  text-decoration: underline;
+  min-width: 28px;
+}
+
+.bapp-wordpad-color {
+  width: 36px;
+  height: 28px;
+  padding: 1px;
+  border: 2px solid var(--bapp-wordpad-ink);
+  border-radius: 0;
+  background: var(--bapp-wordpad-paper);
+  cursor: pointer;
+}
+
+.bapp-wordpad-sep {
+  align-self: stretch;
+  width: 2px;
+  margin: 2px 2px;
+  background: var(--bapp-wordpad-ink);
+  opacity: 0.4;
+}
+
+.bapp-wordpad-btn:focus-visible,
+.bapp-wordpad-select:focus-visible,
+.bapp-wordpad-input:focus-visible,
+.bapp-wordpad-color:focus-visible,
+.bapp-wordpad-editor:focus-visible {
+  outline: 3px solid var(--bapp-wordpad-ink);
+  outline-offset: 1px;
+}
+
+.bapp-wordpad-editor {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  margin: 6px;
+  padding: 12px 14px;
+  background: #fff;
+  color: #101010;
+  border: 2px solid var(--bapp-wordpad-ink);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.25);
+  font-family: Chivo, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bapp-wordpad-editor h1 {
+  font-size: 1.6em;
+  margin: 0 0 0.5em;
+}
+
+.bapp-wordpad-editor h2 {
+  font-size: 1.3em;
+}
+
+.bapp-wordpad-editor p {
+  margin: 0 0 0.75em;
+}
+
+.bapp-wordpad-editor a {
+  text-decoration: underline;
+}
+
+@media (forced-colors: active) {
+  .bapp-wordpad-btn[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+}

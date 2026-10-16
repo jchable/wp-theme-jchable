@@ -1,0 +1,171 @@
+.bapp-doom {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  background: #000;
+  color: var(--wp--preset--color--contrast, #101010);
+  font-family: var(--wp--preset--font-family--mono, ui-monospace, monospace);
+  font-size: 13px;
+}
+
+.bapp-doom-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #000;
+  color: #f2f0ea;
+}
+
+.bapp-doom-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000;
+}
+
+.bapp-doom-frame:focus-visible {
+  outline: 3px solid var(--wp--preset--color--yellow, #ffe14d);
+  outline-offset: -3px;
+}
+
+/* Invite par-dessus le jeu tant qu'il n'a pas le clavier. */
+.bapp-doom-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 0 12px 24px;
+  border: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.85), rgb(0 0 0 / 0) 45%);
+  color: #fff;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.bapp-doom-hint[hidden] {
+  display: none;
+}
+
+.bapp-doom-hint-main {
+  padding: 6px 12px;
+  border: 2px solid #fff;
+  background: #a00000;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.bapp-doom-hint-sub {
+  font-size: 12px;
+}
+
+.bapp-doom-hint:focus-visible {
+  outline: 3px solid var(--wp--preset--color--yellow, #ffe14d);
+  outline-offset: -3px;
+}
+
+.bapp-doom-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border-top: 2px solid var(--wp--preset--color--contrast, #101010);
+  background: var(--wp--preset--color--base, #f2f0ea);
+}
+
+.bapp-doom-btn {
+  min-height: 28px;
+  padding: 2px 10px;
+  border: 2px solid var(--wp--preset--color--contrast, #101010);
+  background: #fff;
+  color: var(--wp--preset--color--contrast, #101010);
+  font: inherit;
+  cursor: pointer;
+}
+
+.bapp-doom-btn:hover:not(:disabled) {
+  background: var(--wp--preset--color--yellow, #ffe14d);
+}
+
+.bapp-doom-btn:focus-visible {
+  outline: 3px solid var(--wp--preset--color--accent, #2d3fc8);
+  outline-offset: 2px;
+}
+
+.bapp-doom-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.bapp-doom-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.bapp-doom-loading-label,
+.bapp-doom-loading-value {
+  margin: 0;
+}
+
+.bapp-doom-progress {
+  width: min(320px, 90%);
+  height: 18px;
+  accent-color: #c00000;
+}
+
+.bapp-doom-error {
+  box-sizing: border-box;
+  height: 100%;
+  overflow: auto;
+  padding: 16px;
+  background: var(--wp--preset--color--base, #f2f0ea);
+  color: var(--wp--preset--color--contrast, #101010);
+}
+
+.bapp-doom-error-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.bapp-doom-error-text {
+  margin: 0 0 12px;
+}
+
+.bapp-doom-error-details {
+  margin: 0 0 12px;
+}
+
+.bapp-doom-error-pre {
+  max-height: 12em;
+  overflow: auto;
+  margin: 6px 0 0;
+  padding: 6px;
+  border: 1px solid currentColor;
+  background: #fff;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bapp-doom-progress {
+    transition: none;
+  }
+}

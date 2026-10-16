@@ -15,10 +15,13 @@
     "test:e2e": "playwright test",
     "test:tools": "node --test \"tools/**/*.test.mjs\"",
     "check": "wp-env run cli wp eval-file wp-content/jchable-tools/check/theme-check.php",
-    "zip": "node tools/zip/zip.mjs",
+    "zip": "npm run build:js && node tools/zip/zip.mjs",
     "test:e2e:bureau": "playwright test -c playwright.bureau.config.ts",
     "fonts": "node tools/fonts/copy-fonts.mjs",
-    "check:all": "npm run check -- jchable && npm run check -- jchable-bureau"
+    "check:all": "npm run check -- jchable && npm run check -- jchable-bureau",
+    "build:js": "vite build -c packages/bureau-desktop/vite.config.ts",
+    "test:unit": "vitest run -c packages/bureau-desktop/vitest.config.ts",
+    "typecheck": "tsc -p packages/bureau-desktop --noEmit"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

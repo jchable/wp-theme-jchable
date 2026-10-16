@@ -17,7 +17,8 @@ export default defineConfig({
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash][extname]',
+        // Le CSS de l'entrée garde un nom stable (le PHP le charge) ; le reste est versionné par empreinte.
+        assetFileNames: (asset) => (asset.names?.includes('bureau.css') ? 'bureau.css' : 'assets/[name]-[hash][extname]'),
       },
     },
   },
