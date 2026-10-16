@@ -85,24 +85,32 @@ cp src/websockets-doom.js src/websockets-doom.wasm /out/'
 sha256sum themes/jchable-bureau/assets/doom/websockets-doom.*
 ```
 
-Les SHA-256 doivent être ceux du tableau. Si la taille du `.wasm` ou du `.js` change, mettre à jour
-`EXPECTED_SIZES` dans `packages/bureau-desktop/src/apps/doom/loader.ts` (sert à la barre
-d'avancement quand le serveur n'envoie pas de `Content-Length`).
+Les SHA-256 doivent être ceux du tableau. Tout remplacement intentionnel exige une vérification
+de provenance, puis la mise à jour de `DOOM_INTEGRITY` et `EXPECTED_SIZES` dans
+`packages/bureau-desktop/src/apps/doom/loader.ts`, des empreintes du tableau et des tests,
+suivie d'une nouvelle compilation du thème. Ne jamais enlever le contrôle d'intégrité
+pour contourner un échec de téléchargement.
 
 ## Comment l'appli s'en sert
 
-1. Télécharge en parallèle `websockets-doom.js`, `websockets-doom.wasm` (compilé en flux avec
-   `WebAssembly.compileStreaming` si le serveur annonce `application/wasm`, sinon à partir des
-   octets) et `doom1.wad`, avec une barre d'avancement.
-2. Crée une `<iframe sandbox="allow-scripts allow-same-origin" srcdoc>` contenant un `<canvas>`,
-   y définit `Module` (WAD et `default.cfg` écrits dans le système de fichiers virtuel, module
-   WebAssembly déjà compilé fourni par `instantiateWasm`) puis injecte le script du moteur.
+1. Télécharge en parallèle `websockets-doom.js`, `websockets-doom.wasm` et `doom1.wad`,
+   avec vérification SRI SHA-256 par le navigateur. Aucun cookie ni redirection.
+   HTTPS est obligatoire, sauf pour localhost/127.0.0.1/::1 lors des tests.
+   Un CDN externe doit fournir les en-têtes CORS adéquats et conserver les octets exacts.
+2. Crée une `<iframe sandbox="allow-scripts" srcdoc>` contenant un `<canvas>`, sans accès
+   au DOM parent, aux cookies ou au stockage du blog. Une CSP interne interdit les
+   connexions réseau et les ressources externes. Les octets vérifiés et un port de
+   communication privé sont transmis à ce seul contexte ; les messages d'autres fenêtres
+   ne pilotent pas le jeu. Le module WebAssembly est compilé dans l'iframe (un module
+   précompilé ne peut pas être partagé entre ces origines). WAD et `default.cfg` sont écrits
+   dans le système de fichiers virtuel, pas sur l'appareil du visiteur.
 3. Lance `-iwad doom1.wad -window -nogui -nomouse -nomusic -config default.cfg`.
 4. « Quit Game » dans le jeu ferme la fenêtre ; une erreur affiche « DOOM.EXE a cessé de
    fonctionner ».
 
-Le serveur doit servir `.wasm` avec le type `application/wasm` pour la compilation en flux (sinon
-l'appli se replie, un peu plus lentement) ; il n'a besoin d'aucun en-tête COOP/COEP.
+Le type `application/wasm` reste recommandé, mais la compilation depuis les octets vérifiés
+ne dépend pas du MIME. Aucun en-tête COOP/COEP n'est nécessaire. Un fichier modifié ou un
+délai de chargement dépassé produit une erreur visible, jamais une exécution non vérifiée.
 
 ## Licences
 
@@ -122,7 +130,8 @@ l'appli se replie, un peu plus lentement) ; il n'a besoin d'aucun en-tête COOP/
 Alternative entièrement libre : **Freedoom** (BSD à 3 clauses, <https://freedoom.github.io/>).
 Renommer `freedoom1.wad` en `doom1.wad` (le moteur reconnaît l'IWAD par son contenu). Attention :
 il pèse environ 28 Mo (au lieu de 4 Mo) ; il faudrait alors ajouter `LICENSE-Freedoom-BSD-3.txt`
-et adapter `EXPECTED_SIZES.wad`. Le WAD peut aussi être servi ailleurs grâce au filtre
+et adapter `EXPECTED_SIZES.wad` et `DOOM_INTEGRITY.wad` après vérification de provenance.
+Le WAD peut aussi être servi ailleurs grâce au filtre
 `jchable_bureau_doom_data_url`.
 
 ## Offre écrite de code source (GPL v2 §3)

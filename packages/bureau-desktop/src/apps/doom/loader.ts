@@ -24,6 +24,12 @@ export const EXPECTED_SIZES: Readonly<Record<DoomFile, number>> = {
   wad: 4_196_020,
 };
 
+export const DOOM_INTEGRITY: Readonly<Record<DoomFile, string>> = {
+  engineJs: 'sha256-SpWr+qXWPQ9635X3PydttEMnlz7BAKnm569rlq/dn7Y=',
+  engineWasm: 'sha256-cPVkEPsUdyfk3QM4XN2yDs7cW9V3O3gg/P/jlDWl+B4=',
+  wad: 'sha256-HX1DvlAeZ9kn5BXguPPinDvzMHXoWXIYFvZSpSbKx3E=',
+};
+
 export type DoomUrls = Readonly<Record<DoomFile, string>>;
 
 /**
@@ -41,6 +47,10 @@ export function buildDoomUrls(baseUrl: string, documentBase?: string): DoomUrls 
   }
   if (base.protocol !== 'http:' && base.protocol !== 'https:') {
     throw new Error(t('protocolRefused', { protocol: base.protocol }));
+  }
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(base.hostname);
+  if (base.username || base.password || (base.protocol !== 'https:' && !local)) {
+    throw new Error(t('unsafeUrl'));
   }
   base.search = '';
   base.hash = '';
@@ -102,8 +112,14 @@ export class HttpError extends Error {
   }
 }
 
-async function checkedFetch(fetchImpl: FetchLike, url: string, signal?: AbortSignal): Promise<Response> {
-  const response = await fetchImpl(url, { signal, credentials: 'same-origin' });
+async function checkedFetch(fetchImpl: FetchLike, file: DoomFile, url: string, signal?: AbortSignal): Promise<Response> {
+  const response = await fetchImpl(url, {
+    signal,
+    credentials: 'omit',
+    redirect: 'error',
+    mode: 'cors',
+    integrity: DOOM_INTEGRITY[file],
+  });
   if (!response.ok) throw new HttpError(url, response.status);
   return response;
 }
@@ -146,8 +162,9 @@ export async function fetchBytes(
   onProgress: (p: PartProgress) => void,
   fetchImpl: FetchLike,
   signal?: AbortSignal,
+  file: DoomFile = 'wad',
 ): Promise<Uint8Array> {
-  return readBody(await checkedFetch(fetchImpl, url, signal), onProgress);
+  return readBody(await checkedFetch(fetchImpl, file, url, signal), onProgress);
 }
 
 /** Sous-ensemble de l'objet global WebAssembly utilisé ici (injectable dans les tests). */
@@ -190,7 +207,7 @@ export async function compileWasm(
   deps: { fetch: FetchLike; wasm: WasmApi; onProgress: (p: PartProgress) => void; signal?: AbortSignal },
 ): Promise<WebAssembly.Module> {
   const { fetch: fetchImpl, wasm, onProgress, signal } = deps;
-  const response = await checkedFetch(fetchImpl, url, signal);
+  const response = await checkedFetch(fetchImpl, 'engineWasm', url, signal);
   const streaming = typeof wasm.compileStreaming === 'function' ? wasm.compileStreaming.bind(wasm) : null;
   if (streaming && pickWasmStrategy(true, response.headers.get('content-type')) === 'streaming' && response.body) {
     try {
@@ -198,7 +215,7 @@ export async function compileWasm(
     } catch (error) {
       if (!shouldRetryWithArrayBuffer(error)) throw error;
       // Le corps est consommé : on retélécharge (le cache HTTP sert normalement la seconde requête).
-      return wasm.compile(toBufferSource(await fetchBytes(url, onProgress, fetchImpl, signal)));
+      return wasm.compile(toBufferSource(await fetchBytes(url, onProgress, fetchImpl, signal, 'engineWasm')));
     }
   }
   return wasm.compile(toBufferSource(await readBody(response, onProgress)));

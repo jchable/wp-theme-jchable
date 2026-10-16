@@ -47,7 +47,7 @@ describe('DOOM : traductions', () => {
     setLang('en');
     expect(describeError(new HttpError('https://x/doom1.wad', 404))).toBe('A game file could not be found on the server.');
     expect(describeError(new HttpError('https://x/doom1.wad', 500))).toBe('The server refused to provide the game files.');
-    expect(describeError(new TypeError('Failed to fetch'))).toBe('The game files could not be downloaded (network).');
+    expect(describeError(new TypeError('Failed to fetch'))).toBe('The game files were rejected (network, redirect or integrity check).');
     expect(describeError(new Error('boom'))).toBe('The game engine stopped unexpectedly.');
     expect(formatError(undefined)).toBe('Unknown error');
     expect(formatError(new Error(''))).toBe('(no message)');

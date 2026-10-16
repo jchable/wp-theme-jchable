@@ -1,6 +1,12 @@
+/// <reference types="node" />
 import { describe, expect, it, vi } from 'vitest';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   DEFAULT_CFG,
+  DOOM_FILES,
+  DOOM_INTEGRITY,
   EXPECTED_SIZES,
   HttpError,
   buildDoomUrls,
@@ -61,6 +67,32 @@ describe('buildDoomUrls', () => {
   it('refuse une adresse vide ou invalide', () => {
     expect(() => buildDoomUrls('   ')).toThrow(/absente/);
     expect(() => buildDoomUrls('pas une url')).toThrow(/invalide/);
+  });
+
+  it.each(['http://exemple.fr/doom/', 'https://user:pass@exemple.fr/doom/'])(
+    'refuse une origine non sécurisée : %s',
+    (url) => expect(() => buildDoomUrls(url)).toThrow(/HTTPS/),
+  );
+});
+
+describe('intégrité DOOM', () => {
+  it('épingle les trois fichiers réellement livrés', () => {
+    for (const key of Object.keys(DOOM_FILES) as Array<keyof typeof DOOM_FILES>) {
+      const bytes = readFileSync(resolve(__dirname, '../../../../../themes/jchable-bureau/assets/doom', DOOM_FILES[key]));
+      expect(bytes.length).toBe(EXPECTED_SIZES[key]);
+      expect(`sha256-${createHash('sha256').update(bytes).digest('base64')}`).toBe(DOOM_INTEGRITY[key]);
+    }
+  });
+
+  it.each(['engineJs', 'engineWasm', 'wad'] as const)('impose SRI, refuse les redirections et omet les cookies : %s', async (file) => {
+    const fetchImpl = vi.fn<FetchLike>(async () => response(new Uint8Array([1])));
+    await fetchBytes(`https://cdn.example/${DOOM_FILES[file]}`, () => {}, fetchImpl, undefined, file);
+    expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({
+      integrity: DOOM_INTEGRITY[file],
+      credentials: 'omit',
+      redirect: 'error',
+      mode: 'cors',
+    });
   });
 });
 

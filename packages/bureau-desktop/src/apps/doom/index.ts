@@ -1,7 +1,7 @@
 /**
  * DOOM.EXE : Chocolate Doom (WebAssembly) dans une fenêtre du bureau.
  *
- * Le moteur Emscripten ne sait pas redémarrer : il tourne dans une <iframe> jetable (srcdoc, même origine).
+ * Le moteur Emscripten tourne dans une iframe jetable, sans accès à l'origine du blog.
  * Fermer la fenêtre = fermer l'audio puis retirer l'iframe, ce qui arrête sa boucle et libère sa mémoire.
  * Les fichiers (moteur .js, .wasm, doom1.wad) sont téléchargés ici, avec barre d'avancement,
  * puis donnés à l'iframe : aucune autre requête réseau.
@@ -11,18 +11,16 @@ import {
   DEFAULT_CFG,
   DOOM_FILES,
   buildDoomUrls,
-  compileWasm,
   computeProgress,
   describeError,
   engineArgs,
   fetchBytes,
   formatError,
-  isReleaseShortcut,
-  shouldPreventDefault,
   type DoomFile,
   type PartProgress,
 } from './loader';
 import { buildAbout } from './about';
+import { buildFrameHtml } from './frame';
 import { t } from './i18n';
 import { getLang } from '../../core/i18n';
 import './style.css';
@@ -31,44 +29,11 @@ const MUTE_KEY = 'muted';
 const LOG_LINES = 12;
 let labelCounter = 0;
 
-/** Document de l'iframe ; construit au lancement pour suivre la langue courante. */
-const frameHtml = (): string => `<!doctype html><html lang="${getLang()}"><head><meta charset="utf-8"><style>
-html,body{margin:0;height:100%;overflow:hidden;background:#000}
-canvas{display:block;width:100%!important;height:100%!important;object-fit:contain;image-rendering:pixelated;outline:none;background:#000}
-</style></head><body><canvas id="canvas" tabindex="0" aria-label="${t('frameCanvasLabel')}"></canvas></body></html>`;
-
-/** Ce que le moteur Emscripten lit et écrit sur l'objet Module. */
-interface EmscriptenModule {
-  canvas: HTMLCanvasElement;
-  noInitialRun: boolean;
-  preRun: Array<() => void>;
-  FS?: { writeFile(path: string, data: string | Uint8Array): void };
-  callMain?: (args: string[]) => void;
-  SDL2?: { audioContext?: AudioContext };
-  instantiateWasm(
-    imports: WebAssembly.Imports,
-    receive: (instance: WebAssembly.Instance, module: WebAssembly.Module) => void,
-  ): Record<string, never>;
-  onRuntimeInitialized(): void;
-  onExit(code: number): void;
-  onAbort(what: unknown): void;
-  print(text: string): void;
-  printErr(text: string): void;
-  setStatus(text: string): void;
-}
-
-type FrameWindow = Window & typeof globalThis & { Module?: EmscriptenModule };
-
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
-}
-
-function isExitNoise(error: unknown): boolean {
-  if (error === 'unwind') return true;
-  return typeof error === 'object' && error !== null && (error as { name?: unknown }).name === 'ExitStatus';
 }
 
 class DoomSession {
@@ -83,16 +48,12 @@ class DoomSession {
   private readonly listeners = new AbortController();
   /** Annule les téléchargements en cours. */
   private readonly downloads = new AbortController();
-  private readonly audioContexts = new Set<AudioContext>();
   private readonly log: string[] = [];
-  private nativeResume: (() => Promise<void>) | null = null;
   private iframe: HTMLIFrameElement | null = null;
-  private frameWin: FrameWindow | null = null;
-  private canvas: HTMLCanvasElement | null = null;
-  private engine: EmscriptenModule | null = null;
+  private port: MessagePort | null = null;
+  private loadTimer: ReturnType<typeof setTimeout> | null = null;
+  private focused = false;
   private muted: boolean;
-  /** Le son ne démarre qu'après un geste dans le jeu (clic ou touche sur l'invite). */
-  private armed = false;
   private failed = false;
   private disposed = false;
 
@@ -127,6 +88,7 @@ class DoomSession {
     );
     this.hint.addEventListener('click', () => this.focusGame(), { signal });
 
+    this.loadTimer = setTimeout(() => this.fail(new Error(t('loadTimeout'))), 90_000);
     void this.load().catch((error: unknown) => this.fail(error));
   }
 
@@ -161,14 +123,14 @@ class DoomSession {
     };
     const fetchImpl = window.fetch.bind(window);
     const signal = this.downloads.signal;
-    const [script, wasmModule, wad] = await Promise.all([
-      fetchBytes(urls.engineJs, track('engineJs'), fetchImpl, signal).then((b) => new TextDecoder().decode(b)),
-      compileWasm(urls.engineWasm, { fetch: fetchImpl, wasm: WebAssembly, onProgress: track('engineWasm'), signal }),
+    const [script, wasm, wad] = await Promise.all([
+      fetchBytes(urls.engineJs, track('engineJs'), fetchImpl, signal, 'engineJs').then((b) => new TextDecoder().decode(b)),
+      fetchBytes(urls.engineWasm, track('engineWasm'), fetchImpl, signal, 'engineWasm'),
       fetchBytes(urls.wad, track('wad'), fetchImpl, signal),
     ]);
-    if (this.disposed) return;
+    if (this.disposed || this.failed) return;
     progress(100);
-    await this.boot(script, wasmModule, wad);
+    await this.boot(script, wasm, wad);
   }
 
   private showProgress(): (percent: number) => void {
@@ -193,192 +155,85 @@ class DoomSession {
 
   // ---------- Démarrage du moteur dans l'iframe ----------
 
-  private async boot(script: string, wasmModule: WebAssembly.Module, wad: Uint8Array): Promise<void> {
+  private async boot(script: string, wasm: Uint8Array, wad: Uint8Array): Promise<void> {
     const iframe = el('iframe', 'bapp-doom-frame');
     iframe.title = 'DOOM';
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    iframe.setAttribute('sandbox', 'allow-scripts');
     iframe.setAttribute('allow', 'autoplay; fullscreen');
-    iframe.srcdoc = frameHtml();
+    iframe.referrerPolicy = 'no-referrer';
+    iframe.srcdoc = buildFrameHtml(getLang(), t('frameCanvasLabel'), {
+      parentOrigin: location.origin,
+      config: DEFAULT_CFG,
+      args: engineArgs(),
+      wadName: DOOM_FILES.wad,
+      muted: this.muted,
+    });
     const loaded = new Promise<void>((resolve) => iframe.addEventListener('load', () => resolve(), { once: true }));
     this.stage.replaceChildren(iframe, this.hint);
     this.iframe = iframe;
     await loaded;
-    if (this.disposed) return;
-
-    const win = iframe.contentWindow as FrameWindow | null;
-    const canvas = win?.document.getElementById('canvas');
-    if (!win || !(canvas instanceof win.HTMLCanvasElement)) throw new Error(t('frameUnreachable'));
-    this.frameWin = win;
-    this.canvas = canvas;
-    this.wireFrame(win, canvas);
-
-    const engine: EmscriptenModule = {
-      canvas,
-      noInitialRun: true,
-      preRun: [
-        () => {
-          const fs = engine.FS;
-          if (!fs) throw new Error(t('fsMissing'));
-          fs.writeFile(`/${DOOM_FILES.wad}`, wad);
-          fs.writeFile('/default.cfg', DEFAULT_CFG);
-        },
-      ],
-      instantiateWasm: (imports, receive) => {
-        WebAssembly.instantiate(wasmModule, imports).then(
-          (instance) => receive(instance, wasmModule),
-          (error: unknown) => this.fail(error),
-        );
-        return {};
-      },
-      onRuntimeInitialized: () => {
-        if (this.disposed) return;
-        try {
-          engine.callMain?.(engineArgs());
-        } catch (error) {
-          if (!isExitNoise(error)) this.fail(error);
-        }
-        this.fullscreenBtn.disabled = false;
-      },
-      onExit: (code) => {
-        if (this.disposed) return;
-        if (code === 0) this.ctx.close();
-        else this.fail(new Error(t('engineStopped', { code })));
-      },
-      onAbort: (what) => this.fail(what instanceof Error ? what : new Error(t('engineAborted', { detail: formatError(what) }))),
-      print: (text) => this.remember(text),
-      printErr: (text) => this.remember(text),
-      setStatus: () => {},
-    };
-    this.engine = engine;
-    win.Module = engine;
-    const tag = win.document.createElement('script');
-    tag.textContent = script;
-    win.document.body.append(tag);
+    if (this.disposed || this.failed) return;
+    if (!iframe.contentWindow) throw new Error(t('frameUnreachable'));
+    const channel = new MessageChannel();
+    this.port = channel.port1;
+    this.port.onmessage = (event: MessageEvent<unknown>) => this.onFrameMessage(event.data);
+    this.port.onmessageerror = () => this.fail(new Error(t('frameUnreachable')));
+    iframe.contentWindow.postMessage({ type: 'doom:init', script, wasm, wad }, '*', [channel.port2]);
+    document.addEventListener('fullscreenchange', () => this.onFullscreenChange(), { signal: this.listeners.signal });
   }
 
-  private wireFrame(win: FrameWindow, canvas: HTMLCanvasElement): void {
-    const signal = this.listeners.signal;
-    // Le son ne part qu'après un geste : chaque AudioContext créé par le moteur est suivi (et mis en pause).
-    // Le moteur (SDL2) appelle lui-même resume() à chaque tampon audio : on filtre ces appels.
-    const adopt = (audio: AudioContext): void => {
-      this.audioContexts.add(audio);
-      this.syncAudio();
-    };
-    const mayPlay = (): boolean => this.audioAllowed();
-    const Native = win.AudioContext;
-    if (typeof Native === 'function') {
-      this.nativeResume = Native.prototype.resume;
-      win.AudioContext = class extends Native {
-        constructor(options?: AudioContextOptions) {
-          super(options);
-          adopt(this);
-        }
-
-        override resume(): Promise<void> {
-          return mayPlay() ? super.resume() : Promise.resolve();
-        }
-      };
+  private onFrameMessage(data: unknown): void {
+    if (this.disposed || this.failed || !data || typeof data !== 'object' || !('type' in data)) return;
+    const value = 'value' in data ? data.value : undefined;
+    switch (data.type) {
+      case 'ready':
+        if (this.loadTimer !== null) clearTimeout(this.loadTimer);
+        this.loadTimer = null;
+        this.fullscreenBtn.disabled = false;
+        break;
+      case 'log':
+        if (typeof value === 'string') this.remember(value.slice(0, 2000));
+        break;
+      case 'error':
+        if (typeof value === 'string') this.fail(new Error(value.slice(0, 2000)));
+        break;
+      case 'exit':
+        if (value === 0) this.ctx.close();
+        else if (typeof value === 'number') this.fail(new Error(t('engineStopped', { code: value })));
+        break;
+      case 'focus':
+        if (typeof value === 'boolean') this.focused = value;
+        this.updateHint();
+        break;
+      case 'release':
+        this.focused = false;
+        this.fullscreenBtn.focus({ preventScroll: true });
+        this.updateHint();
+        break;
     }
-    const onKey = (event: KeyboardEvent) => {
-      if (event.type === 'keydown' && isReleaseShortcut(event)) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        this.releaseKeyboard();
-        return;
-      }
-      if (shouldPreventDefault(event)) event.preventDefault();
-      if (event.type === 'keydown') this.arm();
-    };
-    win.addEventListener('keydown', onKey, { capture: true, signal });
-    win.addEventListener('keyup', onKey, { capture: true, signal });
-    canvas.addEventListener(
-      'pointerdown',
-      () => {
-        canvas.focus();
-        this.arm();
-      },
-      { signal },
-    );
-    canvas.addEventListener('contextmenu', (event) => event.preventDefault(), { signal });
-    win.addEventListener('focus', () => this.updateHint(), { signal });
-    win.addEventListener('blur', () => this.updateHint(), { signal });
-    win.addEventListener(
-      'error',
-      (event) => {
-        const error: unknown = event.error ?? event.message;
-        if (!isExitNoise(error)) this.fail(error);
-      },
-      { signal },
-    );
-    win.addEventListener(
-      'unhandledrejection',
-      (event) => {
-        if (!isExitNoise(event.reason)) this.fail(event.reason);
-      },
-      { signal },
-    );
-    document.addEventListener('fullscreenchange', () => this.onFullscreenChange(), { signal });
   }
 
   // ---------- Clavier, focus, son ----------
 
   private focusGame(): void {
-    if (!this.frameWin || !this.canvas || this.failed) return;
-    this.frameWin.focus();
-    this.canvas.focus({ preventScroll: true });
-    this.arm();
-    this.updateHint();
-  }
-
-  private releaseKeyboard(): void {
-    this.canvas?.blur();
-    this.fullscreenBtn.focus({ preventScroll: true });
-    this.updateHint();
-  }
-
-  private gameHasFocus(): boolean {
-    return !!this.frameWin && document.activeElement === this.iframe && this.frameWin.document.hasFocus();
+    if (!this.iframe || this.failed) return;
+    this.iframe.focus();
+    this.port?.postMessage({ type: 'focus' });
   }
 
   private updateHint(): void {
     // L'état de focus se stabilise après l'événement : on relit au tour suivant.
     queueMicrotask(() => {
       if (this.disposed) return;
-      this.hint.hidden = this.gameHasFocus() || this.failed;
+      this.hint.hidden = (this.focused && document.activeElement === this.iframe) || this.failed;
     });
-  }
-
-  private arm(): void {
-    if (this.armed) return;
-    this.armed = true;
-    this.syncAudio();
-  }
-
-  private audioAllowed(): boolean {
-    return this.armed && !this.muted && !this.disposed && !this.failed;
-  }
-
-  private syncAudio(): void {
-    const contexts = new Set(this.audioContexts);
-    const sdl = this.engine?.SDL2?.audioContext;
-    if (sdl) contexts.add(sdl);
-    const play = this.audioAllowed();
-    const resume = this.nativeResume;
-    for (const audio of contexts) {
-      if (audio.state === 'closed') continue;
-      let pending: Promise<void>;
-      if (!play) pending = audio.suspend();
-      else if (resume) pending = resume.call(audio);
-      else pending = audio.resume();
-      void pending.catch(() => {});
-    }
   }
 
   private toggleSound(): void {
     this.muted = !this.muted;
     this.ctx.storage.set(MUTE_KEY, this.muted ? '1' : '0');
     this.updateSoundButton();
-    this.syncAudio();
+    this.port?.postMessage({ type: 'mute', value: this.muted });
   }
 
   private updateSoundButton(): void {
@@ -444,19 +299,14 @@ class DoomSession {
   /** Coupe l'audio, retire l'iframe (arrête la boucle du moteur) et oublie toutes les références. */
   private teardownEngine(): void {
     this.downloads.abort();
-    const sdl = this.engine?.SDL2?.audioContext;
-    if (sdl) this.audioContexts.add(sdl);
-    for (const audio of this.audioContexts) {
-      if (audio.state !== 'closed') void audio.close().catch(() => {});
-    }
-    this.audioContexts.clear();
+    if (this.loadTimer !== null) clearTimeout(this.loadTimer);
+    this.loadTimer = null;
     if (this.iframe && document.fullscreenElement === this.iframe) void document.exitFullscreen().catch(() => {});
-    if (this.frameWin) this.frameWin.Module = undefined;
+    this.port?.postMessage({ type: 'dispose' });
+    this.port?.close();
+    this.port = null;
     this.iframe?.remove();
     this.iframe = null;
-    this.frameWin = null;
-    this.canvas = null;
-    this.engine = null;
   }
 
   dispose(): void {
