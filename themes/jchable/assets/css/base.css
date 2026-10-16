@@ -120,3 +120,18 @@ body:not(.paged) .post-feed.is-archive-feed .wp-block-post-template > li:first-c
 	min-width: 0;
 	max-width: 100%;
 }
+
+/* Anciens articles en HTML brut : tableaux, légendes et médias ne dépassent jamais l'écran. */
+.wp-block-post-content :is(table, .wp-caption, figure) {
+	max-width: 100%;
+}
+
+.wp-block-post-content > table {
+	display: block;
+	overflow-x: auto;
+}
+
+.wp-block-post-content .wp-caption img {
+	max-width: 100%;
+	height: auto;
+}

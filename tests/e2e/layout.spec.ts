@@ -10,6 +10,7 @@ const PATHS = [
   POSTS.code.path,
   PAGES.about,
   PAGES.sitemap,
+  PAGES.classic,
   ARCHIVES.category,
   ARCHIVES.month,
   ARCHIVES.search,

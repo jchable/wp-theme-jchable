@@ -35,3 +35,17 @@ add_filter(
 		return $tags->get_updated_html();
 	}
 );
+
+// Tout bloc <pre> du contenu (éditeur classique, bloc Préformaté…) défile : il doit être atteignable au clavier.
+add_filter(
+	'render_block_core/post-content',
+	static function ( string $content ): string {
+		$tags = new WP_HTML_Tag_Processor( $content );
+		while ( $tags->next_tag( 'pre' ) ) {
+			if ( null === $tags->get_attribute( 'tabindex' ) ) {
+				$tags->set_attribute( 'tabindex', '0' );
+			}
+		}
+		return $tags->get_updated_html();
+	}
+);

@@ -20,6 +20,7 @@ export const POSTS = {
 export const PAGES = {
   about: '/a-propos/',
   sitemap: '/plan-du-site/',
+  classic: '/contenu-classique/',
 } as const;
 
 export const ARCHIVES = {

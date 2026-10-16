@@ -208,6 +208,7 @@ update_post_meta( $sitemap, '_wp_page_template', 'plan-du-site' );
 
 // Menu principal réel (le menu de repli de WordPress produit des listes imbriquées invalides).
 require __DIR__ . "/navigation.php";
+require __DIR__ . "/classic-content.php";
 
 update_option( 'jchable_seeded', 1 );
 WP_CLI::success( 'Contenu de test créé.' );

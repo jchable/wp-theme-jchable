@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { POSTS, PAGES, ARCHIVES } from './fixtures';
 
-const PATHS = ['/', POSTS.latest.path, POSTS.code.path, PAGES.about, PAGES.sitemap, ARCHIVES.category, ARCHIVES.search, ARCHIVES.notFound];
+const PATHS = ['/', POSTS.latest.path, POSTS.code.path, PAGES.about, PAGES.sitemap, PAGES.classic, ARCHIVES.category, ARCHIVES.search, ARCHIVES.notFound];
 
 for (const path of PATHS) {
   test(`axe : aucune violation sérieuse ou critique sur ${path}`, async ({ page }) => {
