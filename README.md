@@ -8,6 +8,7 @@ Thèmes blocs pour https://julien.chable.net : un parent `jchable` et un enfant 
 ## Prérequis
 
 - Node 22 ou plus récent
+- Git (également utilisé par le correctif de compatibilité des outils WordPress)
 - Docker Desktop (WordPress local via `@wordpress/env`)
 
 PHP n'est pas nécessaire sur la machine : WP-CLI et PHP tournent dans le conteneur.
@@ -24,12 +25,22 @@ PHP n'est pas nécessaire sur la machine : WP-CLI et PHP tournent dans le conten
 | `npm run typecheck` | vérifie les types TypeScript |
 | `npm run test:unit` | tests unitaires (Vitest) du bureau et des applis |
 | `npm run test:tools` | tests des scripts Node |
+| `npm run test:security:php` | contrôles des permissions REST, métadonnées et échappement sur le WordPress local de test |
 | `npm run test:e2e` | tests Playwright du thème parent (active `jchable`) |
 | `npm run test:e2e:bureau` | tests Playwright du thème Bureau (active `jchable-bureau`) |
 | `npm run check -- <thème>` | Theme Check (`jchable` ou `jchable-bureau`) ; `npm run check:all` pour les deux |
 | `npm run zip` | compile le JS puis génère `dist/<thème>.zip` pour chaque thème ; `npm run zip -- --no-doom` fabrique `jchable-bureau-sans-doom.zip` (léger) |
 
 Les deux suites Playwright partagent le même WordPress local : on ne les lance pas en même temps. Chacune active son thème avant de tourner ; à la fin, le thème de la dernière suite lancée reste actif.
+
+Installer avec `npm ci` : le verrouillage et les correctifs de sécurité sont versionnés. Le script
+`postinstall` applique le patch de compatibilité de `@wordpress/env` avec `simple-git` 4 ;
+il échoue explicitement si le patch ne correspond plus à la version installée.
+Après une installation avec `--ignore-scripts`, lancer `npm run postinstall`.
+Les overrides de `simple-git`, `argparse` et `qs` corrigent les avis npm de l'outillage ;
+les tests des outils vérifient le clonage Git local et la compatibilité de js-yaml.
+Le runtime Docker reste celui utilisé ici ; le runtime Playground optionnel de wp-env
+annonce des prérequis Node/npm plus récents et n'est pas validé avec Node 22.
 
 ## Organisation
 
@@ -65,3 +76,6 @@ Le bureau mémorise, dans le **localStorage du navigateur du visiteur** (clé `j
 ## Installer sur le blog
 
 Voir `docs/deploiement.md` (zips, menu, vérifications, retour en arrière).
+
+Les contrôles de sécurité, leurs limites et les précautions de production sont décrits dans
+[le guide de déploiement](docs/deploiement.md#9-sécurité-et-limites-de-laudit).
