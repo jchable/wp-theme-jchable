@@ -1,5 +1,7 @@
 import type { PrefsApi } from '../core/prefs';
+import type { LangPref } from '../core/i18n';
 import type { BureauApp, BureauConfig } from '../core/types';
+import { t } from '../core/ui-i18n';
 
 export interface StartMenuOptions {
   button: HTMLElement;
@@ -18,6 +20,8 @@ export interface StartMenuOptions {
   onToggle: (open: boolean) => void;
   /** Vrai : l'écran de veille est proposé (grand écran uniquement). */
   screensaverAvailable: boolean;
+  /** Change la langue de l'interface (la page est rechargée ensuite). */
+  setLanguage: (lang: LangPref) => void;
 }
 
 interface PostSummary {
@@ -90,8 +94,8 @@ export class StartMenu {
     const menu = document.createElement('div');
     menu.className = 'bmenu';
     menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', 'Menu Démarrer');
-    menu.append(this.buildPrograms(), this.buildDocuments(), this.buildLinks(), this.buildSettings());
+    menu.setAttribute('aria-label', t('menu.aria'));
+    menu.append(this.buildPrograms(), this.buildDocuments(), this.buildLinks(), this.buildSettings(), this.buildLanguage());
     document.body.append(menu);
     this.menu = menu;
     const rect = button.getBoundingClientRect();
@@ -153,16 +157,16 @@ export class StartMenu {
   }
 
   private buildPrograms(): HTMLElement {
-    const group = this.group('Programmes');
+    const group = this.group(t('menu.programs'));
     for (const app of this.options.apps) group.append(this.action(app.title, () => this.options.openApp(app.id)));
     return group;
   }
 
   private buildDocuments(): HTMLElement {
-    const group = this.group('Documents');
+    const group = this.group(t('menu.documents'));
     this.documents = group;
     if (this.docs) this.fillDocuments(group, this.docs);
-    else this.note(group, 'Chargement…');
+    else this.note(group, t('menu.loading'));
     return group;
   }
 
@@ -192,8 +196,8 @@ export class StartMenu {
   /** Remplit le groupe « Documents » ; `null` : le chargement a échoué. */
   private fillDocuments(group: HTMLElement, docs: ReadonlyArray<{ label: string; href: string }> | null): void {
     group.querySelectorAll('.bmenu-note, [role="menuitem"]').forEach((node) => node.remove());
-    if (docs === null) this.note(group, 'Documents indisponibles.');
-    else if (docs.length === 0) this.note(group, 'Aucun document.');
+    if (docs === null) this.note(group, t('menu.docsFail'));
+    else if (docs.length === 0) this.note(group, t('menu.noDocs'));
     else for (const doc of docs) group.append(this.link(doc.label, doc.href));
   }
 
@@ -205,7 +209,7 @@ export class StartMenu {
   }
 
   private buildLinks(): HTMLElement {
-    const group = this.group('Blog');
+    const group = this.group(t('menu.blog'));
     for (const { label, href } of this.options.links) {
       const item = this.link(label, href);
       item.addEventListener('click', (event) => {
@@ -219,21 +223,44 @@ export class StartMenu {
     return group;
   }
 
+  private radio(label: string, checked: boolean, choose: () => void): HTMLButtonElement {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.setAttribute('role', 'menuitemradio');
+    item.setAttribute('aria-checked', String(checked));
+    item.textContent = label;
+    item.addEventListener('click', () => {
+      this.close(false);
+      choose();
+    });
+    return item;
+  }
+
+  private buildLanguage(): HTMLElement {
+    const { prefs, setLanguage } = this.options;
+    const current = prefs.get().lang;
+    const group = this.group(t('menu.language'));
+    for (const lang of ['auto', 'fr', 'en'] as const) {
+      group.append(this.radio(t(`menu.lang.${lang}`), current === lang, () => setLanguage(lang)));
+    }
+    return group;
+  }
+
   private buildSettings(): HTMLElement {
     const { prefs, resetIcons, startScreensaver, shutdown, screensaverAvailable } = this.options;
-    const group = this.group('Paramètres');
+    const group = this.group(t('menu.settings'));
     group.append(
-      this.checkbox('Son', prefs.get().sound, (value) => prefs.update((p) => (p.sound = value))),
+      this.checkbox(t('menu.sound'), prefs.get().sound, (value) => prefs.update((p) => (p.sound = value))),
     );
     if (screensaverAvailable) {
       group.append(
-        this.checkbox('Écran de veille automatique', prefs.get().screensaver, (value) =>
+        this.checkbox(t('menu.saverAuto'), prefs.get().screensaver, (value) =>
           prefs.update((p) => (p.screensaver = value)),
         ),
-        this.action('Lancer l’écran de veille', startScreensaver),
+        this.action(t('menu.saverNow'), startScreensaver),
       );
     }
-    group.append(this.action('Réorganiser les icônes', resetIcons), this.action('Arrêter…', shutdown));
+    group.append(this.action(t('menu.reset'), resetIcons), this.action(t('menu.shutdown'), shutdown));
     return group;
   }
 }

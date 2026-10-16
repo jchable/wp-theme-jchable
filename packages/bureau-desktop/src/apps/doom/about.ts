@@ -1,5 +1,7 @@
 /** Panneau « À propos de DOOM.EXE » : licences et lien vers le code source (obligations de la GPL). */
 
+import { t } from './i18n';
+
 export const SOURCE_URL =
   'https://github.com/cloudflare/doom-wasm/tree/65e0d3ae2ffa604155eebd96ed40da6567bd08f4';
 
@@ -23,28 +25,26 @@ export function buildAbout(baseUrl: string): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'bapp-doom-about';
   panel.setAttribute('role', 'region');
-  panel.setAttribute('aria-label', 'À propos de DOOM.EXE');
+  panel.setAttribute('aria-label', t('aboutTitle'));
 
   const title = document.createElement('h2');
-  title.textContent = 'À propos de DOOM.EXE';
+  title.textContent = t('aboutTitle');
   const intro = document.createElement('p');
-  intro.textContent =
-    'Le moteur est Chocolate Doom (portage WebAssembly de Cloudflare), un logiciel libre sous licence GPL v2 ou ultérieure. ' +
-    'Les données du jeu sont celles de DOOM shareware (épisode 1), © id Software, que l’éditeur autorise à redistribuer gratuitement et sans modification.';
+  intro.textContent = t('aboutIntro');
 
   const list = document.createElement('ul');
   list.append(
-    item('Code source du moteur : ', link('code source sur GitHub (version exacte)', SOURCE_URL)),
-    item('Notre construction et les deux corrections : ', link('README de la construction', `${base}README.md`)),
-    item('Licence du moteur : ', link('GPL v2', `${base}LICENSE-GPL-2.0.txt`)),
-    item('Données du jeu : ', link('licence shareware de DOOM', `${base}LICENSE-DOOM1-SHAREWARE.txt`)),
-    item('Bibliothèques : ', link('SDL2 (zlib)', `${base}LICENSE-zlib-SDL2.txt`), ' · ', link('Emscripten (MIT/NCSA)', `${base}LICENSE-Emscripten-MIT-NCSA.txt`)),
+    item(t('aboutSourceLabel'), link(t('aboutSourceLink'), SOURCE_URL)),
+    item(t('aboutBuildLabel'), link(t('aboutBuildLink'), `${base}README.md`)),
+    item(t('aboutEngineLicenseLabel'), link('GPL v2', `${base}LICENSE-GPL-2.0.txt`)),
+    item(t('aboutDataLabel'), link(t('aboutDataLink'), `${base}LICENSE-DOOM1-SHAREWARE.txt`)),
+    item(t('aboutLibsLabel'), link('SDL2 (zlib)', `${base}LICENSE-zlib-SDL2.txt`), ' · ', link('Emscripten (MIT/NCSA)', `${base}LICENSE-Emscripten-MIT-NCSA.txt`)),
   );
 
   const close = document.createElement('button');
   close.type = 'button';
   close.className = 'bapp-doom-btn bapp-doom-about-close';
-  close.textContent = 'Fermer ce panneau';
+  close.textContent = t('aboutClose');
   panel.append(title, intro, list, close);
   return panel;
 }

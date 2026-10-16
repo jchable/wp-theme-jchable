@@ -10,6 +10,7 @@ import {
   type Board,
   type LevelId,
 } from './board';
+import { t } from './i18n';
 import './style.css';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -17,11 +18,9 @@ const LONG_PRESS_MS = 500;
 const LONG_PRESS_MOVE_PX = 10;
 const MAX_SECONDS = 999;
 
-const LEVEL_LABELS: Record<LevelId, string> = {
-  beginner: 'Débutant',
-  intermediate: 'Intermédiaire',
-  expert: 'Expert',
-};
+function levelLabel(id: LevelId): string {
+  return id === 'beginner' ? t('levelBeginner') : id === 'intermediate' ? t('levelIntermediate') : t('levelExpert');
+}
 
 type Face = 'smile' | 'surprise' | 'dead' | 'cool';
 
@@ -131,16 +130,15 @@ function faceIcon(kind: Face): SVGSVGElement {
   return svg('0 0 24 24', ...shapes);
 }
 
-const FACE_LABELS: Record<Face, string> = {
-  smile: 'Nouvelle partie',
-  surprise: 'Nouvelle partie',
-  dead: 'Nouvelle partie (partie perdue)',
-  cool: 'Nouvelle partie (partie gagnée)',
-};
+function faceLabel(kind: Face): string {
+  if (kind === 'dead') return t('faceLost');
+  if (kind === 'cool') return t('faceWon');
+  return t('faceNew');
+}
 
 function setFace(s: State, kind: Face): void {
   s.face.replaceChildren(faceIcon(kind));
-  s.face.setAttribute('aria-label', FACE_LABELS[kind]);
+  s.face.setAttribute('aria-label', faceLabel(kind));
 }
 
 function lcd(n: number): string {
@@ -165,21 +163,18 @@ function readBest(s: State, id: LevelId): number | null {
 
 function renderBest(s: State): void {
   const best = readBest(s, s.levelId);
-  s.best.textContent = best === null ? 'Meilleur temps : —' : `Meilleur temps : ${best} s`;
-}
-
-function plural(n: number): string {
-  return n === 1 ? '1 mine voisine' : `${n} mines voisines`;
+  s.best.textContent = best === null ? t('bestNone') : t('best', { seconds: best });
 }
 
 function cellLabel(s: State, i: number): string {
   const c = s.board.cells[i]!;
-  const pos = `ligne ${Math.floor(i / s.board.cols) + 1}, colonne ${(i % s.board.cols) + 1}`;
-  if (isWrongFlag(s.board, i)) return `${pos}, drapeau erroné`;
-  if (c.flagged) return `${pos}, drapeau`;
-  if (!c.revealed) return `${pos}, fermée`;
-  if (c.mine) return `${pos}, mine`;
-  return `${pos}, ${c.adjacent === 0 ? 'aucune mine voisine' : plural(c.adjacent)}`;
+  const pos = t('cellPos', { row: Math.floor(i / s.board.cols) + 1, col: (i % s.board.cols) + 1 });
+  if (isWrongFlag(s.board, i)) return t('cellWrongFlag', { pos });
+  if (c.flagged) return t('cellFlag', { pos });
+  if (!c.revealed) return t('cellClosed', { pos });
+  if (c.mine) return t('cellMine', { pos });
+  if (c.adjacent === 0) return t('cellNoNeighbor', { pos });
+  return c.adjacent === 1 ? t('cellOneNeighbor', { pos }) : t('cellNeighbors', { pos, n: c.adjacent });
 }
 
 function renderCell(s: State, i: number): void {
@@ -210,9 +205,9 @@ function renderCell(s: State, i: number): void {
 
 function renderCounters(s: State): void {
   s.mineLcd.textContent = lcd(flagsLeft(s.board));
-  s.mineLcd.setAttribute('aria-label', `Mines restantes : ${flagsLeft(s.board)}`);
+  s.mineLcd.setAttribute('aria-label', t('minesLeft', { n: flagsLeft(s.board) }));
   s.timeLcd.textContent = lcd(s.seconds);
-  s.timeLcd.setAttribute('aria-label', `Temps : ${s.seconds} s`);
+  s.timeLcd.setAttribute('aria-label', t('time', { seconds: s.seconds }));
 }
 
 function stopTimer(s: State): void {
@@ -295,16 +290,16 @@ function afterAction(s: State, before: Board['status'], changed: number[]): void
     if (s.board.status === 'won') {
       const seconds = Math.max(1, s.seconds);
       const best = readBest(s, s.levelId);
-      let message = `Gagné en ${s.seconds} s`;
+      let message = t('won', { seconds: s.seconds });
       if (best === null || seconds < best) {
         s.ctx.storage.set(bestKey(s.levelId), String(seconds));
-        message += ' : nouveau record !';
+        message += t('newRecord');
       }
       s.status.textContent = message;
       renderBest(s);
       setFace(s, 'cool');
     } else {
-      s.status.textContent = 'Perdu';
+      s.status.textContent = t('lost');
       setFace(s, 'dead');
     }
   }
@@ -472,13 +467,13 @@ function build(ctx: AppContext, root: HTMLElement): State {
 
   const bar = el('div', 'bapp-minesweeper-bar');
   const selectId = 'bapp-minesweeper-level-' + Math.random().toString(36).slice(2, 8);
-  const label = el('label', 'bapp-minesweeper-label', 'Niveau');
+  const label = el('label', 'bapp-minesweeper-label', t('levelLabel'));
   label.htmlFor = selectId;
   const select = el('select', 'bapp-minesweeper-select');
   select.id = selectId;
   (Object.keys(LEVELS) as LevelId[]).forEach((id) => {
     const l = LEVELS[id];
-    const opt = el('option', undefined, `${LEVEL_LABELS[id]} (${l.cols}×${l.rows}, ${l.mines} mines)`);
+    const opt = el('option', undefined, t('levelOption', { name: levelLabel(id), cols: l.cols, rows: l.rows, mines: l.mines }));
     opt.value = id;
     select.appendChild(opt);
   });
@@ -498,18 +493,14 @@ function build(ctx: AppContext, root: HTMLElement): State {
   const scroll = el('div', 'bapp-minesweeper-scroll');
   const grid = el('div', 'bapp-minesweeper-grid');
   grid.setAttribute('role', 'grid');
-  grid.setAttribute('aria-label', 'Champ de mines');
+  grid.setAttribute('aria-label', t('gridLabel'));
   scroll.appendChild(grid);
 
   const status = el('p', 'bapp-minesweeper-status');
   status.setAttribute('role', 'status');
   status.setAttribute('aria-live', 'polite');
 
-  const help = el(
-    'p',
-    'bapp-minesweeper-help',
-    'Entrée ou clic : dévoiler. F ou clic droit : drapeau (appui long sur écran tactile). Flèches : se déplacer. Double clic sur un chiffre : dévoiler les voisines.',
-  );
+  const help = el('p', 'bapp-minesweeper-help', t('help'));
 
   wrap.append(bar, head, scroll, status, help);
   root.replaceChildren(wrap);
@@ -554,7 +545,7 @@ function build(ctx: AppContext, root: HTMLElement): State {
 
 export function mount(host: HTMLElement, ctx: AppContext): void {
   if (state) unmount();
-  ctx.setTitle('Démineur.exe');
+  ctx.setTitle(t('title'));
   state = build(ctx, host);
 }
 

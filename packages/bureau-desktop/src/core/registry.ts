@@ -1,4 +1,5 @@
 import type { BureauApp } from './types';
+import { t } from './ui-i18n';
 
 /**
  * Les applis du bureau. Chaque `load()` est un import dynamique : le code d'une appli
@@ -7,7 +8,9 @@ import type { BureauApp } from './types';
 export const APPS: readonly BureauApp[] = [
   {
     id: 'terminal',
-    title: 'Terminal',
+    get title() {
+      return t('app.terminal');
+    },
     icon: 'terminal',
     defaultSize: { w: 640, h: 420 },
     mobile: 'fullscreen',
@@ -15,7 +18,9 @@ export const APPS: readonly BureauApp[] = [
   },
   {
     id: 'minesweeper',
-    title: 'Démineur.exe',
+    get title() {
+      return t('app.minesweeper');
+    },
     icon: 'minesweeper',
     defaultSize: { w: 460, h: 540 },
     mobile: 'fullscreen',
@@ -23,7 +28,9 @@ export const APPS: readonly BureauApp[] = [
   },
   {
     id: 'wordpad',
-    title: 'WORDPAD.EXE',
+    get title() {
+      return t('app.wordpad');
+    },
     icon: 'wordpad',
     defaultSize: { w: 680, h: 480 },
     mobile: 'fullscreen',
@@ -31,7 +38,9 @@ export const APPS: readonly BureauApp[] = [
   },
   {
     id: 'messenger',
-    title: 'Oh-Oh! Messenger',
+    get title() {
+      return t('app.messenger');
+    },
     icon: 'messenger',
     defaultSize: { w: 360, h: 500 },
     mobile: 'fullscreen',
@@ -39,7 +48,9 @@ export const APPS: readonly BureauApp[] = [
   },
   {
     id: 'trash',
-    title: 'Corbeille',
+    get title() {
+      return t('app.trash');
+    },
     icon: 'trash',
     defaultSize: { w: 540, h: 400 },
     mobile: 'fullscreen',
@@ -47,17 +58,23 @@ export const APPS: readonly BureauApp[] = [
   },
   {
     id: 'doom',
-    title: 'DOOM.EXE',
+    get title() {
+      return t('app.doom');
+    },
     icon: 'doom',
     defaultSize: { w: 700, h: 520 },
     mobile: 'unsupported',
-    unsupportedMessage: 'DOOM.EXE demande un clavier : ouvrez ce blog sur un ordinateur pour jouer.',
+    get unsupportedMessage() {
+      return t('app.doomUnsupported');
+    },
     capturesKeyboard: true,
     load: () => import('../apps/doom/index'),
   },
   {
     id: 'properties',
-    title: 'Propriétés système',
+    get title() {
+      return t('app.properties');
+    },
     icon: 'properties',
     defaultSize: { w: 420, h: 340 },
     mobile: 'fullscreen',

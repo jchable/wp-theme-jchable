@@ -212,7 +212,8 @@ test.describe('bureau : grand écran', () => {
   test('aucune appli n’est téléchargée avant son lancement', async ({ page }) => {
     const chunks: string[] = [];
     page.on('request', (request) => {
-      if (/\/assets\/dist\/chunks\//.test(request.url())) chunks.push(request.url());
+      // Le code partagé (traductions) se charge avec la page ; les applis, jamais avant leur lancement.
+      if (/\/assets\/dist\/chunks\/(?!boot-|i18n-)/.test(request.url())) chunks.push(request.url());
     });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -736,5 +737,45 @@ test.describe('bande d’icônes : jamais cachée, adaptée à la largeur', () =
     const band = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bureau-band')));
     const moved = await icon.boundingBox();
     expect(moved!.x + moved!.width).toBeLessThanOrEqual(band);
+  });
+});
+
+test.describe('un seul bureau, même après le chargement d’une appli', () => {
+  test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
+
+  const APPS: Array<[string, string]> = [
+    ['Terminal', 'terminal'],
+    ['Démineur.exe', 'minesweeper'],
+    ['WORDPAD.EXE', 'wordpad'],
+    ['Oh-Oh! Messenger', 'messenger'],
+    ['Corbeille', 'trash'],
+    ['DOOM.EXE', 'doom'],
+  ];
+
+  for (const [label, id] of APPS) {
+    test(`ouvrir « ${label} » ne duplique ni les icônes, ni les couches, ni le bureau`, async ({ page }) => {
+      await page.goto('/');
+      await openApp(page, label);
+      await expect(page.locator(`.bwin[data-app="${id}"]`)).toBeVisible();
+      await page.waitForTimeout(400);
+      const counts = await page.evaluate(() => ({
+        icons: document.querySelectorAll('#bureau-desktop .bicon').length,
+        desktops: document.querySelectorAll('#bureau-desktop').length,
+        layers: document.querySelectorAll('#bureau-windows').length,
+        taskbarTabs: document.querySelectorAll('.bwin-tabs').length,
+      }));
+      expect(counts).toEqual({ icons: 11, desktops: 1, layers: 1, taskbarTabs: 1 });
+    });
+  }
+
+  test('le fichier du bureau n’est téléchargé qu’une fois (pas de second chargement sous une autre adresse)', async ({ page }) => {
+    const entries: string[] = [];
+    page.on('request', (request) => {
+      if (/\/assets\/dist\/bureau\.js/.test(request.url())) entries.push(request.url());
+    });
+    await page.goto('/');
+    await openApp(page, 'Terminal');
+    await expect(page.locator('.bwin[data-app="terminal"]')).toBeVisible();
+    expect(entries).toHaveLength(1);
   });
 });

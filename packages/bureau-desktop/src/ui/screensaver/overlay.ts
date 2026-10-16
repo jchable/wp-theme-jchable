@@ -1,5 +1,6 @@
 import './style.css';
 import { createScene, resize, step, type Scene } from './physics';
+import { t } from './i18n';
 
 export interface ScreensaverOptions {
   reducedMotion?: () => boolean;
@@ -16,7 +17,6 @@ export interface Screensaver {
 
 const GRACE_MS = 300;
 const MAX_DT_MS = 100;
-const LIVE_TEXT = 'Écran de veille. Bougez la souris ou appuyez sur une touche pour revenir.';
 const ACTIVITY_EVENTS = ['pointermove', 'touchstart', 'wheel'] as const;
 const LISTEN: AddEventListenerOptions = { passive: true, capture: true };
 // Touche et clic qui réveillent l'écran : consommés, pour ne rien déclencher sur la page dessous.
@@ -135,7 +135,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       scene = createScene(Math.max(1, window.innerWidth), Math.max(1, window.innerHeight), Math.random);
       fit();
       document.body.append(root);
-      live.textContent = LIVE_TEXT;
+      live.textContent = t('liveText');
 
       startedAt = Date.now();
       lastTime = null;

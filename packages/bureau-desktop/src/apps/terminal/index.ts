@@ -1,6 +1,7 @@
 import type { AppContext } from '../../core/types';
 import { History } from './logic';
 import { createRunner, PROMPT } from './run';
+import { t } from './i18n';
 import './style.css';
 
 let cleanup: (() => void) | null = null;
@@ -8,7 +9,7 @@ let cleanup: (() => void) | null = null;
 export function mount(el: HTMLElement, ctx: AppContext): void {
   cleanup?.();
   el.textContent = '';
-  ctx.setTitle('Invite de commandes');
+  ctx.setTitle(t('title'));
 
   const root = document.createElement('div');
   root.className = 'bapp-terminal-root';
@@ -17,7 +18,7 @@ export function mount(el: HTMLElement, ctx: AppContext): void {
   output.className = 'bapp-terminal-output';
   output.setAttribute('role', 'log');
   output.setAttribute('aria-live', 'polite');
-  output.setAttribute('aria-label', 'Sortie du terminal');
+  output.setAttribute('aria-label', t('outputLabel'));
 
   const form = document.createElement('form');
   form.className = 'bapp-terminal-line';
@@ -31,7 +32,7 @@ export function mount(el: HTMLElement, ctx: AppContext): void {
   const input = document.createElement('input');
   input.className = 'bapp-terminal-input';
   input.type = 'text';
-  input.setAttribute('aria-label', 'Commande');
+  input.setAttribute('aria-label', t('inputLabel'));
   input.autocomplete = 'off';
   input.spellcheck = false;
   input.setAttribute('autocapitalize', 'off');
@@ -68,7 +69,7 @@ export function mount(el: HTMLElement, ctx: AppContext): void {
     busy = true;
     runner
       .run(line)
-      .catch(() => print('Une erreur interne est survenue.'))
+      .catch(() => print(t('internalError')))
       .finally(() => {
         busy = false;
         output.scrollTop = output.scrollHeight;

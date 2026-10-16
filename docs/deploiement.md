@@ -39,6 +39,7 @@ Elle produit `dist/jchable-bureau-sans-doom.zip` (environ 270 Ko). DOOM n'y est 
 - [ ] **DOOM** : double-clic sur DOOM.EXE : le jeu se charge et affiche son écran titre. Si la fenêtre affiche « DOOM.EXE a cessé de fonctionner » : ouvrir « Détails techniques ». Cause la plus fréquente : le serveur n'envoie pas le type `application/wasm` pour les fichiers `.wasm` (le thème sait contourner), ou un blocage par une règle de sécurité (CSP) qui doit autoriser `'wasm-unsafe-eval'`.
 - [ ] **Messagerie** : affiche les derniers commentaires du blog. Si elle affiche « Impossible de joindre le serveur », vérifier que l'API REST (`/wp-json/wp/v2/comments`) n'est pas bloquée (plugin de sécurité, Cloudflare).
 - [ ] **Cloudflare** : si le CSS ou le JS paraît ancien, vider le cache Cloudflare. Les fichiers sont versionnés (`?ver=`), ce qui évite normalement le problème. Si le bureau ne démarre pas du tout (aucune icône), désactiver **Rocket Loader** et l'optimisation/minification JavaScript de Cloudflare pour ce site : le bureau est un module JavaScript (`<script type="module">`), que ces options peuvent perturber.
+- [ ] **Langue** : avec un navigateur en anglais, l'interface (bouton Start, icônes, applis) est en anglais ; menu Démarrer › Langue permet de forcer le français ou l'anglais. Les articles ne changent pas de langue.
 - [ ] **Mobile** : sur téléphone, pas de bureau d'icônes ; le menu d'origine défile en haut, le menu Démarrer donne accès aux applis en plein écran, DOOM annonce qu'il demande un clavier.
 - [ ] **Page inexistante** (`/nimporte-quoi/`) : écran bleu.
 
@@ -54,7 +55,7 @@ Apparence › Thèmes › activer **Twenty Eleven** (ou le thème précédent). 
 
 ## 6. Respect de la vie privée
 
-Le bureau écrit dans le **localStorage du navigateur du visiteur** : position des icônes et des fenêtres, son, écran de veille, brouillon du WordPad. Ces données servent uniquement à une fonction demandée par le visiteur, restent sur son appareil et ne sont jamais envoyées au serveur, sans suivi ni partage : à notre avis, cela entre dans l'exemption de consentement de la directive ePrivacy (ce n'est pas un avis juridique). Une phrase dans votre page de confidentialité suffit.
+Le bureau écrit dans le **localStorage du navigateur du visiteur** : position des icônes et des fenêtres, langue, son, écran de veille, brouillon du WordPad. Ces données servent uniquement à une fonction demandée par le visiteur, restent sur son appareil et ne sont jamais envoyées au serveur, sans suivi ni partage : à notre avis, cela entre dans l'exemption de consentement de la directive ePrivacy (ce n'est pas un avis juridique). Une phrase dans votre page de confidentialité suffit.
 
 ## 7. Licences à connaître
 

@@ -23,16 +23,19 @@ import {
   type PartProgress,
 } from './loader';
 import { buildAbout } from './about';
+import { t } from './i18n';
+import { getLang } from '../../core/i18n';
 import './style.css';
 
 const MUTE_KEY = 'muted';
 const LOG_LINES = 12;
 let labelCounter = 0;
 
-const FRAME_HTML = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><style>
+/** Document de l'iframe ; construit au lancement pour suivre la langue courante. */
+const frameHtml = (): string => `<!doctype html><html lang="${getLang()}"><head><meta charset="utf-8"><style>
 html,body{margin:0;height:100%;overflow:hidden;background:#000}
 canvas{display:block;width:100%!important;height:100%!important;object-fit:contain;image-rendering:pixelated;outline:none;background:#000}
-</style></head><body><canvas id="canvas" tabindex="0" aria-label="Écran du jeu DOOM"></canvas></body></html>`;
+</style></head><body><canvas id="canvas" tabindex="0" aria-label="${t('frameCanvasLabel')}"></canvas></body></html>`;
 
 /** Ce que le moteur Emscripten lit et écrit sur l'objet Module. */
 interface EmscriptenModule {
@@ -71,10 +74,10 @@ function isExitNoise(error: unknown): boolean {
 class DoomSession {
   private readonly root = el('div', 'bapp-doom');
   private readonly stage = el('div', 'bapp-doom-stage');
-  private readonly fullscreenBtn = el('button', 'bapp-doom-btn', 'Plein écran');
+  private readonly fullscreenBtn = el('button', 'bapp-doom-btn', t('fullscreen'));
   private readonly soundBtn = el('button', 'bapp-doom-btn');
-  private readonly aboutBtn = el('button', 'bapp-doom-btn', 'À propos');
-  private readonly closeBtn = el('button', 'bapp-doom-btn', 'Fermer');
+  private readonly aboutBtn = el('button', 'bapp-doom-btn', t('about'));
+  private readonly closeBtn = el('button', 'bapp-doom-btn', t('close'));
   private readonly hint = el('button', 'bapp-doom-hint');
   /** Retire tous les écouteurs (page et iframe) d'un coup. */
   private readonly listeners = new AbortController();
@@ -104,7 +107,7 @@ class DoomSession {
     this.ctx.setTitle('DOOM.EXE');
     const strip = el('div', 'bapp-doom-strip');
     strip.setAttribute('role', 'toolbar');
-    strip.setAttribute('aria-label', 'Commandes de DOOM');
+    strip.setAttribute('aria-label', t('controls'));
     for (const button of [this.fullscreenBtn, this.soundBtn, this.aboutBtn, this.closeBtn]) button.type = 'button';
     this.fullscreenBtn.disabled = true;
     this.updateSoundButton();
@@ -119,8 +122,8 @@ class DoomSession {
     this.aboutBtn.addEventListener('click', () => this.toggleAbout(), { signal });
     this.hint.type = 'button';
     this.hint.append(
-      el('span', 'bapp-doom-hint-main', 'Cliquez pour jouer — Échap : menu du jeu'),
-      el('span', 'bapp-doom-hint-sub', 'Flèches : se déplacer · Ctrl : tirer · Espace : ouvrir · Alt+Q : rendre le clavier'),
+      el('span', 'bapp-doom-hint-main', t('hintMain')),
+      el('span', 'bapp-doom-hint-sub', t('hintSub')),
     );
     this.hint.addEventListener('click', () => this.focusGame(), { signal });
 
@@ -148,7 +151,7 @@ class DoomSession {
   // ---------- Chargement ----------
 
   private async load(): Promise<void> {
-    if (typeof WebAssembly === 'undefined') throw new Error('WebAssembly indisponible dans ce navigateur.');
+    if (typeof WebAssembly === 'undefined') throw new Error(t('wasmUnavailable'));
     const urls = buildDoomUrls(this.ctx.config.doomBaseUrl, document.baseURI);
     const progress = this.showProgress();
     const parts: Partial<Record<DoomFile, PartProgress>> = {};
@@ -170,13 +173,13 @@ class DoomSession {
 
   private showProgress(): (percent: number) => void {
     const box = el('div', 'bapp-doom-loading');
-    const label = el('p', 'bapp-doom-loading-label', 'Chargement de DOOM…');
+    const label = el('p', 'bapp-doom-loading-label', t('loading'));
     label.id = `bapp-doom-label-${++labelCounter}`;
     const bar = el('progress', 'bapp-doom-progress');
     bar.max = 100;
     bar.value = 0;
     bar.setAttribute('aria-labelledby', label.id);
-    const value = el('p', 'bapp-doom-loading-value', '0 %');
+    const value = el('p', 'bapp-doom-loading-value', t('percent', { n: 0 }));
     box.append(label, bar, value);
     this.stage.replaceChildren(box);
     let last = -1;
@@ -184,7 +187,7 @@ class DoomSession {
       if (percent === last || this.disposed) return;
       last = percent;
       bar.value = percent;
-      value.textContent = `${percent} %`;
+      value.textContent = t('percent', { n: percent });
     };
   }
 
@@ -195,7 +198,7 @@ class DoomSession {
     iframe.title = 'DOOM';
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     iframe.setAttribute('allow', 'autoplay; fullscreen');
-    iframe.srcdoc = FRAME_HTML;
+    iframe.srcdoc = frameHtml();
     const loaded = new Promise<void>((resolve) => iframe.addEventListener('load', () => resolve(), { once: true }));
     this.stage.replaceChildren(iframe, this.hint);
     this.iframe = iframe;
@@ -204,7 +207,7 @@ class DoomSession {
 
     const win = iframe.contentWindow as FrameWindow | null;
     const canvas = win?.document.getElementById('canvas');
-    if (!win || !(canvas instanceof win.HTMLCanvasElement)) throw new Error('Iframe du jeu inaccessible.');
+    if (!win || !(canvas instanceof win.HTMLCanvasElement)) throw new Error(t('frameUnreachable'));
     this.frameWin = win;
     this.canvas = canvas;
     this.wireFrame(win, canvas);
@@ -215,7 +218,7 @@ class DoomSession {
       preRun: [
         () => {
           const fs = engine.FS;
-          if (!fs) throw new Error('Système de fichiers du moteur absent.');
+          if (!fs) throw new Error(t('fsMissing'));
           fs.writeFile(`/${DOOM_FILES.wad}`, wad);
           fs.writeFile('/default.cfg', DEFAULT_CFG);
         },
@@ -239,9 +242,9 @@ class DoomSession {
       onExit: (code) => {
         if (this.disposed) return;
         if (code === 0) this.ctx.close();
-        else this.fail(new Error(`Le moteur s’est arrêté (code ${code}).`));
+        else this.fail(new Error(t('engineStopped', { code })));
       },
-      onAbort: (what) => this.fail(what instanceof Error ? what : new Error(`Arrêt du moteur : ${formatError(what)}`)),
+      onAbort: (what) => this.fail(what instanceof Error ? what : new Error(t('engineAborted', { detail: formatError(what) }))),
       print: (text) => this.remember(text),
       printErr: (text) => this.remember(text),
       setStatus: () => {},
@@ -379,8 +382,8 @@ class DoomSession {
   }
 
   private updateSoundButton(): void {
-    this.soundBtn.textContent = this.muted ? 'Son : non' : 'Son : oui';
-    this.soundBtn.setAttribute('aria-label', this.muted ? 'Son coupé : activer le son' : 'Son actif : couper le son');
+    this.soundBtn.textContent = this.muted ? t('soundOff') : t('soundOn');
+    this.soundBtn.setAttribute('aria-label', this.muted ? t('soundOffLabel') : t('soundOnLabel'));
   }
 
   private toggleFullscreen(): void {
@@ -393,12 +396,12 @@ class DoomSession {
     if (typeof iframe.requestFullscreen !== 'function') return;
     iframe.requestFullscreen().then(
       () => this.focusGame(),
-      () => this.remember('Plein écran refusé par le navigateur.'),
+      () => this.remember(t('fullscreenDenied')),
     );
   }
 
   private onFullscreenChange(): void {
-    this.fullscreenBtn.textContent = document.fullscreenElement === this.iframe ? 'Quitter le plein écran' : 'Plein écran';
+    this.fullscreenBtn.textContent = document.fullscreenElement === this.iframe ? t('exitFullscreen') : t('fullscreen');
     this.updateHint();
   }
 
@@ -413,17 +416,17 @@ class DoomSession {
     if (this.disposed || this.failed) return;
     if (error instanceof DOMException && error.name === 'AbortError') return;
     this.failed = true;
-    const technical = [formatError(error), ...(this.log.length ? ['', 'Derniers messages du moteur :', ...this.log] : [])].join('\n');
+    const technical = [formatError(error), ...(this.log.length ? ['', t('engineLog'), ...this.log] : [])].join('\n');
     this.teardownEngine();
     this.fullscreenBtn.disabled = true;
 
     const panel = el('div', 'bapp-doom-error');
     panel.setAttribute('role', 'alert');
-    const title = el('p', 'bapp-doom-error-title', 'DOOM.EXE a cessé de fonctionner');
+    const title = el('p', 'bapp-doom-error-title', t('crashTitle'));
     const reason = el('p', 'bapp-doom-error-text', describeError(error));
     const details = el('details', 'bapp-doom-error-details');
-    details.append(el('summary', undefined, 'Détails techniques'), el('pre', 'bapp-doom-error-pre', technical));
-    const close = el('button', 'bapp-doom-btn', 'Fermer');
+    details.append(el('summary', undefined, t('technicalDetails')), el('pre', 'bapp-doom-error-pre', technical));
+    const close = el('button', 'bapp-doom-btn', t('close'));
     close.type = 'button';
     close.addEventListener('click', () => this.ctx.close(), { signal: this.listeners.signal });
     panel.append(title, reason, details, close);
@@ -474,7 +477,7 @@ export function mount(el: HTMLElement, ctx: AppContext): void {
     session.start();
   } catch (error) {
     // start() ne devrait pas lever ; par prudence, rien ne remonte au bureau.
-    el.textContent = `DOOM.EXE a cessé de fonctionner : ${formatError(error)}`;
+    el.textContent = t('crashInline', { detail: formatError(error) });
   }
 }
 

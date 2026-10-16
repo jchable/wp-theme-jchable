@@ -1,4 +1,5 @@
 import type { AppContext } from '../../core/types';
+import { t } from './i18n';
 import { sanitizePageHtml } from './sanitize';
 import './style.css';
 
@@ -40,7 +41,7 @@ export function mount(el: HTMLElement, ctx: AppContext): void {
   const link = document.createElement('a');
   const target = typeof page.link === 'string' ? page.link : '';
   link.href = /^https?:\/\//.test(target) ? target : `${ctx.config.homeUrl}${encodeURIComponent(slug)}/`;
-  link.textContent = 'Ouvrir la page ↗';
+  link.textContent = t('openPage');
   footer.append(link);
 
   article.append(title, content, footer);

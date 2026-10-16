@@ -1,3 +1,4 @@
+import type { LangPref } from './i18n';
 import type { AppStorage } from './types';
 
 /** Clé du localStorage. Une nouvelle version du format repart des valeurs par défaut. */
@@ -20,6 +21,8 @@ export interface Prefs {
   windows: Record<string, WinPos>;
   sound: boolean;
   screensaver: boolean;
+  /** Langue de l'interface : « auto » suit le navigateur. */
+  lang: LangPref;
   seen: Record<string, string | boolean>;
 }
 
@@ -29,6 +32,7 @@ export const DEFAULT_PREFS: Prefs = {
   windows: {},
   sound: true,
   screensaver: true,
+  lang: 'auto',
   seen: {},
 };
 
@@ -91,6 +95,7 @@ export function sanitizePrefs(raw: unknown): Prefs {
     windows: cleanWindows(raw['windows']),
     sound: typeof raw['sound'] === 'boolean' ? raw['sound'] : DEFAULT_PREFS.sound,
     screensaver: typeof raw['screensaver'] === 'boolean' ? raw['screensaver'] : DEFAULT_PREFS.screensaver,
+    lang: raw['lang'] === 'fr' || raw['lang'] === 'en' ? raw['lang'] : 'auto',
     seen: cleanSeen(raw['seen']),
   };
 }

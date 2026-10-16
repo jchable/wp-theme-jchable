@@ -1,4 +1,6 @@
 import type { AppContext } from '../../core/types';
+import { getLang } from '../../core/i18n';
+import { t, type MessageKey } from './i18n';
 import { decodeEntities, formatDate, formatDateTime, parseCommand } from './logic';
 
 export const PROMPT = 'C:\\Blog>';
@@ -24,38 +26,24 @@ interface Post {
   link: string;
 }
 
-const NETWORK_ERROR = 'Impossible de joindre le serveur.';
-
-const HELP_LINES = [
-  'Commandes disponibles :',
-  '  help          cette liste',
-  '  ls            les 10 derniers articles',
-  '  cat <slug>    ouvre un article',
-  '  cd archives   le plan du site',
-  '  whoami        qui êtes-vous ?',
-  '  date          la date et l\'heure',
-  '  clear         efface l\'écran',
-  '  doom          lance DOOM',
-  '  wordpad       ouvre le WordPad',
-  '  exit          ferme le terminal',
+const HELP_KEYS: readonly MessageKey[] = [
+  'helpTitle',
+  'helpHelp',
+  'helpLs',
+  'helpCat',
+  'helpCd',
+  'helpWhoami',
+  'helpDate',
+  'helpClear',
+  'helpDoom',
+  'helpWordpad',
+  'helpExit',
 ];
 
-const GAGS: ReadonlyArray<{ match: string; line: string; bsod: string }> = [
-  {
-    match: 'sudo rm -rf /',
-    line: 'Suppression de / en cours... Vous n\'avez pas les droits, mais Windows s\'en moque.',
-    bsod: 'Vous avez essayé sudo sur un système qui ne connaît pas sudo. Le système a préféré s\'arrêter pour réfléchir à ses choix.',
-  },
-  {
-    match: 'rm -rf /',
-    line: 'Suppression de tous les fichiers... 1%... 2%... Oh non.',
-    bsod: 'Tous vos fichiers ont été supprimés. Même ceux de vos voisins. Veuillez redémarrer et faire comme si de rien n\'était.',
-  },
-  {
-    match: 'format c:',
-    line: 'ATTENTION : toutes les données du lecteur C: seront perdues. Formatage...',
-    bsod: 'Le lecteur C: a été formaté. Le blog va très bien, merci. Appuyez sur une touche pour faire semblant de continuer.',
-  },
+const GAGS: ReadonlyArray<{ match: string; line: MessageKey; bsod: MessageKey }> = [
+  { match: 'sudo rm -rf /', line: 'gagSudoLine', bsod: 'gagSudoBsod' },
+  { match: 'rm -rf /', line: 'gagRmLine', bsod: 'gagRmBsod' },
+  { match: 'format c:', line: 'gagFormatLine', bsod: 'gagFormatBsod' },
 ];
 
 const isHttpUrl = (value: unknown): value is string => typeof value === 'string' && /^https?:\/\//i.test(value);
@@ -99,18 +87,18 @@ export function createRunner(ctx: AppContext, deps: RunnerDeps): Runner {
     try {
       list = toPosts(await ctx.fetchJson<unknown>(api('wp/v2/posts?per_page=10&_fields=slug,title,date,link')));
     } catch {
-      print(NETWORK_ERROR);
+      print(t('networkError'));
       return;
     }
     posts.splice(0, posts.length, ...list);
-    if (list.length === 0) print('Le répertoire est vide.');
+    if (list.length === 0) print(t('emptyDir'));
     for (const p of list) print(`${formatDate(p.date)}  ${p.slug}.md`);
   }
 
   async function cat(args: string[]): Promise<void> {
     const wanted = args.join(' ').replace(/\.md$/i, '');
     if (wanted === '') {
-      print('Syntaxe : cat <article>');
+      print(t('catSyntax'));
       return;
     }
     let url = posts.find((p) => p.slug === wanted)?.link;
@@ -121,12 +109,12 @@ export function createRunner(ctx: AppContext, deps: RunnerDeps): Runner {
         const link = (first as { link?: unknown } | undefined)?.link;
         url = typeof link === 'string' ? link : undefined;
       } catch {
-        print(NETWORK_ERROR);
+        print(t('networkError'));
         return;
       }
     }
     if (!isHttpUrl(url)) {
-      print(`Fichier introuvable : ${wanted}`);
+      print(t('fileNotFound', { name: wanted }));
       return;
     }
     navigate(url);
@@ -135,15 +123,15 @@ export function createRunner(ctx: AppContext, deps: RunnerDeps): Runner {
   function gag(normalized: string): boolean {
     const g = GAGS.find((x) => x.match === normalized);
     if (!g) return false;
-    print(g.line);
-    ctx.openBsod(g.bsod);
+    print(t(g.line));
+    ctx.openBsod(t(g.bsod));
     return true;
   }
 
   return {
     welcome() {
-      print(`${ctx.config.siteName} [version 1.0]`);
-      print('Tapez help pour la liste des commandes.');
+      print(t('welcomeVersion', { site: ctx.config.siteName }));
+      print(t('welcomeHint'));
       print('');
     },
 
@@ -153,7 +141,7 @@ export function createRunner(ctx: AppContext, deps: RunnerDeps): Runner {
       if (gag([cmd.name, ...cmd.args].join(' ').toLowerCase())) return;
       switch (cmd.name) {
         case 'help':
-          HELP_LINES.forEach(print);
+          HELP_KEYS.forEach((key) => print(t(key)));
           return;
         case 'ls':
           await ls();
@@ -163,13 +151,13 @@ export function createRunner(ctx: AppContext, deps: RunnerDeps): Runner {
           return;
         case 'cd':
           if (cmd.args[0]?.toLowerCase().replace(/[\\/]$/, '') === 'archives') navigate(ctx.config.sitemapUrl);
-          else print("Le chemin d'accès spécifié est introuvable.");
+          else print(t('pathNotFound'));
           return;
         case 'whoami':
-          print(`visiteur@${hostOf(ctx.config.homeUrl)}`);
+          print(t('whoami', { host: hostOf(ctx.config.homeUrl) }));
           return;
         case 'date':
-          print(formatDateTime(now(), ctx.config.locale));
+          print(formatDateTime(now(), getLang() === 'en' ? 'en-GB' : 'fr-FR'));
           return;
         case 'clear':
           deps.clear();
@@ -184,7 +172,7 @@ export function createRunner(ctx: AppContext, deps: RunnerDeps): Runner {
           ctx.close();
           return;
         default:
-          print(`'${cmd.name}' n'est pas reconnu en tant que commande interne ou externe. Tapez help.`);
+          print(t('unknownCommand', { name: cmd.name }));
       }
     },
   };

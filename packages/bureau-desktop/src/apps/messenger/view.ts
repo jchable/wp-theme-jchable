@@ -1,4 +1,5 @@
 import type { AppContext } from '../../core/types';
+import { t } from './i18n';
 import { countNew, formatRelative, maxId, parseComments, replyUrl, type Message } from './logic';
 
 export interface MessengerDeps {
@@ -55,7 +56,7 @@ export function createMessenger(el: HTMLElement, ctx: AppContext, deps: Messenge
   const root = h('div', 'bapp-messenger');
   const header = h('div', 'bapp-messenger-header');
   const titles = h('div', 'bapp-messenger-titles');
-  titles.append(h('div', 'bapp-messenger-name', TITLE), h('div', 'bapp-messenger-status', 'En ligne'));
+  titles.append(h('div', 'bapp-messenger-name', TITLE), h('div', 'bapp-messenger-status', t('online')));
   header.append(buildIcon(), titles);
   const body = h('div', 'bapp-messenger-body');
   root.append(header, body);
@@ -64,22 +65,22 @@ export function createMessenger(el: HTMLElement, ctx: AppContext, deps: Messenge
   const url = `${ctx.config.restUrl}wp/v2/comments?per_page=10&status=approve&_fields=id,author_name,date_gmt,content,link,post&order=desc`;
 
   function showLoading(): void {
-    const p = h('p', 'bapp-messenger-state', 'Connexion…');
+    const p = h('p', 'bapp-messenger-state', t('connecting'));
     p.setAttribute('role', 'status');
     body.replaceChildren(p);
   }
 
   function showEmpty(): void {
-    body.replaceChildren(h('p', 'bapp-messenger-state', 'Aucun message pour le moment. Soyez le premier à commenter !'));
+    body.replaceChildren(h('p', 'bapp-messenger-state', t('empty')));
   }
 
   function showError(): void {
     const box = h('div', 'bapp-messenger-state bapp-messenger-error');
     box.setAttribute('role', 'alert');
-    const retry = h('button', 'bapp-messenger-retry', 'Réessayer');
+    const retry = h('button', 'bapp-messenger-retry', t('retry'));
     retry.type = 'button';
     retry.addEventListener('click', () => void load());
-    box.append(h('p', undefined, 'Impossible de joindre le serveur.'), retry);
+    box.append(h('p', undefined, t('unreachable')), retry);
     body.replaceChildren(box);
   }
 
@@ -88,13 +89,13 @@ export function createMessenger(el: HTMLElement, ctx: AppContext, deps: Messenge
     const meta = h('div', 'bapp-messenger-meta');
     meta.append(h('span', 'bapp-messenger-author', m.author));
     if (m.date) meta.append(h('time', 'bapp-messenger-date', formatRelative(m.date, now, ctx.config.locale)));
-    if (isNew) meta.append(h('span', 'bapp-messenger-new', 'nouveau'));
+    if (isNew) meta.append(h('span', 'bapp-messenger-new', t('newBadge')));
     li.append(meta, h('p', 'bapp-messenger-text', m.text));
     const target = replyUrl(m.link);
     if (target) {
-      const reply = h('button', 'bapp-messenger-reply', 'Répondre');
+      const reply = h('button', 'bapp-messenger-reply', t('reply'));
       reply.type = 'button';
-      reply.setAttribute('aria-label', `Répondre à ${m.author}`);
+      reply.setAttribute('aria-label', t('replyTo', { author: m.author }));
       reply.addEventListener('click', () => deps.navigate(target));
       li.append(reply);
     }
@@ -107,7 +108,7 @@ export function createMessenger(el: HTMLElement, ctx: AppContext, deps: Messenge
     const log = h('div', 'bapp-messenger-log');
     log.setAttribute('role', 'log');
     log.setAttribute('aria-live', 'polite');
-    log.setAttribute('aria-label', 'Conversation');
+    log.setAttribute('aria-label', t('conversation'));
     log.tabIndex = 0;
     for (const m of messages) log.append(bubble(m, m.id > seenNum, now));
     body.replaceChildren(log);

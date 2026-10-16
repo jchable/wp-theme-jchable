@@ -452,6 +452,21 @@ html:not(.bureau-desktop-on) .bwin-handle {
 	background: currentcolor;
 }
 
+.bmenu [role="menuitemradio"]::before {
+	content: "";
+	display: inline-block;
+	width: 0.75rem;
+	height: 0.75rem;
+	margin-right: 0.5rem;
+	border: 2px solid currentcolor;
+	border-radius: 50%;
+	vertical-align: -1px;
+}
+
+.bmenu [role="menuitemradio"][aria-checked="true"]::before {
+	background: currentcolor;
+}
+
 /* ---------- Écrans plein écran ---------- */
 
 .bbsod,

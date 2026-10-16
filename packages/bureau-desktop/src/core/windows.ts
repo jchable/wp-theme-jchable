@@ -1,6 +1,7 @@
 import { createAppStorage } from './prefs';
 import type { PrefsApi } from './prefs';
 import { findApp } from './registry';
+import { t } from './ui-i18n';
 import type { AppContext, AppModule, BureauApp, BureauConfig, SoundName } from './types';
 import { WindowStack, clampPosition, fitBox } from './windowStack';
 
@@ -241,9 +242,9 @@ export class WindowManager {
     const controls = document.createElement('span');
     controls.className = 'bwin-controls';
     for (const [action, label, glyph] of [
-      ['minimize', 'Réduire', '_'],
-      ['maximize', 'Agrandir', '□'],
-      ['close', 'Fermer', '×'],
+      ['minimize', t('win.minimize'), '_'],
+      ['maximize', t('win.maximize'), '□'],
+      ['close', t('win.close'), '×'],
     ] as const) {
       const button = document.createElement('button');
       button.type = 'button';
@@ -260,7 +261,7 @@ export class WindowManager {
 
     const body = document.createElement('div');
     body.className = 'bwin-body';
-    body.textContent = 'Chargement…';
+    body.textContent = t('win.loading');
     el.append(titlebar, body);
 
     const win: OpenWindow = {
@@ -369,7 +370,7 @@ export class WindowManager {
       playSound: (name) => this.options.playSound(name),
       fetchJson: async <T>(url: string): Promise<T> => {
         const target = new URL(url, location.href);
-        if (target.origin !== location.origin) throw new Error('Adresse refusée : hors du site');
+        if (target.origin !== location.origin) throw new Error(t('win.offsite'));
         const response = await fetch(target, { headers: { Accept: 'application/json' } });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return (await response.json()) as T;
@@ -380,7 +381,7 @@ export class WindowManager {
   private async mountApp(win: OpenWindow, args: Record<string, unknown>): Promise<void> {
     const { app, body } = win;
     if (this.options.isMobile() && app.mobile === 'unsupported') {
-      this.showMessage(win, app.unsupportedMessage ?? 'Cette application n’est pas disponible sur petit écran.');
+      this.showMessage(win, app.unsupportedMessage ?? t('win.unsupported'));
       return;
     }
     try {
@@ -408,16 +409,16 @@ export class WindowManager {
     box.className = 'bwin-error';
     const title = document.createElement('p');
     title.className = 'bwin-error-title';
-    title.textContent = `${win.app.title} a cessé de fonctionner.`;
+    title.textContent = t('win.crashed', { title: win.app.title });
     const details = document.createElement('details');
     const summary = document.createElement('summary');
-    summary.textContent = 'Détails techniques';
+    summary.textContent = t('win.details');
     const pre = document.createElement('pre');
     pre.textContent = error instanceof Error ? error.message : String(error);
     details.append(summary, pre);
     const close = document.createElement('button');
     close.type = 'button';
-    close.textContent = 'Fermer';
+    close.textContent = t('win.close');
     close.addEventListener('click', () => this.close(win.app.id));
     box.append(title, details, close);
     win.body.replaceChildren(box);

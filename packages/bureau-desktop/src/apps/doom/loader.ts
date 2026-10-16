@@ -4,6 +4,8 @@
  */
 
 /** Fichiers servis par `doomBaseUrl` (voir themes/jchable-bureau/assets/doom/README.md). */
+import { t } from './i18n';
+
 export const DOOM_FILES = {
   engineJs: 'websockets-doom.js',
   engineWasm: 'websockets-doom.wasm',
@@ -30,15 +32,15 @@ export type DoomUrls = Readonly<Record<DoomFile, string>>;
  */
 export function buildDoomUrls(baseUrl: string, documentBase?: string): DoomUrls {
   const raw = baseUrl.trim();
-  if (raw === '') throw new Error('Adresse du dossier DOOM absente (doomBaseUrl).');
+  if (raw === '') throw new Error(t('urlMissing'));
   let base: URL;
   try {
     base = documentBase === undefined ? new URL(raw) : new URL(raw, documentBase);
   } catch {
-    throw new Error(`Adresse du dossier DOOM invalide : ${raw}`);
+    throw new Error(t('urlInvalid', { url: raw }));
   }
   if (base.protocol !== 'http:' && base.protocol !== 'https:') {
-    throw new Error(`Protocole refusé pour le dossier DOOM : ${base.protocol}`);
+    throw new Error(t('protocolRefused', { protocol: base.protocol }));
   }
   base.search = '';
   base.hash = '';
@@ -95,7 +97,7 @@ export class HttpError extends Error {
     readonly url: string,
     readonly status: number,
   ) {
-    super(`HTTP ${status} pour ${url}`);
+    super(t('httpError', { status, url }));
     this.name = 'HttpError';
   }
 }
@@ -237,11 +239,11 @@ export function formatError(error: unknown): string {
   let current: unknown = error;
   for (let depth = 0; depth < 4 && current !== undefined && current !== null; depth++) {
     if (current instanceof Error) {
-      const name = current.name && current.name !== 'Error' ? `${current.name} : ` : '';
-      lines.push(`${name}${current.message || '(sans message)'}`);
+      const message = current.message || t('noMessage');
+      lines.push(current.name && current.name !== 'Error' ? t('namedError', { name: current.name, message }) : message);
       current = (current as Error & { cause?: unknown }).cause;
     } else if (typeof current === 'string') {
-      lines.push(current || '(sans message)');
+      lines.push(current || t('noMessage'));
       current = undefined;
     } else {
       let text: string;
@@ -254,22 +256,22 @@ export function formatError(error: unknown): string {
       current = undefined;
     }
   }
-  if (lines.length === 0) lines.push('Erreur inconnue');
-  return lines.map((line, i) => (i === 0 ? line : `Cause : ${line}`)).join('\n');
+  if (lines.length === 0) lines.push(t('unknownError'));
+  return lines.map((line, i) => (i === 0 ? line : t('cause', { text: line }))).join('\n');
 }
 
 /** Message court et compréhensible, selon le type d'erreur. */
 export function describeError(error: unknown): string {
   if (error instanceof HttpError) {
     return error.status === 404
-      ? 'Un fichier du jeu est introuvable sur le serveur.'
-      : 'Le serveur a refusé de fournir les fichiers du jeu.';
+      ? t('errNotFound')
+      : t('errRefused');
   }
   if (error instanceof TypeError && /fetch|network|réseau/i.test(error.message)) {
-    return 'Les fichiers du jeu n’ont pas pu être téléchargés (réseau).';
+    return t('errNetwork');
   }
-  if (typeof WebAssembly === 'undefined') return 'Ce navigateur ne sait pas exécuter WebAssembly.';
-  return 'Le moteur du jeu s’est arrêté de façon inattendue.';
+  if (typeof WebAssembly === 'undefined') return t('errNoWasm');
+  return t('errUnexpected');
 }
 
 /**

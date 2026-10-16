@@ -1,6 +1,7 @@
 import { BAND_PAD_X, BAND_TOP, CELL_SIZE, bandLayout, cellKey, cellToPoint, clampCell, layoutIcons, nearestFreeCell, pointToCell } from '../core/grid';
 import type { Cell } from '../core/grid';
 import type { PrefsApi } from '../core/prefs';
+import { t } from '../core/ui-i18n';
 
 export interface IconItem {
   id: string;
@@ -137,7 +138,7 @@ export class DesktopIcons {
     const hint = document.createElement('div');
     hint.className = 'bicon-hint';
     hint.setAttribute('role', 'status');
-    hint.textContent = 'Double-cliquez pour ouvrir';
+    hint.textContent = t('icons.hint');
     hint.style.left = `${button.offsetLeft}px`;
     hint.style.top = `${button.offsetTop + button.offsetHeight + 4}px`;
     host.append(hint);

@@ -1,15 +1,18 @@
 import { focusAnchor } from './anchor';
+import { getLang, resolveLang, setLang } from './i18n';
 import { hasReadableContent, slugOf } from './pages';
 import { LISTED_APPS, pageApp } from './registry';
 import { readConfig } from './config';
 import { createPrefs } from './prefs';
 import { createSound } from './sound';
+import { t } from './ui-i18n';
 import { WindowManager } from './windows';
 import { showContextMenu } from '../ui/contextMenu';
 import { DesktopIcons } from '../ui/desktopIcons';
 import type { IconItem } from '../ui/desktopIcons';
 import { showBsod, showShutdown } from '../ui/overlays';
 import { SidebarWindows } from '../ui/sidebarWindows';
+import { chromeLabel, translateChrome } from '../ui/chrome';
 import { readMenuIcons } from '../ui/menuIcons';
 import { IdleWatcher, createScreensaver, isScreensaverEligiblePage } from '../ui/screensaver';
 import { StartMenu } from '../ui/startMenu';
@@ -30,11 +33,18 @@ function safeStorage(): Storage | null {
 export function bootstrap(): void {
   const root = document.documentElement;
   root.classList.add('bureau-js');
+
+  const storage = safeStorage();
+  const prefs = createPrefs(storage);
+
+  // Langue de l'interface : le choix du visiteur, sinon celle de son navigateur (français ou anglais).
+  setLang(resolveLang(prefs.get().lang, navigator.languages?.length ? navigator.languages : [navigator.language]));
+  root.dataset['bureauLang'] = getLang();
+  translateChrome(document);
+
   if (document.querySelector('.bsod')) return; // la page 404 est un écran bleu, pas un bureau
 
   const config = readConfig();
-  const storage = safeStorage();
-  const prefs = createPrefs(storage);
   const sound = createSound(() => prefs.get().sound);
   const mq = window.matchMedia(DESKTOP_QUERY);
   const leftInset = (): number => parseFloat(getComputedStyle(root).getPropertyValue('--bureau-band')) || 0;
@@ -67,7 +77,7 @@ export function bootstrap(): void {
   const desktopHost = document.createElement('div');
   desktopHost.id = 'bureau-desktop';
   desktopHost.setAttribute('role', 'group');
-  desktopHost.setAttribute('aria-label', 'Icônes du bureau');
+  desktopHost.setAttribute('aria-label', t('icons.group'));
   // Placé après le contenu : la première tabulation tombe sur le lien d'évitement, pas sur les icônes.
   const siteBlocks = document.querySelector('.wp-site-blocks');
   if (siteBlocks) siteBlocks.after(desktopHost);
@@ -75,7 +85,7 @@ export function bootstrap(): void {
 
   const sidebar = new SidebarWindows(prefs, document, leftInset);
   const items: IconItem[] = [
-    ...readMenuIcons(document, config.assetsUrl, config.feedUrl),
+    ...readMenuIcons(document, config.assetsUrl, config.feedUrl).map((item) => ({ ...item, label: chromeLabel(item.label) })),
     ...LISTED_APPS.map(
       (app): IconItem => ({
         id: `app:${app.id}`,
@@ -125,8 +135,8 @@ export function bootstrap(): void {
     onAnchor: focusAnchor,
     onContextMenu: (x, y) =>
       showContextMenu(x, y, [
-        { label: 'Réorganiser les icônes', action: () => resetAll() },
-        { label: 'Propriétés', action: () => manager.open('properties') },
+        { label: t('menu.reset'), action: () => resetAll() },
+        { label: t('menu.properties'), action: () => manager.open('properties') },
       ]),
   });
 
@@ -164,9 +174,15 @@ export function bootstrap(): void {
         openApp: launch,
         links: [
           ...items.filter((item) => item.kind === 'link' && item.href && item.href !== config.feedUrl).map((item) => ({ label: item.label, href: item.href as string })),
-          { label: 'Flux RSS', href: config.feedUrl },
+          { label: t('menu.rss'), href: config.feedUrl },
         ],
         openPage: (href) => void openPage(href),
+        setLanguage: (lang) => {
+          prefs.update((p) => {
+            p.lang = lang;
+          });
+          location.reload();
+        },
         resetIcons: () => resetAll(),
         startScreensaver: () => saver.start(),
         shutdown: () => showShutdown(),

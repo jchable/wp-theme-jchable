@@ -1,6 +1,8 @@
+import { getLang } from '../../core/i18n';
 import type { AppContext } from '../../core/types';
 import * as commands from './commands';
 import { initialDocumentHtml } from './document';
+import { t } from './i18n';
 import { sanitizeHtml } from './sanitize';
 import { buildHtmlDocument, htmlToText, makeFileName } from './text';
 import './style.css';
@@ -8,7 +10,6 @@ import './style.css';
 const DRAFT_KEY = 'draft';
 const DRAFT_DELAY_MS = 500;
 const REVOKE_DELAY_MS = 1000;
-const UNTITLED = 'Sans titre';
 const APP_NAME = 'WordPad';
 
 const FONTS: readonly { label: string; value: string }[] = [
@@ -17,11 +18,11 @@ const FONTS: readonly { label: string; value: string }[] = [
   { label: 'Serif', value: 'serif' },
 ];
 
-const SIZES: readonly { label: string; value: string; px: number }[] = [
-  { label: 'Petite', value: 'small', px: 12 },
-  { label: 'Normale', value: 'normal', px: 16 },
-  { label: 'Grande', value: 'large', px: 22 },
-  { label: 'Très grande', value: 'x-large', px: 32 },
+const SIZES: readonly { label: () => string; value: string; px: number }[] = [
+  { label: () => t('sizeSmall'), value: 'small', px: 12 },
+  { label: () => t('sizeNormal'), value: 'normal', px: 16 },
+  { label: () => t('sizeLarge'), value: 'large', px: 22 },
+  { label: () => t('sizeXLarge'), value: 'x-large', px: 32 },
 ];
 
 type Format = 'html' | 'txt';
@@ -54,11 +55,11 @@ function createWordPad(root: HTMLElement, ctx: AppContext): Instance {
   };
 
   const setWindowTitle = (name: string): void => ctx.setTitle(`${name} - ${APP_NAME}`);
-  setWindowTitle(UNTITLED);
+  setWindowTitle(t('untitled'));
 
   // --- Construction de l'interface ---------------------------------------------------------
   const wrapper = el('div', 'bapp-wordpad');
-  const toolbar = el('div', 'bapp-wordpad-toolbar', { role: 'toolbar', 'aria-label': 'Mise en forme' });
+  const toolbar = el('div', 'bapp-wordpad-toolbar', { role: 'toolbar', 'aria-label': t('toolbarLabel') });
 
   const makeButton = (label: string, text: string, extraClass = '', toggle = false): HTMLButtonElement => {
     const b = el('button', `bapp-wordpad-btn ${extraClass}`.trim(), { type: 'button', 'aria-label': label, title: label }, text);
@@ -69,21 +70,21 @@ function createWordPad(root: HTMLElement, ctx: AppContext): Instance {
   };
   const separator = (): HTMLElement => el('span', 'bapp-wordpad-sep', { role: 'separator', 'aria-orientation': 'vertical' });
 
-  const newBtn = makeButton('Nouveau', 'Nouveau');
-  const saveBtn = makeButton('Enregistrer sous…', 'Enregistrer sous…');
-  const boldBtn = makeButton('Gras', 'G', 'bapp-wordpad-btn-bold', true);
-  const italicBtn = makeButton('Italique', 'I', 'bapp-wordpad-btn-italic', true);
-  const underlineBtn = makeButton('Souligné', 'S', 'bapp-wordpad-btn-underline', true);
-  const leftBtn = makeButton('Aligner à gauche', 'Gauche', '', true);
-  const centerBtn = makeButton('Centrer', 'Centre', '', true);
-  const rightBtn = makeButton('Aligner à droite', 'Droite', '', true);
+  const newBtn = makeButton(t('new'), t('new'));
+  const saveBtn = makeButton(t('saveAs'), t('saveAs'));
+  const boldBtn = makeButton(t('bold'), t('boldShort'), 'bapp-wordpad-btn-bold', true);
+  const italicBtn = makeButton(t('italic'), t('italicShort'), 'bapp-wordpad-btn-italic', true);
+  const underlineBtn = makeButton(t('underline'), t('underlineShort'), 'bapp-wordpad-btn-underline', true);
+  const leftBtn = makeButton(t('alignLeft'), t('alignLeftShort'), '', true);
+  const centerBtn = makeButton(t('alignCenter'), t('alignCenterShort'), '', true);
+  const rightBtn = makeButton(t('alignRight'), t('alignRightShort'), '', true);
 
-  const fontSelect = el('select', 'bapp-wordpad-select', { 'aria-label': 'Police' });
+  const fontSelect = el('select', 'bapp-wordpad-select', { 'aria-label': t('font') });
   for (const f of FONTS) fontSelect.append(new Option(f.label, f.value));
-  const sizeSelect = el('select', 'bapp-wordpad-select', { 'aria-label': 'Taille' });
-  for (const s of SIZES) sizeSelect.append(new Option(s.label, s.value));
+  const sizeSelect = el('select', 'bapp-wordpad-select', { 'aria-label': t('size') });
+  for (const s of SIZES) sizeSelect.append(new Option(s.label(), s.value));
   sizeSelect.value = 'normal';
-  const colorInput = el('input', 'bapp-wordpad-color', { type: 'color', 'aria-label': 'Couleur du texte', title: 'Couleur du texte', value: '#101010' });
+  const colorInput = el('input', 'bapp-wordpad-color', { type: 'color', 'aria-label': t('textColor'), title: t('textColor'), value: '#101010' });
 
   toolbar.append(
     newBtn, saveBtn, separator(),
@@ -93,27 +94,27 @@ function createWordPad(root: HTMLElement, ctx: AppContext): Instance {
   );
 
   // Formulaire « Enregistrer sous… » en ligne (pas de window.prompt).
-  const form = el('form', 'bapp-wordpad-saveform', { 'aria-label': 'Enregistrer sous…' });
+  const form = el('form', 'bapp-wordpad-saveform', { 'aria-label': t('saveAs') });
   form.hidden = true;
   const nameId = `${uid}-name`;
   const formatId = `${uid}-format`;
-  const nameLabel = el('label', 'bapp-wordpad-label', { for: nameId }, 'Nom du fichier');
+  const nameLabel = el('label', 'bapp-wordpad-label', { for: nameId }, t('fileName'));
   const nameInput = el('input', 'bapp-wordpad-input', { type: 'text', id: nameId, maxlength: '100', autocomplete: 'off' });
-  nameInput.value = 'document';
-  const formatLabel = el('label', 'bapp-wordpad-label', { for: formatId }, 'Format');
+  nameInput.value = t('defaultSaveName');
+  const formatLabel = el('label', 'bapp-wordpad-label', { for: formatId }, t('format'));
   const formatSelect = el('select', 'bapp-wordpad-select', { id: formatId });
-  formatSelect.append(new Option('Page web (.html)', 'html'), new Option('Texte brut (.txt)', 'txt'));
-  const submitBtn = el('button', 'bapp-wordpad-btn', { type: 'submit' }, 'Enregistrer');
-  const cancelBtn = el('button', 'bapp-wordpad-btn', { type: 'button' }, 'Annuler');
+  formatSelect.append(new Option(t('formatHtml'), 'html'), new Option(t('formatTxt'), 'txt'));
+  const submitBtn = el('button', 'bapp-wordpad-btn', { type: 'submit' }, t('save'));
+  const cancelBtn = el('button', 'bapp-wordpad-btn', { type: 'button' }, t('cancel'));
   form.append(nameLabel, nameInput, formatLabel, formatSelect, submitBtn, cancelBtn);
 
   const editor = el('div', 'bapp-wordpad-editor', {
     contenteditable: 'true',
     role: 'textbox',
     'aria-multiline': 'true',
-    'aria-label': 'Document',
+    'aria-label': t('document'),
     spellcheck: 'true',
-    lang: 'fr',
+    lang: getLang(),
   });
 
   wrapper.append(toolbar, form, editor);
@@ -203,7 +204,7 @@ function createWordPad(root: HTMLElement, ctx: AppContext): Instance {
     editor.innerHTML = '';
     savedRange = null;
     closeForm(false);
-    setWindowTitle(UNTITLED);
+    setWindowTitle(t('untitled'));
     if (draftTimer !== null) clearTimeout(draftTimer);
     saveDraft();
     editor.focus();

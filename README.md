@@ -52,9 +52,15 @@ docs/                       spec, plans et guide de déploiement
 
 Le site est en français. Pour un article écrit dans une autre langue, ajouter le champ personnalisé `jchable_lang` (par exemple `en`) : le contenu de l'article reçoit alors l'attribut `lang` correspondant.
 
+## Langue de l'interface (français / anglais)
+
+Les textes du thème et des applis existent en français et en anglais, sans plugin. La langue suit le navigateur du visiteur (français pour les navigateurs français, anglais pour tous les autres), et il peut la changer dans le menu Démarrer › Langue (Automatique, Français, English) ; son choix est mémorisé. Le contenu des articles et des pages n'est jamais traduit : il reste dans sa langue d'origine.
+
+Pour ajouter ou corriger un texte : chaque appli a son fichier `i18n.ts` (`src/apps/<appli>/i18n.ts`), le cœur du bureau `src/core/ui-i18n.ts`, et les textes écrits dans les gabarits PHP/HTML sont traduits par `src/ui/chrome.ts`. Un test vérifie que chaque texte existe dans les deux langues.
+
 ## Données du visiteur
 
-Le bureau mémorise, dans le **localStorage du navigateur du visiteur** (clé `jchable-bureau:v1`), la position des icônes et des fenêtres, l'activation du son et de l'écran de veille, et le brouillon du WordPad. Rien n'est envoyé au serveur. Si le stockage est bloqué, tout fonctionne en mémoire.
+Le bureau mémorise, dans le **localStorage du navigateur du visiteur** (clé `jchable-bureau:v1`), la position des icônes et des fenêtres, la langue, l'activation du son et de l'écran de veille, et le brouillon du WordPad. Rien n'est envoyé au serveur. Si le stockage est bloqué, tout fonctionne en mémoire.
 
 ## Installer sur le blog
 

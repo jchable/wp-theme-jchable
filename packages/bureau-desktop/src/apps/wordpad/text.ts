@@ -1,3 +1,5 @@
+import { getLang } from '../../core/i18n';
+
 /** Fonctions pures de texte pour le WordPad : échappement, export HTML/texte, nom de fichier. */
 
 export function escapeHtml(text: string): string {
@@ -13,7 +15,7 @@ export function escapeHtml(text: string): string {
 export function buildHtmlDocument(title: string, bodyHtml: string): string {
   return [
     '<!DOCTYPE html>',
-    '<html lang="fr">',
+    `<html lang="${getLang()}">`,
     '<head>',
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1">',

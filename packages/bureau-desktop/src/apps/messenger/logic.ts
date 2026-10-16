@@ -1,5 +1,7 @@
 /** Logique pure de « Oh-Oh! Messenger » : aucune dépendance au DOM de l'appli. */
 
+import { t } from './i18n';
+
 export interface Message {
   id: number;
   author: string;
@@ -38,15 +40,15 @@ export function excerptText(html: string, max: number): string {
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-/** Date relative en français : « il y a 3 h », « hier », sinon dd.mm.yyyy. */
+/** Date relative dans la langue courante (« il y a 3 h » / « 3 h ago », « hier » / « yesterday »), sinon dd.mm.yyyy. */
 export function formatRelative(date: Date, now: Date, _locale: string = 'fr'): string {
-  const t = date.getTime();
-  if (Number.isNaN(t)) return '';
-  const diff = now.getTime() - t;
-  if (diff < MIN) return 'à l’instant';
-  if (diff < HOUR) return `il y a ${Math.floor(diff / MIN)} min`;
-  if (diff < 24 * HOUR) return `il y a ${Math.floor(diff / HOUR)} h`;
-  if (diff < 48 * HOUR) return 'hier';
+  const time = date.getTime();
+  if (Number.isNaN(time)) return '';
+  const diff = now.getTime() - time;
+  if (diff < MIN) return t('justNow');
+  if (diff < HOUR) return t('minutesAgo', { n: Math.floor(diff / MIN) });
+  if (diff < 24 * HOUR) return t('hoursAgo', { n: Math.floor(diff / HOUR) });
+  if (diff < 48 * HOUR) return t('yesterday');
   return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
 }
 
@@ -90,7 +92,7 @@ export function parseComments(raw: unknown): Message[] {
     const author = typeof o.author_name === 'string' ? toPlainText(o.author_name) : '';
     out.push({
       id,
-      author: author || 'Anonyme',
+      author: author || t('anonymous'),
       date: parseDate(o.date_gmt),
       text,
       link: safeLink(o.link),

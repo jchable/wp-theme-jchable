@@ -1,13 +1,12 @@
 import type { AppContext } from '../../core/types';
 import { formatCount, formatDate, formatSize, moveSelection, totalSize } from './helpers';
 import { TRASH_ITEMS, type TrashItem } from './items';
+import { t } from './i18n';
 import './style.css';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const SHRED_DURATION_MS = 600;
 const SHRED_STEP_MS = 50;
-const RESTORE_GAG = 'Impossible de restaurer : le brouillon a été supprimé pour de bonnes raisons.';
-const NO_SELECTION_HINT = 'Sélectionnez un fichier pour voir un aperçu.';
 
 /** Réglages injectables (tests) : attente et détection du mouvement réduit. */
 export interface TrashOptions {
@@ -75,7 +74,7 @@ export function mountTrash(el: HTMLElement, ctx: AppContext, options: TrashOptio
   const wait = options.wait ?? defaultWait;
   const reducedMotion = options.reducedMotion ?? defaultReducedMotion;
 
-  ctx.setTitle('Corbeille');
+  ctx.setTitle(t('title'));
 
   let items: readonly TrashItem[] = emptied ? [] : TRASH_ITEMS;
   let selected = -1;
@@ -86,26 +85,26 @@ export function mountTrash(el: HTMLElement, ctx: AppContext, options: TrashOptio
 
   const toolbar = h('div', 'bapp-trash-toolbar');
   toolbar.setAttribute('role', 'toolbar');
-  toolbar.setAttribute('aria-label', 'Actions de la corbeille');
-  const restoreBtn = h('button', 'bapp-trash-btn', 'Restaurer');
+  toolbar.setAttribute('aria-label', t('toolbarLabel'));
+  const restoreBtn = h('button', 'bapp-trash-btn', t('restore'));
   restoreBtn.type = 'button';
-  const emptyBtn = h('button', 'bapp-trash-btn', 'Vider la corbeille');
+  const emptyBtn = h('button', 'bapp-trash-btn', t('empty'));
   emptyBtn.type = 'button';
   toolbar.append(restoreBtn, emptyBtn);
 
   const header = h('div', 'bapp-trash-row bapp-trash-head');
   header.setAttribute('aria-hidden', 'true');
-  header.append(h('span', '', 'Nom'), h('span', 'bapp-trash-num', 'Taille'), h('span', '', 'Supprimé le'));
+  header.append(h('span', '', t('colName')), h('span', 'bapp-trash-num', t('colSize')), h('span', '', t('colDeleted')));
 
   const listbox = h('div', 'bapp-trash-list');
   listbox.setAttribute('role', 'listbox');
-  listbox.setAttribute('aria-label', 'Brouillons supprimés');
+  listbox.setAttribute('aria-label', t('listLabel'));
 
   const empty = h('div', 'bapp-trash-empty');
-  const emptyTitle = h('p', 'bapp-trash-empty-title', 'Corbeille vide');
-  empty.append(binIcon(), emptyTitle, h('p', 'bapp-trash-empty-text', 'Rien à voir ici. Circulez.'));
+  const emptyTitle = h('p', 'bapp-trash-empty-title', t('emptyTitle'));
+  empty.append(binIcon(), emptyTitle, h('p', 'bapp-trash-empty-text', t('emptyText')));
 
-  const preview = h('p', 'bapp-trash-preview', NO_SELECTION_HINT);
+  const preview = h('p', 'bapp-trash-preview', t('noSelectionHint'));
   preview.setAttribute('aria-live', 'polite');
 
   const status = h('p', 'bapp-trash-status');
@@ -130,7 +129,7 @@ export function mountTrash(el: HTMLElement, ctx: AppContext, options: TrashOptio
       row.tabIndex = i === (selected >= 0 ? selected : 0) ? 0 : -1;
     });
     const item = items[selected];
-    preview.textContent = item ? item.preview : NO_SELECTION_HINT;
+    preview.textContent = item ? item.preview : t('noSelectionHint');
     if (focus) rows[selected]?.focus();
   }
 
@@ -179,7 +178,7 @@ export function mountTrash(el: HTMLElement, ctx: AppContext, options: TrashOptio
   }
 
   restoreBtn.addEventListener('click', () => {
-    status.textContent = items[selected] ? RESTORE_GAG : 'Sélectionnez d’abord un brouillon.';
+    status.textContent = items[selected] ? t('restoreGag') : t('restoreNone');
   });
 
   emptyBtn.addEventListener('click', () => {
