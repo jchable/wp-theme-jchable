@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable/request-path",
+  "title": "Chemin demandé",
+  "category": "theme",
+  "description": "Affiche le chemin de l'adresse demandée (utile sur la page 404).",
+  "textdomain": "jchable",
+  "supports": { "html": false, "color": { "text": true, "background": true }, "typography": { "fontSize": true } },
+  "editorScript": "jchable-blocks-editor",
+  "render": "file:./render.php"
+}

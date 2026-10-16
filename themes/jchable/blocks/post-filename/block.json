@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable/post-filename",
+  "title": "Nom de fichier de l'article",
+  "category": "theme",
+  "description": "Affiche le slug de l'article sous la forme slug.md, avec la date en option.",
+  "textdomain": "jchable",
+  "usesContext": ["postId", "postType"],
+  "attributes": {
+    "showDate": { "type": "boolean", "default": false }
+  },
+  "supports": { "html": false, "color": { "text": true, "background": true }, "typography": { "fontSize": true } },
+  "editorScript": "jchable-blocks-editor",
+  "render": "file:./render.php"
+}

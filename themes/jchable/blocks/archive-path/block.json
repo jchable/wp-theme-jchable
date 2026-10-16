@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable/archive-path",
+  "title": "Chemin de l'archive",
+  "category": "theme",
+  "description": "Affiche la page d'archives courante comme un chemin Windows : C:\\Blog\\Archives\\2026\\10.",
+  "textdomain": "jchable",
+  "supports": { "html": false, "color": { "text": true, "background": true }, "typography": { "fontSize": true } },
+  "editorScript": "jchable-blocks-editor",
+  "render": "file:./render.php"
+}
