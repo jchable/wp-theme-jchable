@@ -1,4 +1,5 @@
 import { focusAnchor } from './anchor';
+import { arrangeDesktopIcons } from './iconOrder';
 import { getLang, resolveLang, setLang } from './i18n';
 import { hasReadableContent, slugOf } from './pages';
 import { LISTED_APPS, pageApp } from './registry';
@@ -95,18 +96,22 @@ export function bootstrap(): void {
   else document.body.append(desktopHost);
 
   const sidebar = new SidebarWindows(prefs, document, leftInset);
-  const items: IconItem[] = [
-    ...readMenuIcons(document, config.assetsUrl, config.feedUrl).map((item) => ({ ...item, label: chromeLabel(item.label) })),
-    ...LISTED_APPS.map(
-      (app): IconItem => ({
-        id: `app:${app.id}`,
-        label: app.title,
-        iconUrl: `${config.assetsUrl}icons/${app.icon}.svg`,
-        kind: 'app',
-        appId: app.id,
-      }),
-    ),
-  ];
+  const menuIcons = readMenuIcons(document, config.assetsUrl, config.feedUrl).map((item) => ({ ...item, label: chromeLabel(item.label) }));
+  const appIcons = LISTED_APPS.map(
+    (app): IconItem => ({
+      id: `app:${app.id}`,
+      label: app.title,
+      iconUrl: `${config.assetsUrl}icons/${app.icon}.svg`,
+      kind: 'app',
+      appId: app.id,
+    }),
+  );
+  // Plan du site et RSS sont dans la barre des tâches ; la corbeille est juste sous Accueil.
+  const { desktop: items, menuLinks } = arrangeDesktopIcons(menuIcons, appIcons, {
+    homeUrl: config.homeUrl,
+    sitemapUrl: config.sitemapUrl,
+    feedUrl: config.feedUrl,
+  });
 
   // Une page avec du contenu (À propos…) s'ouvre dans une fenêtre ; tout le reste est une navigation normale.
   const openPage = async (href: string): Promise<void> => {
@@ -206,7 +211,7 @@ export function bootstrap(): void {
         apps: LISTED_APPS,
         openApp: launch,
         links: [
-          ...items.filter((item) => item.kind === 'link' && item.href && item.href !== config.feedUrl).map((item) => ({ label: item.label, href: item.href as string })),
+          ...menuLinks.map((item) => ({ label: item.label, href: item.href as string })),
           { label: t('menu.rss'), href: config.feedUrl },
         ],
         openPage: (href) => void openPage(href),

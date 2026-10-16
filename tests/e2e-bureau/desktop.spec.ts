@@ -4,13 +4,22 @@ import { PAGES } from '../e2e/fixtures';
 test.describe('icônes du bureau (menu d’origine, sans JavaScript)', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('5 icônes : 3 du menu du site et 2 outils', async ({ page }) => {
+  test('4 icônes : 3 du menu du site et la recherche ; plan du site et RSS dans la barre des tâches', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.desktop-icons a.wp-block-navigation-item__content')).toHaveCount(5);
+    await expect(page.locator('.desktop-icons a.wp-block-navigation-item__content')).toHaveCount(4);
     await expect(page.locator('.desktop-icons')).toContainText('Accueil');
     await expect(page.locator('.desktop-icons')).toContainText('À propos');
     await expect(page.locator('.desktop-icons')).toContainText('Recherche');
-    await expect(page.locator('.desktop-icons')).toContainText('RSS');
+    await expect(page.locator('.desktop-icons')).not.toContainText('RSS');
+    // Les raccourcis (plan du site, RSS) sont dans la barre des tâches, à côté de l'heure.
+    const links = page.locator('.taskbar .taskbar-links a');
+    await expect(links).toHaveCount(2);
+    await expect(links.nth(0)).toHaveAttribute('href', /\/plan-du-site\/$/);
+    await expect(links.nth(1)).toHaveAttribute('href', /\/feed\/$/);
+    await expect(links.nth(1)).toHaveAccessibleName('Flux RSS');
+    const clock = (await page.locator('.taskbar .taskbar-clock').boundingBox())!;
+    const last = (await links.nth(1).boundingBox())!;
+    expect(last.x + last.width).toBeLessThanOrEqual(clock.x + 1);
   });
 
   test('chaque icône affiche un pictogramme', async ({ page }) => {

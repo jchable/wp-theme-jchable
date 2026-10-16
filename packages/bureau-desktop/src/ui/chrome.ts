@@ -33,6 +33,7 @@ const CHROME_EN: Readonly<Record<string, string>> = {
   'Aucun article dans cette archive.': 'No posts in this archive.',
   "Aucun résultat pour cette recherche. Essayez d'autres mots :": 'No results for this search. Try other words:',
   'Flux RSS': 'RSS feed',
+  'Raccourcis': 'Shortcuts',
 };
 
 /** Parties de la page qui appartiennent au thème : le contenu des articles n'est jamais traduit. */
