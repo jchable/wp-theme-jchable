@@ -65,3 +65,17 @@ test.describe('pas de bandeau en haut de la page', () => {
     }
   });
 });
+
+test.describe('image du dernier article sur l’accueil', () => {
+  test('elle est deux fois moins haute qu’en 16/9, et centrée verticalement', async ({ page }) => {
+    await page.goto('/');
+    const img = page.locator('.post-feed .wp-block-post-template > li:first-child .wp-block-post-featured-image img');
+    await expect(img).toBeVisible();
+    const box = (await img.boundingBox())!;
+    // 16/9 donnerait une hauteur de largeur × 0,5625 ; la moitié, c'est largeur × 0,28125 (32/9)
+    expect(box.height / box.width).toBeCloseTo(9 / 32, 2);
+    const fit = await img.evaluate((el) => ({ fit: getComputedStyle(el).objectFit, pos: getComputedStyle(el).objectPosition }));
+    expect(fit.fit).toBe('cover');
+    expect(fit.pos).toBe('50% 50%');
+  });
+});
