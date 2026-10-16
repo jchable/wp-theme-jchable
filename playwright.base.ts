@@ -2,6 +2,8 @@
 export const baseUse = {
   baseURL: process.env.WP_BASE_URL ?? 'http://localhost:8888',
   trace: 'retain-on-failure' as const,
+  // Les tests vérifient les textes français ; l'anglais est testé explicitement (i18n.spec.ts).
+  locale: 'fr-FR',
 };
 
 export const viewportProjects = [
