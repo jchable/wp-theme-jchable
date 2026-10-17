@@ -17,8 +17,11 @@ add_action(
 	'wp_enqueue_scripts',
 	static function (): void {
 		$base = get_stylesheet_directory_uri() . '/assets/css/';
-		wp_enqueue_style( 'jchable-bureau-fonts', $base . 'fonts.css', [], JCHABLE_BUREAU_VERSION );
-		wp_enqueue_style( 'jchable-bureau', $base . 'bureau.css', [ 'jchable-base', 'jchable-bureau-fonts' ], JCHABLE_BUREAU_VERSION );
+		$dir  = get_stylesheet_directory() . '/assets/css/';
+		// La version suit la date du fichier : une mise à jour du CSS n'est jamais masquée par un cache.
+		$ver = static fn ( string $file ): string => file_exists( $dir . $file ) ? (string) filemtime( $dir . $file ) : JCHABLE_BUREAU_VERSION;
+		wp_enqueue_style( 'jchable-bureau-fonts', $base . 'fonts.css', [], $ver( 'fonts.css' ) );
+		wp_enqueue_style( 'jchable-bureau', $base . 'bureau.css', [ 'jchable-base', 'jchable-bureau-fonts' ], $ver( 'bureau.css' ) );
 	}
 );
 

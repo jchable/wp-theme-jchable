@@ -30,10 +30,12 @@
     "demo:video": "node tools/demo-video/record.cjs",
     "test:e2e:bureau": "playwright test -c playwright.bureau.config.ts",
     "fonts": "node tools/fonts/copy-fonts.mjs",
-    "check:all": "npm run check -- jchable && npm run check -- jchable-bureau",
+    "check:all": "npm run check -- jchable && npm run check -- jchable-bureau && npm run check -- jchable-swiss && npm run check -- jchable-arcade",
     "build:js": "vite build -c packages/bureau-desktop/vite.config.ts",
     "test:unit": "vitest run -c packages/bureau-desktop/vitest.config.ts",
-    "typecheck": "tsc -p packages/bureau-desktop --noEmit"
+    "typecheck": "tsc -p packages/bureau-desktop --noEmit",
+    "test:e2e:swiss": "playwright test -c playwright.swiss.config.ts",
+    "test:e2e:arcade": "playwright test -c playwright.arcade.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

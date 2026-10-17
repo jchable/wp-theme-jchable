@@ -9,7 +9,9 @@
   ],
   "themes": [
     "./themes/jchable",
-    "./themes/jchable-bureau"
+    "./themes/jchable-bureau",
+    "./themes/jchable-swiss",
+    "./themes/jchable-arcade"
   ],
   "mappings": {
     "wp-content/jchable-tools": "./tools"
