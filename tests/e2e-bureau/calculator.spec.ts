@@ -34,18 +34,20 @@ test.describe('Calculatrice', () => {
     await expect(page.locator('.bmenu').getByRole('menuitem', { name: 'Paint' })).toBeVisible();
   });
 
-  test('le nom de l’icône tient sur une seule ligne, comme ceux de Démineur.exe et WORDPAD.EXE', async ({ page }, info) => {
+  test('tous les noms d’icônes ont la même taille de police, même s’ils passent sur deux lignes', async ({ page }, info) => {
     test.skip(!isDesktop(info.project.name));
     await page.goto('/');
-    for (const name of ['Calculatrice', 'Démineur.exe', 'WORDPAD.EXE', 'Paint']) {
-      const label = page.locator('#bureau-desktop .bicon', { hasText: name }).locator('.bicon-label');
-      const lines = await label.evaluate((el) => {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        return new Set(Array.from(range.getClientRects(), (r) => Math.round(r.top))).size;
-      });
-      expect(lines, name).toBe(1);
-    }
+    const sizes = await page.locator('#bureau-desktop .bicon .bicon-label').evaluateAll((labels) => [...new Set(labels.map((el) => getComputedStyle(el).fontSize))]);
+    expect(sizes).toHaveLength(1);
+    // la bande n'est pas pour autant recouverte ni tronquée : chaque nom reste entièrement visible dans son icône
+    const clipped = await page.locator('#bureau-desktop .bicon').evaluateAll((icons) =>
+      icons.filter((icon) => {
+        const label = icon.querySelector('.bicon-label')!.getBoundingClientRect();
+        const box = icon.getBoundingClientRect();
+        return label.left < box.left - 1 || label.right > box.right + 1;
+      }).length,
+    );
+    expect(clipped).toBe(0);
   });
 
   test('s’ouvre à 280×360 sur grand écran, avec le bon titre', async ({ page }, info) => {

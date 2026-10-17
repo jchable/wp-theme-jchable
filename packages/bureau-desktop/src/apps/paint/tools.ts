@@ -12,9 +12,8 @@ export type FillStyle = 'outline' | 'filled' | 'solid';
 /** Épaisseurs proposées (en pixels). */
 export const SIZES: readonly number[] = [1, 2, 4, 8];
 
-/** Épaisseur réellement utilisée : le crayon fait toujours 1 pixel, la gomme est plus large que le trait. */
+/** Épaisseur réellement utilisée : celle choisie, la gomme étant plus large que le trait. */
 export function effectiveSize(tool: FreehandTool, size: number): number {
-  if (tool === 'pencil') return 1;
   return tool === 'eraser' ? eraserSide(size) : size;
 }
 

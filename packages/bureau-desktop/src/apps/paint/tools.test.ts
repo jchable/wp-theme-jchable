@@ -15,12 +15,36 @@ function painted(r: Raster, color: RGBA): number {
 }
 
 describe('strokeSegment : crayon, pinceau, gomme', () => {
-  it('le crayon trace un pixel par point de la ligne, sans trou', () => {
+  it('le crayon en taille 1 trace un pixel par point de la ligne, sans trou', () => {
     const r = createRaster(40, 40);
-    strokeSegment(r, 'pencil', { x: 2, y: 3 }, { x: 30, y: 17 }, 4, RED);
+    strokeSegment(r, 'pencil', { x: 2, y: 3 }, { x: 30, y: 17 }, 1, RED);
     const expected = linePoints(2, 3, 30, 17);
-    expect(painted(r, RED)).toBe(expected.length); // le crayon fait toujours 1 pixel, même en taille 4
+    expect(painted(r, RED)).toBe(expected.length);
     for (const p of expected) expect(is(r, p.x, p.y, RED)).toBe(true);
+  });
+
+  it('le crayon suit l’épaisseur choisie : plus la taille est grande, plus le trait est large', () => {
+    const counts = [1, 2, 4, 8].map((size) => {
+      const r = createRaster(80, 80);
+      strokeSegment(r, 'pencil', { x: 10, y: 40 }, { x: 70, y: 40 }, size, RED);
+      return painted(r, RED);
+    });
+    expect(counts[1]).toBeGreaterThan(counts[0]!);
+    expect(counts[2]).toBeGreaterThan(counts[1]!);
+    expect(counts[3]).toBeGreaterThan(counts[2]!);
+    // en taille 8, le trait couvre bien 8 pixels de haut au milieu de la ligne
+    const r = createRaster(80, 80);
+    strokeSegment(r, 'pencil', { x: 10, y: 40 }, { x: 70, y: 40 }, 8, RED);
+    let column = 0;
+    for (let y = 0; y < 80; y++) if (is(r, 40, y, RED)) column++;
+    expect(column).toBe(8);
+  });
+
+  it('la zone à rafraîchir tient compte de l’épaisseur du crayon', () => {
+    const r = createRaster(100, 80);
+    const small = strokeBounds(r, { x: 50, y: 40 }, { x: 50, y: 40 }, 'pencil', 1);
+    const large = strokeBounds(r, { x: 50, y: 40 }, { x: 50, y: 40 }, 'pencil', 8);
+    expect(large.x1 - large.x0).toBeGreaterThan(small.x1 - small.x0);
   });
 
   it('un clic sans bouger dessine un point', () => {

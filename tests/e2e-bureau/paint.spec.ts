@@ -110,6 +110,21 @@ test.describe('Paint : dessiner', () => {
     expect(await pixel(win, 50, 200)).toEqual(WHITE);
   });
 
+  test('l’épaisseur choisie s’applique aussi au crayon (trace libre) : de 1 à 8 pixels de haut', async ({ page }, info) => {
+    const win = await openPaint(page, info.project.name);
+    const heights: number[] = [];
+    let y = 40;
+    for (const size of ['1 px', '2 px', '4 px', '8 px']) {
+      await win.getByRole('button', { name: size, exact: true }).click();
+      await drag(page, win, [100, y], [300, y], { steps: 10 });
+      let rows = 0;
+      for (let yy = y - 12; yy <= y + 12; yy++) if ((await pixel(win, 200, yy)).join() === BLACK.join()) rows++;
+      heights.push(rows);
+      y += 60;
+    }
+    expect(heights).toEqual([1, 2, 4, 8]);
+  });
+
   test('un clic dessine un point, le clic droit dessine avec la couleur d’arrière-plan', async ({ page }, info) => {
     const win = await openPaint(page, info.project.name);
     await win.getByRole('button', { name: 'Rouge', exact: true }).click();

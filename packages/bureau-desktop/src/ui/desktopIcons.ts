@@ -166,8 +166,7 @@ export class DesktopIcons {
     image.setAttribute('aria-hidden', 'true');
     image.style.backgroundImage = `url("${item.iconUrl}")`;
     const label = document.createElement('span');
-    // Un nom long (« Calculatrice ») prend une graisse de corps plus petite pour tenir sur une ligne.
-    label.className = item.label.length >= 11 ? 'bicon-label bicon-label--long' : 'bicon-label';
+    label.className = 'bicon-label';
     label.setAttribute('aria-hidden', 'true');
     label.textContent = item.label;
     button.append(image, label);
