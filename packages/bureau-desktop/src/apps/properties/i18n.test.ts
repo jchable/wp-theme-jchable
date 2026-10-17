@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { missingKeys, setLang } from '../../core/i18n';
 import type { AppContext, BureauConfig } from '../../core/types';
@@ -21,6 +23,16 @@ function makeCtx() {
 }
 
 afterEach(() => unmount());
+
+describe('Propriétés système : version affichée', () => {
+  it('suit la version du thème (style.css)', () => {
+    // les tests se lancent depuis la racine du dépôt (npm run test:unit)
+    const css = readFileSync(join(process.cwd(), 'themes', 'jchable-bureau', 'style.css'), 'utf8');
+    const [major, minor] = (css.match(/^Version:\s*(\d+)\.(\d+)/m) ?? []).slice(1);
+    expect(major, 'version introuvable dans style.css').toBeDefined();
+    for (const lang of ['fr', 'en'] as const) expect(messages[lang].systemValue).toContain(`Bureau ${major}.${minor} `);
+  });
+});
 
 describe('Propriétés système : traductions', () => {
   it('a les mêmes clés en français et en anglais', () => {
