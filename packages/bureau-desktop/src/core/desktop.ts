@@ -95,7 +95,7 @@ export function bootstrap(): void {
   if (siteBlocks) siteBlocks.after(desktopHost);
   else document.body.append(desktopHost);
 
-  const sidebar = new SidebarWindows(prefs, document, leftInset);
+  const sidebar = new SidebarWindows(prefs, document);
   const menuIcons = readMenuIcons(document, config.assetsUrl, config.feedUrl).map((item) => ({ ...item, label: chromeLabel(item.label) }));
   const appIcons = LISTED_APPS.map(
     (app): IconItem => ({

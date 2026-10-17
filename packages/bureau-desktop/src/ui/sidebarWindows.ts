@@ -18,7 +18,6 @@ export class SidebarWindows {
   constructor(
     private readonly prefs: PrefsApi,
     private readonly root: ParentNode = document,
-    private readonly leftInset: () => number = () => 0,
   ) {}
 
   private windows(): HTMLElement[] {
@@ -54,7 +53,6 @@ export class SidebarWindows {
         { w: rect.width, h: rect.height },
         { w: window.innerWidth, h: window.innerHeight },
         GRAB,
-        this.leftInset(),
       );
       if (absolute.x !== rect.left || absolute.y !== rect.top) {
         this.apply(el, offset.x + absolute.x - rect.left, offset.y + absolute.y - rect.top);
@@ -104,7 +102,6 @@ export class SidebarWindows {
         { w: rect.width, h: rect.height },
         { w: window.innerWidth, h: window.innerHeight },
         GRAB,
-        this.leftInset(),
       );
       this.apply(el, offset.x + absolute.x - rect.left, offset.y + absolute.y - rect.top);
     };

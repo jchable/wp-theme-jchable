@@ -195,7 +195,7 @@ export class WindowManager {
       const y = parseFloat(win.el.style.top) || 0;
       const w = parseFloat(win.el.style.width) || win.app.defaultSize.w;
       const h = parseFloat(win.el.style.height) || win.app.defaultSize.h;
-      const next = fitBox({ x, y, w, h }, area, GRAB, this.options.leftInset());
+      const next = fitBox({ x, y, w, h }, area, GRAB);
       Object.assign(win.el.style, { left: `${next.x}px`, top: `${next.y}px`, width: `${next.w}px`, height: `${next.h}px` });
     }
   }
@@ -335,12 +335,13 @@ export class WindowManager {
     const area = { w: window.innerWidth, h: window.innerHeight };
     const width = Math.min(size.w, area.w - this.options.leftInset() - 24);
     const height = Math.min(size.h, area.h - 24);
-    // Les fenêtres s'ouvrent à droite des deux colonnes d'icônes, en cascade.
+    // Les fenêtres s'ouvrent à droite des colonnes d'icônes, en cascade ; ensuite on peut les tirer par-dessus.
+    // Une partie de la barre de titre reste toujours à l'écran (GRAB), donc on peut toujours les rattraper.
     const inset = this.options.leftInset();
     const fallback = { x: Math.max(250, inset + 24) + this.cascade * 28, y: 70 + this.cascade * 28 };
     this.cascade = (this.cascade + 1) % 8;
     const start = saved ? { x: saved.x, y: saved.y } : fallback;
-    const at = clampPosition(start, { w: width, h: height }, area, GRAB, inset);
+    const at = clampPosition(start, { w: width, h: height }, area, GRAB);
     Object.assign(win.el.style, { left: `${at.x}px`, top: `${at.y}px`, width: `${width}px`, height: `${height}px` });
   }
 
@@ -369,7 +370,6 @@ export class WindowManager {
           { w: rect.width, h: rect.height },
           { w: window.innerWidth, h: window.innerHeight },
           GRAB,
-          this.options.leftInset(),
         );
         win.el.style.left = `${next.x}px`;
         win.el.style.top = `${next.y}px`;

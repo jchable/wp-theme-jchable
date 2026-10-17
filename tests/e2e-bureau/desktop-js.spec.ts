@@ -727,23 +727,34 @@ test.describe('bande d’icônes : jamais cachée, adaptée à la largeur', () =
     expect(main!.x).toBeGreaterThanOrEqual(band);
   });
 
-  test('aucune fenêtre ne recouvre une icône, même tirée tout à gauche', async ({ page }) => {
+  test('une fenêtre peut être tirée tout à gauche, par-dessus les icônes, et les libère en repartant', async ({ page }) => {
     await page.goto('/');
-    for (const title of ['Terminal', 'Démineur.exe', 'WORDPAD.EXE']) await openApp(page, title);
+    await openApp(page, 'Terminal');
     const win = page.locator('.bwin[data-app="terminal"]');
-    const bar = await win.locator('.bwin-titlebar').boundingBox();
-    await page.mouse.move(bar!.x + 80, bar!.y + 10);
-    await page.mouse.down();
-    await page.mouse.move(2, bar!.y + 200, { steps: 8 });
-    await page.mouse.up();
-    const covered = await page.locator('#bureau-desktop .bicon').evaluateAll((icons) =>
-      icons.filter((icon) => {
-        const r = icon.getBoundingClientRect();
-        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-        return hit?.closest('.bicon') !== icon;
-      }).map((icon) => (icon as HTMLElement).dataset['id']),
-    );
-    expect(covered).toEqual([]);
+    const band = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bureau-band')));
+    const drag = async (toX: number): Promise<void> => {
+      const bar = (await win.locator('.bwin-titlebar').boundingBox())!;
+      await page.mouse.move(bar.x + 80, bar.y + 10);
+      await page.mouse.down();
+      await page.mouse.move(toX, bar.y + 40, { steps: 8 });
+      await page.mouse.up();
+    };
+    const coveredIcons = (): Promise<number> =>
+      page.locator('#bureau-desktop .bicon').evaluateAll(
+        (icons) =>
+          icons.filter((icon) => {
+            const r = icon.getBoundingClientRect();
+            return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest('.bicon') !== icon;
+          }).length,
+      );
+
+    await drag(2);
+    expect((await win.boundingBox())!.x).toBeLessThan(band - 20); // elle est bien passée sur la bande d'icônes
+    expect(await coveredIcons()).toBeGreaterThan(0);
+    // Elle reste attrapable (une partie de sa barre de titre est toujours à l'écran) : on la ramène à droite.
+    await drag(700);
+    expect((await win.boundingBox())!.x).toBeGreaterThan(band);
+    expect(await coveredIcons()).toBe(0);
   });
 
   test('une icône lâchée sur le contenu revient dans la bande', async ({ page }) => {
