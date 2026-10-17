@@ -1,5 +1,5 @@
 import { test, expect, type Locator } from '@playwright/test';
-import { POSTS, TOTAL_POSTS } from '../e2e/fixtures';
+import { ARCHIVES, POSTS, TOTAL_POSTS } from '../e2e/fixtures';
 import { feedNumbers } from './helpers';
 
 const INK = 'rgb(10, 10, 10)';
@@ -42,6 +42,19 @@ test.describe('en-tête', () => {
     await page.goto('/a-propos/');
     const nav = page.getByRole('navigation', { name: 'Menu principal' });
     await expect(nav.locator('[aria-current="page"]')).toHaveText('À propos');
+  });
+
+  test('sur la recherche, aucune entrée du menu n’est « courante » (surtout pas Accueil)', async ({ page }) => {
+    await page.goto(ARCHIVES.search);
+    const nav = page.getByRole('navigation', { name: 'Menu principal' });
+    await expect(nav.getByRole('link')).toHaveCount(3);
+    await expect(nav.locator('[aria-current]')).toHaveCount(0);
+  });
+
+  test('sur une adresse sans chemin (?s=, ?p=), Accueil n’est courant que sur l’accueil', async ({ page }) => {
+    await page.goto('/?p=1');
+    const nav = page.getByRole('navigation', { name: 'Menu principal' });
+    await expect(nav.locator('[aria-current]')).toHaveCount(0);
   });
 
   test('un filet noir de 2 px sous la barre', async ({ page }) => {

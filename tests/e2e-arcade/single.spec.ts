@@ -3,6 +3,19 @@ import { POSTS, PAGES } from '../e2e/fixtures';
 
 const CARD = 'rgb(23, 27, 48)';
 
+/** Rapport de contraste WCAG entre deux couleurs « rgb(r, g, b) ». */
+function contrast(a: string, b: string): number {
+  const luminance = (css: string): number => {
+    const [r, g, bl] = (css.match(/\d+/g) ?? ['0', '0', '0']).slice(0, 3).map((n) => {
+      const v = Number(n) / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r! + 0.7152 * g! + 0.0722 * bl!;
+  };
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi! + 0.05) / (lo! + 0.05);
+}
+
 test.describe('article Arcade', () => {
   test('carte pixel : stage, date, catégorie, titre h1 pixel, image légendée', async ({ page }) => {
     await page.goto(POSTS.latest.path);
@@ -48,7 +61,9 @@ test.describe('article Arcade', () => {
     expect(await comments.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(CARD);
     const field = await comments.locator('textarea#comment').evaluate((el) => ({ bg: getComputedStyle(el).backgroundColor, border: getComputedStyle(el).borderTopColor }));
     expect(field.bg).toBe('rgb(15, 18, 34)');
-    expect(field.border).toBe('rgb(58, 65, 112)');
+    // WCAG 1.4.11 : la bordure d'un champ se distingue de son fond avec au moins 3:1 (et de la carte qui l'entoure).
+    expect(contrast(field.border, field.bg)).toBeGreaterThanOrEqual(3);
+    expect(contrast(field.border, CARD)).toBeGreaterThanOrEqual(3);
   });
 
   test('commentaires fermés : ni formulaire ni carte vide', async ({ page }) => {

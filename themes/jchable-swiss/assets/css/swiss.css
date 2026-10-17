@@ -1138,3 +1138,30 @@ body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-visual {
 		padding: 22px 20px;
 	}
 }
+
+/* ---------- Impression : texte noir sur blanc (les navigateurs n'impriment pas les fonds par défaut) ---------- */
+
+@media print {
+	*,
+	*::before,
+	*::after {
+		background: transparent !important;
+		box-shadow: none !important;
+		color: #000 !important;
+		text-shadow: none !important;
+		animation: none !important;
+	}
+
+	nav,
+	aside,
+	form,
+	.wp-block-search,
+	.wp-block-archives,
+	.wp-block-query-pagination {
+		display: none !important;
+	}
+
+	a {
+		text-decoration: underline;
+	}
+}

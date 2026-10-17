@@ -15,7 +15,7 @@
         { "slug": "raised", "name": "Carte en relief", "color": "#1C2140" },
         { "slug": "placeholder", "name": "Visuel vide", "color": "#222849" },
         { "slug": "line", "name": "Filet", "color": "#2A3060" },
-        { "slug": "border", "name": "Bordure de champ", "color": "#3A4170" },
+        { "slug": "border", "name": "Bordure de champ", "color": "#6670A8" },
         { "slug": "contrast", "name": "Texte", "color": "#E8EAF6" },
         { "slug": "muted", "name": "Texte secondaire", "color": "#B9BEDB" },
         { "slug": "accent", "name": "Accent", "color": "#FFCC33" },

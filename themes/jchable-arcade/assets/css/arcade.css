@@ -1110,3 +1110,33 @@ body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arc
 		padding: 12px 18px;
 	}
 }
+
+/* ---------- Impression : texte noir sur blanc (les navigateurs n'impriment pas les fonds par défaut) ---------- */
+
+@media print {
+	html,
+	body,
+	*,
+	*::before,
+	*::after {
+		background: transparent !important;
+		background-image: none !important;
+		box-shadow: none !important;
+		clip-path: none !important;
+		color: #000 !important;
+		text-shadow: none !important;
+	}
+
+	nav,
+	aside,
+	form,
+	.wp-block-search,
+	.wp-block-archives,
+	.wp-block-query-pagination {
+		display: none !important;
+	}
+
+	a {
+		text-decoration: underline;
+	}
+}

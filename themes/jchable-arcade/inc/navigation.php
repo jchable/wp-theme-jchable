@@ -35,8 +35,16 @@ add_filter(
 			return $content;
 		}
 
-		// Les pages 2, 3… de la liste des articles restent « Accueil ».
-		$current = jchable_arcade_normalize_url( home_url( is_front_page() || is_home() ? '/' : (string) ( $wp->request ?? '' ) ) );
+		// Les pages 2, 3… de la liste des articles restent « Accueil » ; une recherche ou une adresse sans chemin (?p=) n'est jamais l'accueil.
+		$on_home = is_front_page() || ( is_home() && 'posts' === get_option( 'show_on_front' ) );
+		$request = (string) ( $wp->request ?? '' );
+		if ( $on_home ) {
+			$current = jchable_arcade_normalize_url( home_url( '/' ) );
+		} elseif ( '' !== $request ) {
+			$current = jchable_arcade_normalize_url( home_url( $request ) );
+		} else {
+			return $content;
+		}
 		if ( $link !== $current ) {
 			return $content;
 		}

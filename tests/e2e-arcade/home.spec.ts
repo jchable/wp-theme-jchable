@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { POSTS, TOTAL_POSTS } from '../e2e/fixtures';
+import { ARCHIVES, POSTS, TOTAL_POSTS } from '../e2e/fixtures';
 
 const ACCENT = 'rgb(255, 204, 51)';
 const CYAN = 'rgb(92, 225, 230)';
@@ -26,6 +26,20 @@ test.describe('accueil Arcade : en-tête', () => {
     const style = await current.evaluate((a) => ({ bg: getComputedStyle(a).backgroundColor, clip: getComputedStyle(a).clipPath }));
     expect(style.bg).toBe('rgb(28, 33, 64)');
     expect(style.clip).toContain('polygon');
+  });
+
+  test('sur la recherche, aucune entrée du menu n’est « courante » (surtout pas Accueil)', async ({ page }) => {
+    await page.goto(ARCHIVES.search);
+    const nav = page.getByRole('navigation', { name: 'Menu principal' });
+    await expect(nav.getByRole('link')).toHaveCount(3);
+    await expect(nav.locator('[aria-current]')).toHaveCount(0);
+    await expect(page.locator('.arcade-menu .current-menu-item')).toHaveCount(0);
+  });
+
+  test('sur une adresse sans chemin (?p=), Accueil n’est courant que sur l’accueil', async ({ page }) => {
+    await page.goto('/?p=1');
+    const nav = page.getByRole('navigation', { name: 'Menu principal' });
+    await expect(nav.locator('[aria-current]')).toHaveCount(0);
   });
 
   test('le point du logo suit la couleur d’accent', async ({ page }) => {

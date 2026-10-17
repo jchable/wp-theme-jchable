@@ -161,3 +161,25 @@ test.describe('sans JavaScript', () => {
     await expect(page).toHaveURL(/\/page\/2\/$/);
   });
 });
+
+test.describe('impression', () => {
+  test('à l’impression : texte noir sur fond blanc, sans menu ni formulaires, quel que soit le design', async ({ page }) => {
+    await page.goto(POSTS.latest.path);
+    await page.emulateMedia({ media: 'print' });
+    const style = await page.evaluate(() => {
+      const visible = (selector: string) => [...document.querySelectorAll<HTMLElement>(selector)].some((el) => getComputedStyle(el).display !== 'none');
+      return {
+        bodyColor: getComputedStyle(document.body).color,
+        bodyBg: getComputedStyle(document.body).backgroundColor,
+        bodyImage: getComputedStyle(document.body).backgroundImage,
+        navVisible: visible('nav'),
+        formVisible: visible('form[role="search"], .wp-block-search'),
+      };
+    });
+    expect(style.bodyColor).toBe('rgb(0, 0, 0)');
+    expect(['rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)']).toContain(style.bodyBg);
+    expect(style.bodyImage).toBe('none');
+    expect(style.navVisible).toBe(false);
+    expect(style.formVisible).toBe(false);
+  });
+});
