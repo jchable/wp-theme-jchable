@@ -1,0 +1,137 @@
+{
+  "$schema": "https://schemas.wp.org/wp/6.6/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "layout": { "contentSize": "720px", "wideSize": "1224px" },
+    "color": {
+      "defaultPalette": false,
+      "defaultGradients": false,
+      "defaultDuotone": false,
+      "palette": [
+        { "slug": "base", "name": "Papier", "color": "#FAFAF7" },
+        { "slug": "contrast", "name": "Encre", "color": "#0A0A0A" },
+        { "slug": "muted", "name": "Encre atténuée", "color": "#55554F" },
+        { "slug": "surface", "name": "Blanc", "color": "#FFFFFF" },
+        { "slug": "accent", "name": "Accent électrique", "color": "#2B2BFF" },
+        { "slug": "lime", "name": "Jaune-vert", "color": "#D4FF00" }
+      ]
+    },
+    "typography": {
+      "fluid": true,
+      "defaultFontSizes": false,
+      "fontSizes": [
+        { "slug": "small", "name": "Petit (mono)", "size": "0.8125rem", "fluid": false },
+        { "slug": "medium", "name": "Moyen", "size": "1.0625rem", "fluid": false },
+        { "slug": "large", "name": "Grand", "size": "1.1875rem", "fluid": false },
+        { "slug": "x-large", "name": "Très grand", "size": "2rem", "fluid": { "min": "1.625rem", "max": "2.25rem" } },
+        { "slug": "xx-large", "name": "Titre", "size": "4.5rem", "fluid": { "min": "2.5rem", "max": "5.5rem" } },
+        { "slug": "huge", "name": "Énorme", "size": "13rem", "fluid": { "min": "4.5rem", "max": "13rem" } }
+      ],
+      "fontFamilies": [
+        {
+          "slug": "body",
+          "name": "Bricolage Grotesque",
+          "fontFamily": "'Bricolage Grotesque', system-ui, -apple-system, 'Segoe UI', sans-serif"
+        },
+        {
+          "slug": "mono",
+          "name": "IBM Plex Mono",
+          "fontFamily": "'IBM Plex Mono', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace"
+        }
+      ]
+    },
+    "spacing": {
+      "defaultSpacingSizes": false,
+      "spacingSizes": [
+        { "slug": "20", "name": "XS", "size": "0.5rem" },
+        { "slug": "30", "name": "S", "size": "clamp(0.75rem, 1.5vw, 1rem)" },
+        { "slug": "40", "name": "M", "size": "clamp(1rem, 2.5vw, 1.5rem)" },
+        { "slug": "50", "name": "L", "size": "clamp(1.5rem, 4vw, 2.5rem)" },
+        { "slug": "60", "name": "XL", "size": "clamp(2rem, 6vw, 4.5rem)" }
+      ]
+    }
+  },
+  "styles": {
+    "color": { "background": "var:preset|color|base", "text": "var:preset|color|contrast" },
+    "typography": {
+      "fontFamily": "var:preset|font-family|body",
+      "fontSize": "var:preset|font-size|medium",
+      "lineHeight": "1.55"
+    },
+    "spacing": { "blockGap": "var:preset|spacing|40" },
+    "elements": {
+      "link": {
+        "color": { "text": "var:preset|color|contrast" },
+        "typography": { "textDecoration": "underline" },
+        ":hover": { "color": { "text": "var:preset|color|accent" } }
+      },
+      "heading": {
+        "typography": { "fontWeight": "800", "lineHeight": "1.05", "letterSpacing": "-0.03em" }
+      },
+      "h1": {
+        "typography": { "fontSize": "var:preset|font-size|xx-large", "lineHeight": "0.95", "letterSpacing": "-0.05em" }
+      },
+      "h2": { "typography": { "fontSize": "var:preset|font-size|x-large" } },
+      "h3": { "typography": { "fontSize": "1.5rem" } },
+      "h4": { "typography": { "fontSize": "var:preset|font-size|large" } },
+      "h5": { "typography": { "fontSize": "var:preset|font-size|medium" } },
+      "h6": { "typography": { "fontSize": "var:preset|font-size|medium" } },
+      "button": {
+        "color": { "background": "var:preset|color|contrast", "text": "var:preset|color|base" },
+        "border": { "radius": "0" },
+        "typography": { "fontWeight": "800", "textDecoration": "none" },
+        ":hover": { "color": { "background": "var:preset|color|accent", "text": "var:preset|color|base" } }
+      }
+    },
+    "blocks": {
+      "core/site-title": {
+        "typography": { "fontWeight": "800", "letterSpacing": "-0.04em" },
+        "elements": { "link": { "typography": { "textDecoration": "none" } } }
+      },
+      "core/post-title": {
+        "typography": { "fontWeight": "800", "letterSpacing": "-0.03em" },
+        "elements": { "link": { "typography": { "textDecoration": "none" } } }
+      },
+      "core/post-date": {
+        "typography": { "fontFamily": "var:preset|font-family|mono", "fontSize": "var:preset|font-size|small" }
+      },
+      "core/post-terms": {
+        "typography": { "fontFamily": "var:preset|font-family|mono", "fontSize": "var:preset|font-size|small" },
+        "elements": { "link": { "typography": { "textDecoration": "none" } } }
+      },
+      "core/code": {
+        "typography": { "fontFamily": "var:preset|font-family|mono", "fontSize": "var:preset|font-size|small" },
+        "border": { "width": "2px", "style": "solid", "color": "var(--wp--preset--color--contrast)", "radius": "0" },
+        "spacing": { "padding": { "top": "1rem", "right": "1rem", "bottom": "1rem", "left": "1rem" } }
+      },
+      "core/quote": {
+        "border": { "left": { "width": "6px", "style": "solid", "color": "var(--wp--preset--color--accent)" } },
+        "spacing": { "padding": { "left": "1.25rem" } }
+      },
+      "core/separator": {
+        "color": { "text": "var:preset|color|contrast" },
+        "border": { "width": "2px" }
+      },
+      "core/image": {
+        "css": "& figcaption { font-family: var(--wp--preset--font-family--mono); font-size: var(--wp--preset--font-size--small); }"
+      },
+      "core/comment-author-name": {
+        "typography": { "fontWeight": "800" },
+        "elements": { "link": { "typography": { "textDecoration": "none" } } }
+      },
+      "core/comment-date": {
+        "typography": { "fontFamily": "var:preset|font-family|mono", "fontSize": "var:preset|font-size|small" }
+      },
+      "core/query-title": {
+        "typography": { "fontWeight": "800", "letterSpacing": "-0.05em" }
+      }
+    }
+  },
+  "templateParts": [
+    { "name": "header", "title": "En-tête (barre et menu)", "area": "header" },
+    { "name": "hero", "title": "Grand titre de l'accueil", "area": "uncategorized" },
+    { "name": "footer", "title": "Pied de page", "area": "footer" },
+    { "name": "sidebar", "title": "Cartes recherche et archives", "area": "uncategorized" }
+  ]
+}

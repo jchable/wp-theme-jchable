@@ -1,0 +1,45 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:template-part {"slug":"hero"} /-->
+
+<!-- wp:group {"tagName":"main","anchor":"contenu","className":"swiss-wrap swiss-main","layout":{"type":"constrained","contentSize":"1224px"}} -->
+<main id="contenu" class="wp-block-group swiss-wrap swiss-main"><!-- wp:query {"queryId":1,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"className":"swiss-feed swiss-feed--home"} -->
+<div class="wp-block-query swiss-feed swiss-feed--home"><!-- wp:post-template {"layout":{"type":"default"}} -->
+<!-- wp:group {"tagName":"article","className":"swiss-card","layout":{"type":"default"}} -->
+<article class="wp-block-group swiss-card"><!-- wp:group {"className":"swiss-meta","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group swiss-meta"><!-- wp:post-date {"format":"d.m.Y"} /-->
+
+<!-- wp:post-terms {"term":"category"} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:post-title {"level":2,"isLink":true} /-->
+
+<!-- wp:post-excerpt {"excerptLength":30} /-->
+
+<!-- wp:group {"className":"swiss-visual","layout":{"type":"default"}} -->
+<div class="wp-block-group swiss-visual"><!-- wp:post-featured-image {"isLink":false} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+
+<!-- wp:group {"className":"swiss-after","layout":{"type":"default"}} -->
+<div class="wp-block-group swiss-after"><!-- wp:query-pagination {"paginationArrow":"arrow","className":"swiss-pagination","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<!-- wp:query-pagination-previous {"label":"Articles plus récents"} /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next {"label":"Articles plus anciens"} /-->
+<!-- /wp:query-pagination -->
+
+<!-- wp:template-part {"slug":"sidebar"} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>Aucun article pour le moment.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

@@ -1,0 +1,1140 @@
+/*
+ * Swiss Électrique : design typographique suisse, en CSS pur (aucun JavaScript).
+ * Les couleurs, polices et tailles viennent de theme.json (variables --wp--preset--*), donc modifiables dans l'éditeur.
+ */
+
+:root {
+	--swiss-accent: var(--wp--preset--color--accent);
+	--swiss-ink: var(--wp--preset--color--contrast);
+	--swiss-paper: var(--wp--preset--color--base);
+	--swiss-lime: var(--wp--preset--color--lime);
+	--swiss-mono: var(--wp--preset--font-family--mono);
+	--swiss-rule: 2px solid var(--swiss-ink);
+	--swiss-pad: clamp(16px, 4vw, 48px);
+}
+
+/* ---------- Socle ---------- */
+
+body {
+	overflow-wrap: break-word;
+}
+
+.wp-site-blocks > * {
+	margin-block-start: 0;
+	margin-block-end: 0;
+}
+
+.swiss-wrap {
+	padding-inline: var(--swiss-pad);
+}
+
+a {
+	text-underline-offset: 0.18em;
+	text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+	outline: 3px solid var(--swiss-accent);
+	outline-offset: 3px;
+}
+
+/* Sur les aplats d'accent et les blocs noirs, le contour reste visible. */
+.swiss-footer :focus-visible {
+	outline-color: var(--swiss-paper);
+}
+
+.swiss-main {
+	padding-bottom: 72px;
+}
+
+/* Lien d'évitement */
+.skip-link.screen-reader-text:focus {
+	background: var(--swiss-ink);
+	color: var(--swiss-paper);
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	padding: 14px 18px;
+	top: 8px;
+	left: 8px;
+	z-index: 100000;
+	clip-path: none;
+	text-decoration: none;
+}
+
+/* ---------- Barre du haut : domaine en mono et menu ---------- */
+
+.swiss-bar {
+	gap: 16px;
+	padding: 18px 0;
+	border-bottom: var(--swiss-rule);
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+}
+
+.swiss-bar p,
+.swiss-bar .wp-block-navigation {
+	margin: 0;
+}
+
+.wp-block-jchable-swiss-site-host {
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.wp-block-jchable-swiss-site-host a {
+	text-decoration: none;
+}
+
+.swiss-menu {
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+}
+
+.swiss-bar .wp-block-navigation,
+.swiss-menu .wp-block-navigation__container,
+.swiss-menu .wp-block-navigation-item {
+	min-width: 0;
+	max-width: 100%;
+}
+
+.swiss-menu .wp-block-navigation__container {
+	gap: 4px;
+}
+
+.swiss-menu .wp-block-navigation-item__label {
+	overflow-wrap: anywhere;
+}
+
+.swiss-menu .wp-block-navigation-item .wp-block-navigation-item__content {
+	display: block;
+	padding: 12px 14px;
+	text-decoration: none;
+	color: var(--swiss-ink);
+}
+
+.swiss-menu .wp-block-navigation-item .wp-block-navigation-item__content:hover {
+	color: var(--swiss-accent);
+}
+
+/* L'entrée courante : un bloc noir. */
+.swiss-menu .wp-block-navigation-item .wp-block-navigation-item__content[aria-current="page"],
+.swiss-menu .wp-block-navigation-item.current-menu-item > .wp-block-navigation-item__content {
+	background: var(--swiss-ink);
+	color: var(--swiss-paper);
+}
+
+.swiss-menu .wp-block-navigation-item .wp-block-navigation-item__content[aria-current="page"]:hover {
+	color: var(--swiss-lime);
+}
+
+/* ---------- Grand titre de l'accueil et badge ---------- */
+
+.swiss-hero {
+	gap: 32px;
+	padding: 48px 0 40px;
+	align-items: flex-end;
+}
+
+.wp-block-site-title.swiss-hero-title {
+	flex: 0 1 auto;
+	width: min-content;
+	max-width: 100%;
+	margin: 0;
+	font-weight: 800;
+	font-size: clamp(72px, 13vw, 210px);
+	line-height: 0.82;
+	letter-spacing: -0.06em;
+	overflow-wrap: break-word;
+}
+
+.swiss-hero-title::after {
+	content: ".";
+	color: var(--swiss-accent);
+}
+
+.swiss-hero-side {
+	flex: 0 1 260px;
+	margin-inline-start: auto;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+.swiss-hero-side .wp-block-html,
+.swiss-hero-side svg {
+	display: block;
+}
+
+.swiss-badge-svg {
+	flex: 0 0 auto;
+	max-width: 100%;
+	height: auto;
+}
+
+.swiss-badge text {
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	font-weight: 500;
+	fill: var(--swiss-ink);
+}
+
+.swiss-badge {
+	transform-origin: 100px 100px;
+	animation: swiss-spin 40s linear infinite;
+}
+
+.swiss-badge-initials {
+	font-family: var(--wp--preset--font-family--body);
+	font-size: 24px;
+	font-weight: 800;
+	fill: var(--swiss-paper);
+}
+
+@keyframes swiss-spin {
+	from {
+		transform: rotate(-12deg);
+	}
+
+	to {
+		transform: rotate(348deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.swiss-badge {
+		animation: none;
+		transform: rotate(-12deg);
+	}
+}
+
+.swiss-intro {
+	margin: 0;
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+}
+
+/* ---------- Titres de page (article, page, archive, recherche, plan du site, 404) ---------- */
+
+.swiss-title,
+.wp-block-query-title.swiss-title {
+	margin: 0;
+	padding: 48px 0 32px;
+	font-weight: 800;
+	font-size: clamp(40px, 5.5vw, 84px);
+	line-height: 0.98;
+	letter-spacing: -0.045em;
+	overflow-wrap: anywhere;
+}
+
+/* ---------- Liste d'articles : grille à filets noirs ---------- */
+
+.swiss-feed {
+	border-top: var(--swiss-rule);
+}
+
+.swiss-feed .wp-block-post-template {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	counter-reset: swiss-post;
+}
+
+.swiss-feed .wp-block-post {
+	min-width: 0;
+	margin: 0;
+	padding: 36px 32px;
+	border-bottom: var(--swiss-rule);
+}
+
+/* Colonne de gauche = articles impairs ; sur l'accueil (page 1), le premier article prend toute la largeur. */
+.swiss-feed .wp-block-post:nth-child(odd) {
+	padding-left: 0;
+	border-right: var(--swiss-rule);
+}
+
+.swiss-feed .wp-block-post:nth-child(even) {
+	padding-right: 0;
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:nth-child(odd) {
+	padding-left: 32px;
+	padding-right: 0;
+	border-right: 0;
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:nth-child(even) {
+	padding-left: 0;
+	padding-right: 32px;
+	border-right: var(--swiss-rule);
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child {
+	grid-column: 1 / -1;
+	padding: 40px 0;
+	border-right: 0;
+}
+
+@media (max-width: 699px) {
+	.swiss-feed .wp-block-post-template {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.swiss-feed .wp-block-post,
+	body:not(.paged) .swiss-feed--home .wp-block-post:nth-child(n) {
+		padding: 28px 0;
+		border-right: 0;
+	}
+}
+
+/* La carte : numéro, métadonnées, titre, résumé. */
+.swiss-card {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-areas:
+		"num meta"
+		"title title"
+		"excerpt excerpt";
+	column-gap: 16px;
+	row-gap: 14px;
+	align-items: baseline;
+}
+
+.swiss-card::before {
+	grid-area: num;
+	counter-increment: swiss-post;
+	content: counter(swiss-post, decimal-leading-zero);
+	content: counter(swiss-post, decimal-leading-zero) / "";
+	font-weight: 800;
+	font-size: 56px;
+	line-height: 1;
+	letter-spacing: -0.05em;
+	color: var(--swiss-ink);
+}
+
+.swiss-card > * {
+	margin: 0;
+	min-width: 0;
+}
+
+.swiss-meta {
+	grid-area: meta;
+	justify-self: end;
+	gap: 4px 12px;
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+	text-align: right;
+}
+
+.swiss-meta .wp-block-post-date,
+.swiss-meta .wp-block-post-terms {
+	margin: 0;
+	font-size: inherit;
+}
+
+.swiss-meta .wp-block-post-terms::before {
+	content: "·" / "";
+	margin-right: 12px;
+}
+
+.swiss-card .wp-block-post-title {
+	grid-area: title;
+	font-weight: 800;
+	font-size: 30px;
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+	overflow-wrap: anywhere;
+}
+
+.swiss-card .wp-block-post-title a {
+	text-decoration: none;
+}
+
+.swiss-card .wp-block-post-title a:hover {
+	color: var(--swiss-accent);
+}
+
+.swiss-card .wp-block-post-excerpt {
+	grid-area: excerpt;
+	font-size: 17px;
+	line-height: 1.55;
+	overflow-wrap: anywhere;
+}
+
+.swiss-card .wp-block-post-excerpt__excerpt {
+	margin: 0;
+}
+
+.swiss-visual {
+	display: none;
+}
+
+/* Le premier article de l'accueil : pleine largeur, numéro en accent, grand aplat à quadrillage. */
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-card {
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-areas:
+		"num meta"
+		"num title"
+		"num excerpt"
+		"visual visual";
+	column-gap: 32px;
+	row-gap: 18px;
+	align-items: start;
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-card::before {
+	font-size: clamp(64px, 8vw, 120px);
+	line-height: 0.8;
+	color: var(--swiss-accent);
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-meta {
+	justify-self: start;
+	text-align: left;
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-meta::before {
+	content: "Nouveau";
+	padding: 2px 8px;
+	background: var(--swiss-lime);
+	color: var(--swiss-ink);
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child .wp-block-post-title {
+	font-size: clamp(34px, 4.4vw, 64px);
+	line-height: 0.98;
+	letter-spacing: -0.03em;
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child .wp-block-post-excerpt {
+	max-width: 640px;
+	font-size: 19px;
+}
+
+body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-visual {
+	grid-area: visual;
+	display: block;
+	position: relative;
+	min-height: 220px;
+	overflow: hidden;
+	background-color: var(--swiss-accent);
+	background-image:
+		linear-gradient(rgb(250 250 247 / 20%) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(250 250 247 / 20%) 1px, transparent 1px);
+	background-size: 32px 32px;
+}
+
+.swiss-visual .wp-block-post-featured-image {
+	position: absolute;
+	inset: 0;
+	margin: 0;
+}
+
+.swiss-visual .wp-block-post-featured-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: 50% 50%;
+}
+
+@media (min-width: 1000px) {
+	body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-card {
+		grid-template-columns: auto minmax(0, 1.3fr) minmax(0, 1fr);
+		grid-template-areas:
+			"num meta visual"
+			"num title visual"
+			"num excerpt visual";
+		grid-template-rows: auto auto 1fr;
+	}
+
+	body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-visual {
+		min-height: 280px;
+	}
+}
+
+@media (max-width: 639px) {
+	body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-card {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"num"
+			"meta"
+			"title"
+			"excerpt"
+			"visual";
+		row-gap: 14px;
+	}
+
+	body:not(.paged) .swiss-feed--home .wp-block-post:first-child .swiss-card::before {
+		font-size: 72px;
+	}
+}
+
+/* ---------- Pagination, recherche et archives ---------- */
+
+.swiss-after {
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 0.87fr);
+	gap: 32px;
+	align-items: stretch;
+	margin-top: 56px;
+}
+
+.swiss-after > .wp-block-template-part {
+	display: contents;
+}
+
+.swiss-after--cards {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.swiss-after:not(:has(.wp-block-query-pagination)) {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 999px) {
+	.swiss-after,
+	.swiss-after:not(:has(.wp-block-query-pagination)) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.swiss-after > .wp-block-query-pagination {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (max-width: 639px) {
+	.swiss-after,
+	.swiss-after:not(:has(.wp-block-query-pagination)),
+	.swiss-after--cards {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 20px;
+		margin-top: 40px;
+	}
+}
+
+.swiss-pagination {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+	gap: 16px;
+	margin: 0;
+	min-width: 0;
+}
+
+.swiss-pagination:empty {
+	display: none;
+}
+
+.swiss-pagination .wp-block-query-pagination-next,
+.swiss-pagination .wp-block-query-pagination-previous {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+	margin: 0;
+	text-decoration: none;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.05;
+	overflow-wrap: anywhere;
+}
+
+.swiss-pagination .wp-block-query-pagination-next {
+	order: 1;
+	flex: 1 1 100%;
+	padding: 32px;
+	background: var(--swiss-ink);
+	color: var(--swiss-paper);
+	font-size: clamp(28px, 3vw, 44px);
+}
+
+.swiss-pagination .wp-block-query-pagination-next:hover {
+	color: var(--swiss-paper);
+	background: var(--swiss-accent);
+}
+
+.swiss-pagination .wp-block-query-pagination-next .wp-block-query-pagination-next-arrow {
+	color: var(--swiss-lime);
+	margin: 0;
+}
+
+.swiss-pagination .wp-block-query-pagination-numbers {
+	order: 2;
+	align-self: center;
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	margin: 0;
+}
+
+.swiss-pagination .wp-block-query-pagination-numbers .page-numbers {
+	display: inline-block;
+	padding: 6px 10px;
+	text-decoration: none;
+}
+
+.swiss-pagination .wp-block-query-pagination-numbers .page-numbers.current {
+	background: var(--swiss-ink);
+	color: var(--swiss-paper);
+}
+
+.swiss-pagination .wp-block-query-pagination-previous {
+	order: 3;
+	flex: 1 1 auto;
+	padding: 14px 20px;
+	border: var(--swiss-rule);
+	color: var(--swiss-ink);
+	font-size: 20px;
+}
+
+.swiss-pagination .wp-block-query-pagination-previous:hover {
+	background: var(--swiss-ink);
+	color: var(--swiss-paper);
+}
+
+.swiss-pagination .wp-block-query-pagination-previous .wp-block-query-pagination-previous-arrow {
+	margin: 0;
+	color: var(--swiss-accent);
+}
+
+.swiss-pagination .wp-block-query-pagination-previous:hover .wp-block-query-pagination-previous-arrow {
+	color: var(--swiss-lime);
+}
+
+/* Les cartes à filets : recherche et archives. */
+.swiss-card-box {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 10px;
+	min-width: 0;
+	padding: 20px;
+	border: var(--swiss-rule);
+}
+
+.swiss-card-box > * {
+	margin: 0;
+	min-width: 0;
+}
+
+.swiss-card-box label {
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+	font-weight: 400;
+	overflow-wrap: anywhere;
+}
+
+.swiss-card-box .wp-block-search__label {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.swiss-card-box .wp-block-search__inside-wrapper {
+	display: flex;
+	gap: 8px;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+.swiss-card-box .wp-block-search__input {
+	flex: 1 1 auto;
+	width: 100%;
+	min-width: 0;
+	padding: 10px 0;
+	border: 0;
+	border-bottom: var(--swiss-rule);
+	border-radius: 0;
+	background: transparent;
+	color: var(--swiss-ink);
+	font: inherit;
+	font-size: 18px;
+}
+
+.swiss-card-box .wp-block-search__input::placeholder {
+	color: var(--wp--preset--color--muted);
+	opacity: 1;
+}
+
+.swiss-card-box .wp-block-search__button {
+	flex: 0 0 48px;
+	width: 48px;
+	height: 48px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: var(--swiss-accent);
+	color: var(--swiss-paper);
+	cursor: pointer;
+}
+
+.swiss-card-box .wp-block-search__button:hover {
+	background: var(--swiss-ink);
+	color: var(--swiss-lime);
+}
+
+.swiss-card-box .wp-block-search__button svg {
+	fill: currentColor;
+	width: 26px;
+	height: 26px;
+	margin: auto;
+}
+
+.swiss-card-box .wp-block-archives select {
+	width: 100%;
+	max-width: 100%;
+	padding: 12px 0;
+	border: 0;
+	border-bottom: var(--swiss-rule);
+	border-radius: 0;
+	background: transparent;
+	color: var(--swiss-ink);
+	font: inherit;
+	font-size: 18px;
+}
+
+.swiss-card-box .wp-block-archives label {
+	display: block;
+	margin-bottom: 4px;
+}
+
+/* ---------- Article et page ---------- */
+
+.swiss-single {
+	padding-bottom: 8px;
+}
+
+.swiss-single-meta {
+	gap: 6px 24px;
+	padding: 12px 0;
+	border-top: var(--swiss-rule);
+	border-bottom: var(--swiss-rule);
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+}
+
+.swiss-single-meta > * {
+	margin: 0;
+	min-width: 0;
+}
+
+.swiss-single-meta .wp-block-jchable-post-filename {
+	font-size: inherit;
+}
+
+.swiss-single-meta .wp-block-post-terms a {
+	text-decoration: none;
+}
+
+.swiss-single-meta .wp-block-post-terms a:hover {
+	color: var(--swiss-accent);
+}
+
+.swiss-single-image {
+	margin: 32px 0 0;
+}
+
+.swiss-single-image img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: var(--swiss-rule);
+}
+
+.swiss-single .wp-block-post-content {
+	margin-top: 40px;
+	font-size: 18px;
+	line-height: 1.6;
+}
+
+.swiss-page .swiss-title {
+	border-bottom: var(--swiss-rule);
+	padding-bottom: 28px;
+}
+
+.swiss-single .wp-block-post-content a:not(.wp-element-button) {
+	text-decoration: underline;
+}
+
+.swiss-single .wp-block-post-content > :where(h2, h3, h4) {
+	margin-top: 2.2em;
+}
+
+.wp-block-post-content :is(pre, .wp-block-code) {
+	padding: 1rem;
+	border: var(--swiss-rule);
+	border-radius: 0;
+	background: var(--wp--preset--color--surface);
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.wp-block-post-content :where(code) {
+	font-family: var(--swiss-mono);
+	font-size: 0.9em;
+}
+
+.wp-block-post-content :is(table, th, td) {
+	border: 2px solid var(--swiss-ink);
+	border-collapse: collapse;
+}
+
+.wp-block-post-content :is(th, td) {
+	padding: 8px 12px;
+}
+
+.wp-block-post-content figcaption {
+	margin-top: 8px;
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+	color: var(--wp--preset--color--muted);
+}
+
+/* Commentaires */
+.post-comments {
+	max-width: var(--wp--style--global--content-size, 720px);
+	margin-top: 72px;
+	padding-top: 8px;
+	border-top: var(--swiss-rule);
+}
+
+.post-comments .wp-block-comments-title {
+	margin: 24px 0;
+	font-size: clamp(28px, 3vw, 40px);
+	line-height: 1;
+	letter-spacing: -0.03em;
+}
+
+.post-comments .wp-block-comment-template {
+	margin: 0 0 40px;
+	padding: 0;
+	list-style: none;
+}
+
+.post-comments .wp-block-comment-template > li {
+	padding: 20px 0;
+	border-top: var(--swiss-rule);
+	overflow-wrap: anywhere;
+}
+
+.post-comments .wp-block-comment-template > li > * {
+	margin-block: 0 8px;
+}
+
+.post-comments .wp-block-comment-author-name {
+	font-size: 18px;
+}
+
+.post-comments .wp-block-comment-date,
+.post-comments .wp-block-comment-reply-link {
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+}
+
+.post-comments .wp-block-post-comments-form {
+	margin-top: 32px;
+}
+
+.post-comments .comment-reply-title {
+	font-size: 28px;
+	letter-spacing: -0.03em;
+}
+
+.post-comments label {
+	display: block;
+	margin-bottom: 4px;
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+}
+
+.post-comments :is(textarea, input[type="text"], input[type="email"], input[type="url"]) {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+	padding: 10px 12px;
+	border: var(--swiss-rule);
+	border-radius: 0;
+	background: var(--wp--preset--color--surface);
+	color: var(--swiss-ink);
+	font: inherit;
+}
+
+.post-comments .comment-form-cookies-consent label {
+	display: inline;
+}
+
+.post-comments .wp-element-button {
+	padding: 14px 24px;
+	border: 0;
+	border-radius: 0;
+	cursor: pointer;
+	font: inherit;
+	font-weight: 800;
+}
+
+/* Article précédent / suivant */
+.post-nav {
+	gap: 32px;
+	margin-top: 56px;
+}
+
+.post-nav > * {
+	flex: 1 1 280px;
+	min-width: 0;
+	margin: 0;
+}
+
+.post-nav a {
+	display: block;
+	padding: 20px 24px;
+	border: var(--swiss-rule);
+	text-decoration: none;
+	font-weight: 800;
+	font-size: 22px;
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+	overflow-wrap: anywhere;
+}
+
+.post-nav a:hover {
+	background: var(--swiss-ink);
+	color: var(--swiss-paper);
+}
+
+.post-nav .wp-block-post-navigation-link-next,
+.post-nav .post-navigation-link-next {
+	text-align: right;
+}
+
+.post-nav .post-navigation-link__label {
+	display: block;
+	margin-bottom: 6px;
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+	font-weight: 400;
+	letter-spacing: 0;
+}
+
+/* ---------- Plan du site ---------- */
+
+.swiss-sitemap {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	margin-top: 8px;
+}
+
+.swiss-sitemap > * {
+	margin-block: 0;
+}
+
+.swiss-sitemap-section {
+	min-width: 0;
+	padding: 20px 32px 32px 0;
+	border-top: var(--swiss-rule);
+}
+
+.swiss-sitemap-section + .swiss-sitemap-section {
+	padding-left: 32px;
+	border-left: var(--swiss-rule);
+}
+
+.swiss-sitemap-section > * {
+	margin-block: 0;
+}
+
+.swiss-sitemap-section h2 {
+	margin-bottom: 14px;
+	font-family: var(--swiss-mono);
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0;
+	line-height: 1.4;
+}
+
+.swiss-sitemap-section :is(ul, ol) {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.swiss-sitemap-section li {
+	padding: 6px 0;
+	overflow-wrap: anywhere;
+}
+
+.swiss-sitemap-section li a {
+	font-weight: 800;
+	font-size: 20px;
+	letter-spacing: -0.02em;
+	text-decoration: none;
+}
+
+.swiss-sitemap-section li a:hover {
+	color: var(--swiss-accent);
+}
+
+@media (max-width: 899px) {
+	.swiss-sitemap {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.swiss-sitemap-section,
+	.swiss-sitemap-section + .swiss-sitemap-section {
+		padding: 20px 0 24px;
+		border-left: 0;
+	}
+}
+
+/* ---------- Page introuvable ---------- */
+
+.swiss-404 {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 16px 40px;
+	padding: 48px 0 40px;
+	border-bottom: var(--swiss-rule);
+}
+
+.swiss-404-code {
+	flex: 0 1 auto;
+	margin: 0;
+	font-weight: 800;
+	font-size: clamp(120px, 22vw, 340px);
+	line-height: 0.8;
+	letter-spacing: -0.07em;
+	color: var(--swiss-accent);
+}
+
+.swiss-404-text {
+	flex: 1 1 340px;
+	min-width: 0;
+}
+
+.swiss-404-text > * {
+	margin-block: 0 20px;
+}
+
+.swiss-404-text .swiss-title {
+	padding: 0;
+}
+
+.swiss-lead {
+	font-size: 19px;
+}
+
+.wp-block-jchable-request-path {
+	display: block;
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	overflow-wrap: anywhere;
+}
+
+.swiss-home-link {
+	margin-bottom: 0;
+}
+
+.swiss-home-link a {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+	padding: 24px 28px;
+	background: var(--swiss-ink);
+	color: var(--swiss-paper);
+	text-decoration: none;
+	font-weight: 800;
+	font-size: clamp(24px, 3vw, 36px);
+	letter-spacing: -0.02em;
+	line-height: 1.05;
+}
+
+.swiss-home-link a:hover {
+	background: var(--swiss-accent);
+	color: var(--swiss-paper);
+}
+
+.swiss-home-link .swiss-arrow {
+	color: var(--swiss-lime);
+}
+
+/* ---------- Pied de page : plein accent ---------- */
+
+.swiss-footer {
+	padding-block: 40px;
+	background: var(--swiss-accent);
+	color: var(--swiss-paper);
+}
+
+.swiss-footer-inner {
+	justify-content: space-between;
+	align-items: flex-end;
+	gap: 24px;
+}
+
+.swiss-what {
+	margin: 0;
+	font-weight: 800;
+	font-size: clamp(40px, 6vw, 88px);
+	line-height: 0.9;
+	letter-spacing: -0.05em;
+	overflow-wrap: anywhere;
+}
+
+.swiss-credits {
+	gap: 4px 12px;
+	font-family: var(--swiss-mono);
+	font-size: 14px;
+	min-width: 0;
+}
+
+.swiss-credits > * {
+	margin: 0;
+	min-width: 0;
+}
+
+.swiss-credits .wp-block-site-title {
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: 400;
+	letter-spacing: 0;
+	line-height: inherit;
+}
+
+.swiss-credits .wp-block-site-title::before {
+	content: "© ";
+}
+
+.swiss-credits > * + *::before {
+	content: "·" / "";
+	margin-right: 12px;
+}
+
+.swiss-footer a {
+	color: inherit;
+}
+
+.swiss-footer a:hover {
+	color: var(--swiss-lime);
+}
+
+/* Petits écrans : tout reste dans la largeur, quels que soient les textes. */
+@media (max-width: 639px) {
+	.swiss-bar {
+		padding: 12px 0;
+	}
+
+	.swiss-hero {
+		padding: 32px 0 28px;
+	}
+
+	.swiss-pagination .wp-block-query-pagination-next {
+		padding: 22px 20px;
+	}
+}
