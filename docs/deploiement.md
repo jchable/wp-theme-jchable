@@ -14,7 +14,7 @@ npm audit
 npm run zip
 ```
 
-Produit `dist/jchable.zip` (thème parent, environ 80 Ko) et `dist/jchable-bureau.zip` (thème enfant, avec le JavaScript compilé et DOOM, environ 3 Mo). Le thème Bureau a besoin du parent : installer les deux.
+Produit `dist/jchable.zip` (thème parent, environ 80 Ko), `dist/jchable-bureau.zip` (thème enfant, avec le JavaScript compilé et DOOM, environ 3 Mo), et `dist/jchable-swiss.zip` et `dist/jchable-arcade.zip` (deux autres designs, environ 0,3 Mo chacun, sans JavaScript). Tous les thèmes enfants ont besoin du parent : installer toujours `jchable.zip`. Les zips ne sont pas versionnés (`dist/` est ignoré par git) : on les refait à volonté depuis le code ; il n'y a rien d'autre à versionner pour déployer.
 
 Si votre hébergeur limite le téléversement à 2 Mo (voir Médias › Ajouter), fabriquer plutôt la version légère :
 

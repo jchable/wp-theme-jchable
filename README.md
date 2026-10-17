@@ -1,6 +1,14 @@
 # jchable : thèmes WordPress pour julien.chable.net
 
-Thèmes blocs WordPress pour le blog https://julien.chable.net : un thème parent, `jchable`, et un thème enfant par design. Le premier design livré s'appelle **Bureau** (`jchable-bureau`) : le blog habillé en bureau d'ordinateur rétro, avec des fenêtres, des icônes déplaçables, une barre des tâches, un menu Démarrer, un écran bleu pour la page 404 et des applis cachées dans le blog.
+Thèmes blocs WordPress pour le blog https://julien.chable.net : un thème parent, `jchable`, et un thème enfant par design. Trois designs sont livrés :
+
+| Thème | Dossier | Style |
+|---|---|---|
+| **Bureau** | `jchable-bureau` | le blog habillé en bureau d'ordinateur rétro : fenêtres, icônes déplaçables, barre des tâches, menu Démarrer, écran bleu pour la 404 et applis cachées dans le blog |
+| **Swiss Électrique** | `jchable-swiss` | design typographique suisse : énormes titres, filets noirs, articles numérotés, accent électrique |
+| **Arcade Sobre** | `jchable-arcade` | ambiance arcade sobre : pixels, néons sur fond nuit, articles en « stages », « high score » réel |
+
+Bureau est le plus complet (interactif, bilingue français/anglais). Swiss et Arcade sont en CSS pur, sans JavaScript, en français seulement pour l'instant.
 
 Le blog reste un vrai blog : les articles, les pages, les commentaires, le flux RSS et la recherche fonctionnent sans JavaScript. Le bureau interactif s'ajoute par-dessus, sur grand écran.
 
@@ -71,8 +79,10 @@ Cela compile le JavaScript puis produit, dans `dist/` :
 |---|---|---|
 | `jchable.zip` | thème parent | ≈ 80 Ko |
 | `jchable-bureau.zip` | thème enfant, JavaScript compilé et DOOM compris | ≈ 3 Mo |
+| `jchable-swiss.zip` | thème enfant Swiss Électrique | ≈ 0,3 Mo |
+| `jchable-arcade.zip` | thème enfant Arcade Sobre | ≈ 0,3 Mo |
 
-Le thème Bureau a besoin du parent : installez les deux.
+Tous les thèmes enfants ont besoin du parent : installez toujours `jchable.zip`. Pour essayer un autre design, téléversez de la même façon `jchable-swiss.zip` ou `jchable-arcade.zip`, puis utilisez **Aperçu en direct** (rien ne change pour les visiteurs tant que vous n'activez pas).
 
 Si votre hébergeur limite le téléversement à 2 Mo (voir Médias › Ajouter), fabriquez la version légère :
 
@@ -136,9 +146,11 @@ Le code du bureau est en TypeScript (Vite). `npm run build:js` doit être relanc
 | `npm run test:security:php` | contrôles des permissions REST, métadonnées et échappement sur le WordPress local de test |
 | `npm run test:e2e` | tests Playwright du thème parent (active `jchable`) |
 | `npm run test:e2e:bureau` | tests Playwright du thème Bureau (active `jchable-bureau`) |
-| `npm run check -- <thème>` | Theme Check (`jchable` ou `jchable-bureau`) ; `npm run check:all` pour les deux |
+| `npm run test:e2e:swiss` | tests Playwright du thème Swiss (active `jchable-swiss`) |
+| `npm run test:e2e:arcade` | tests Playwright du thème Arcade (active `jchable-arcade`) |
+| `npm run check -- <thème>` | Theme Check d'un thème (`jchable`, `jchable-bureau`, `jchable-swiss` ou `jchable-arcade`) ; `npm run check:all` pour les quatre |
 | `npm run demo:video` | filme le bureau (Terminal, DOOM, Démineur, écrans de veille, 404) et écrit `dist/demo/bureau-demo.mp4` ; demande WordPress local démarré et ffmpeg |
-| `npm run zip` | compile le JS puis génère `dist/<thème>.zip` pour chaque thème ; `npm run zip -- --no-doom` fabrique `jchable-bureau-sans-doom.zip` (léger) |
+| `npm run zip` | compile le JS puis génère `dist/<thème>.zip` pour chaque thème (parent, Bureau, Swiss, Arcade) ; `npm run zip -- jchable jchable-swiss` n'en fabrique que certains ; `npm run zip -- --no-doom` fabrique `jchable-bureau-sans-doom.zip` (léger) |
 
 ## Tests
 
@@ -162,6 +174,8 @@ npm run test:security:php
 npm run check:all
 npm run test:e2e
 npm run test:e2e:bureau
+npm run test:e2e:swiss
+npm run test:e2e:arcade
 ```
 
 Les tests Playwright tournent à trois tailles (ordinateur 1440 px, tablette 768 px, téléphone 390 px), en français par défaut (l'anglais est testé explicitement), avec des contrôles d'accessibilité axe.
@@ -173,6 +187,8 @@ Les deux suites Playwright (`test:e2e` pour le parent et `test:e2e:bureau`) part
 ```
 themes/jchable/             thème parent : theme.json, gabarits, blocs dynamiques
 themes/jchable-bureau/      thème enfant Bureau : gabarits, parties, blocs, CSS, polices, icônes
+themes/jchable-swiss/       thème enfant Swiss Électrique : gabarits, parties, CSS, polices
+themes/jchable-arcade/      thème enfant Arcade Sobre : gabarits, parties, blocs (stage, high-score), CSS, polices
   assets/dist/              JS compilé (généré, non versionné)
   assets/doom/              moteur WebAssembly et données de DOOM (voir son README)
 packages/bureau-desktop/    code TypeScript du bureau interactif
@@ -182,6 +198,8 @@ packages/bureau-desktop/    code TypeScript du bureau interactif
 tools/                      contenu de test, Theme Check, polices, zips
 tests/e2e/                  tests Playwright du thème parent
 tests/e2e-bureau/           tests Playwright du thème Bureau
+tests/e2e-swiss/            tests Playwright du thème Swiss
+tests/e2e-arcade/           tests Playwright du thème Arcade
 docs/                       conception, plans et guide de déploiement
 dist/                       zips générés (non versionnés)
 ```
@@ -219,7 +237,7 @@ L'écran de veille automatique ne se lance que sur l'accueil, les archives et la
 
 **Ajouter un écran de veille** : créez `src/ui/screensaver/scenes/<id>.ts` qui exporte `create: SceneFactory` (voir `scenes/types.ts` et `scenes/math3d.ts`), inscrivez-le dans `catalog.ts` (nom et description en français et en anglais) et `loader.ts`, puis testez-le avec `expectSceneConforms` (`scenes/testing.ts`) : il vérifie les tailles extrêmes, les valeurs finies et le déterminisme. Tout le hasard passe par `context.rng`.
 
-**Ajouter un design** : créez un nouveau thème enfant dans `themes/` qui déclare `jchable` comme parent ; les autres designs prévus (Swiss, Pixel Pro, Arcade, Console) suivront la même structure.
+**Ajouter un design** : créez un nouveau thème enfant dans `themes/` qui déclare `jchable` comme parent (voir `themes/jchable-swiss/` pour un exemple en CSS pur, sans JavaScript), ajoutez-le à `themes` dans `.wp-env.json` pour le monter dans le WordPress local, copiez `playwright.swiss.config.ts` pour sa suite de tests, et ajoutez-le à `check:all` dans `package.json`. Les designs encore à faire (Pixel Pro, Console) suivront la même structure.
 
 ## Données du visiteur
 
