@@ -1,0 +1,280 @@
+/* « Propriétés de Date/heure » : une fenêtre flottante au-dessus de l'horloge de la barre des tâches. */
+
+.bclock-pop {
+  --bclock-ink: var(--wp--preset--color--contrast, #101010);
+  --bclock-paper: var(--wp--preset--color--base, #F2F0EA);
+  --bclock-yellow: var(--wp--preset--color--yellow, #FFE14D);
+  --bclock-accent: var(--wp--preset--color--accent, #2D3FC8);
+  position: fixed;
+  z-index: 100000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  padding: 0.75rem;
+  border: 2px solid var(--bclock-ink);
+  background: var(--bclock-paper);
+  box-shadow: 6px 6px 0 var(--bclock-ink);
+  color: var(--bclock-ink);
+  font-family: var(--wp--preset--font-family--mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+}
+
+.bclock-pop *,
+.bclock-pop *::before,
+.bclock-pop *::after {
+  box-sizing: border-box;
+}
+
+.bclock-pop:focus {
+  outline: none;
+}
+
+.bclock-cal {
+  display: flex;
+  flex: 0 0 17.5rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.bclock-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bclock-nav-btn,
+.bclock-today-btn {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0 0.5rem;
+  border: 2px solid var(--bclock-ink);
+  background: #fff;
+  box-shadow: 2px 2px 0 var(--bclock-ink);
+  color: var(--bclock-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bclock-nav-btn:hover,
+.bclock-today-btn:hover {
+  background: var(--bclock-yellow);
+}
+
+.bclock-nav-btn:active,
+.bclock-today-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.bclock-month,
+.bclock-year {
+  min-height: 2rem;
+  padding: 0 0.25rem;
+  border: 2px solid var(--bclock-ink);
+  background: #fff;
+  color: var(--bclock-ink);
+  font: inherit;
+  text-transform: capitalize;
+}
+
+.bclock-month {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.bclock-year {
+  width: 5.25rem;
+  text-transform: none;
+}
+
+.bclock-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 2px;
+  border: 2px solid var(--bclock-ink);
+  background: #fff;
+  table-layout: fixed;
+}
+
+.bclock-grid th {
+  padding: 0.25rem 0;
+  border-bottom: 2px solid var(--bclock-ink);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.bclock-day {
+  padding: 0;
+  text-align: center;
+}
+
+.bclock-day-btn {
+  display: block;
+  width: 100%;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--bclock-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.bclock-day-btn:hover {
+  background: color-mix(in srgb, var(--bclock-yellow) 55%, transparent);
+}
+
+.bclock-out .bclock-day-btn {
+  color: #5f5f58;
+}
+
+.bclock-today .bclock-day-btn {
+  border-color: var(--bclock-ink);
+  font-weight: 700;
+}
+
+.bclock-day[aria-selected="true"] .bclock-day-btn {
+  background: var(--bclock-accent);
+  color: #fff;
+}
+
+.bclock-day-btn:focus-visible,
+.bclock-nav-btn:focus-visible,
+.bclock-today-btn:focus-visible,
+.bclock-month:focus-visible,
+.bclock-year:focus-visible {
+  outline: 3px solid var(--bclock-ink);
+  outline-offset: 1px;
+}
+
+.bclock-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Horloge analogique. */
+
+.bclock-time {
+  display: flex;
+  flex: 0 0 10.5rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  margin-inline: auto;
+}
+
+.bclock-face {
+  width: 9.5rem;
+  height: 9.5rem;
+}
+
+.bclock-dial {
+  fill: #fff;
+  stroke: var(--bclock-ink);
+  stroke-width: 3;
+}
+
+.bclock-tick {
+  stroke: var(--bclock-ink);
+  stroke-width: 1;
+}
+
+.bclock-tick--major {
+  stroke-width: 3;
+}
+
+.bclock-num {
+  fill: var(--bclock-ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bclock-hand {
+  transform-box: view-box;
+  transform-origin: 80px 80px;
+}
+
+.bclock-hand line {
+  stroke: var(--bclock-ink);
+  stroke-linecap: square;
+}
+
+.bclock-hand--hour line {
+  stroke-width: 5;
+}
+
+.bclock-hand--minute line {
+  stroke-width: 3;
+}
+
+.bclock-hand--second line {
+  stroke: var(--bclock-accent);
+  stroke-width: 1.5;
+}
+
+/* Les secondes avancent d'un petit bond ; avec « moins d'animations », elles sautent sans transition. */
+.bclock-hand--second {
+  transition: transform 0.25s cubic-bezier(0.4, 2.2, 0.5, 1);
+}
+
+.bclock--still .bclock-hand--second {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bclock-hand--second {
+    transition: none;
+  }
+  .bclock-nav-btn:active,
+  .bclock-today-btn:active {
+    transform: none;
+  }
+}
+
+.bclock-pin {
+  fill: var(--bclock-yellow);
+  stroke: var(--bclock-ink);
+  stroke-width: 2;
+}
+
+.bclock-digital {
+  padding: 0.125rem 0.625rem;
+  border: 2px solid var(--bclock-ink);
+  background: #fff;
+  box-shadow: inset 2px 2px 0 rgba(16, 16, 16, 0.18);
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.bclock-tz {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.bclock-tz-id {
+  color: #4a4a44;
+}
+
+@media (max-width: 30rem) {
+  .bclock-pop {
+    gap: 0.75rem;
+  }
+}

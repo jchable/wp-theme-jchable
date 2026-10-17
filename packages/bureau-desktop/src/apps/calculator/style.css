@@ -1,0 +1,139 @@
+.bapp-calc {
+  --bapp-calc-ink: var(--wp--preset--color--contrast, #101010);
+  --bapp-calc-paper: var(--wp--preset--color--base, #F2F0EA);
+  --bapp-calc-yellow: var(--wp--preset--color--yellow, #FFE14D);
+  --bapp-calc-accent: var(--wp--preset--color--accent, #2D3FC8);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 28rem; /* en plein écran, le clavier ne s'étire pas sur toute la largeur */
+  height: 100%;
+  min-height: 0;
+  margin-inline: auto;
+  box-sizing: border-box;
+  padding: 10px;
+  background: var(--bapp-calc-paper);
+  color: var(--bapp-calc-ink);
+  font-family: var(--wp--preset--font-family--mono, ui-monospace, monospace);
+  font-size: 0.9375rem;
+  outline: none;
+}
+
+.bapp-calc *,
+.bapp-calc *::before,
+.bapp-calc *::after {
+  box-sizing: border-box;
+}
+
+.bapp-calc [hidden] {
+  display: none !important;
+}
+
+/* Afficheur : à droite, chiffres gras, un peu d'ombre intérieure pour le creux. */
+.bapp-calc-display {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  min-height: 3rem;
+  padding: 0.25rem 0.625rem;
+  overflow: hidden;
+  border: 2px solid var(--bapp-calc-ink);
+  background: #fff;
+  box-shadow: inset 3px 3px 0 rgba(16, 16, 16, 0.18);
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.bapp-calc-display--error {
+  font-size: 0.9375rem;
+  white-space: normal;
+}
+
+.bapp-calc-top {
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.bapp-calc-memory {
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--bapp-calc-ink);
+  background: #fff;
+  font-weight: 700;
+}
+
+.bapp-calc-clears {
+  display: flex;
+  gap: 6px;
+}
+
+.bapp-calc-clears > .bapp-calc-key {
+  flex: 1 1 0;
+  min-height: 2.25rem;
+}
+
+.bapp-calc-grid {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-auto-rows: minmax(2.25rem, 1fr);
+  gap: 6px;
+  max-height: 28rem;
+}
+
+.bapp-calc-key {
+  min-width: 0;
+  padding: 0;
+  border: 2px solid var(--bapp-calc-ink);
+  background: #e2ded3;
+  box-shadow: 2px 2px 0 var(--bapp-calc-ink);
+  color: var(--bapp-calc-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bapp-calc-key--digit {
+  background: #fff;
+}
+
+.bapp-calc-key--op {
+  background: var(--bapp-calc-yellow);
+}
+
+.bapp-calc-key--clear {
+  color: #8a1c0f;
+}
+
+.bapp-calc-key--memory {
+  color: var(--bapp-calc-accent);
+}
+
+.bapp-calc-key:hover {
+  background: var(--bapp-calc-accent);
+  color: #fff;
+}
+
+.bapp-calc-key:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.bapp-calc-key:focus-visible {
+  outline: 3px solid var(--bapp-calc-ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bapp-calc-key:active {
+    transform: none;
+  }
+}

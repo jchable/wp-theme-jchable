@@ -16,14 +16,14 @@ async function openFromStartMenu(page: Page, title: string): Promise<void> {
 test.describe('bureau : grand écran', () => {
   test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
 
-  test('9 icônes : 3 du menu du site et 6 applis ; le menu d’origine est masqué', async ({ page }) => {
+  test('11 icônes : 3 du menu du site et 8 applis ; le menu d’origine est masqué', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(9);
+    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
     // Le plan du site et le RSS sont dans la barre des tâches, pas sur le bureau.
     await expect(page.locator('#bureau-desktop .bicon', { hasText: 'Plan du site' })).toHaveCount(0);
     await expect(page.locator('#bureau-desktop .bicon', { hasText: 'RSS' })).toHaveCount(0);
     await expect(page.locator('.desktop-icons')).toBeHidden();
-    for (const label of ['Accueil', 'Terminal', 'Démineur.exe', 'WORDPAD.EXE', 'Oh-Oh! Messenger', 'Corbeille', 'DOOM.EXE']) {
+    for (const label of ['Accueil', 'Terminal', 'Calculatrice', 'Paint', 'Démineur.exe', 'WORDPAD.EXE', 'Oh-Oh! Messenger', 'Corbeille', 'DOOM.EXE']) {
       await expect(page.locator('#bureau-desktop .bicon', { hasText: label })).toBeVisible();
     }
   });
@@ -143,7 +143,8 @@ test.describe('bureau : grand écran', () => {
 
   test('Maj + flèche déplace une icône au clavier', async ({ page }) => {
     await page.goto('/');
-    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Terminal' });
+    // La Calculatrice est la dernière icône de la première colonne (6 + 5) : la case à sa droite est libre.
+    const icon = page.locator('#bureau-desktop .bicon', { hasText: 'Calculatrice' });
     const start = await icon.boundingBox();
     await icon.focus();
     await page.keyboard.press('Shift+ArrowRight');
@@ -498,7 +499,7 @@ test.describe('correctifs issus de la relecture indépendante', () => {
       await page.setViewportSize({ width, height: 900 });
       await expect(page.locator('html')).toHaveClass(width >= 900 ? /bureau-desktop-on/ : /^((?!bureau-desktop-on).)*$/);
     }
-    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(9);
+    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
     await page.mouse.click(30, 820, { button: 'right' });
     await expect(page.locator('.bctx')).toHaveCount(1);
   });
@@ -552,7 +553,7 @@ test.describe('correctifs issus de la relecture indépendante', () => {
       link?.setAttribute('href', '#');
     });
     await page.reload();
-    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(9);
+    await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
   });
 });
 
@@ -699,15 +700,32 @@ test.describe('bande d’icônes : jamais cachée, adaptée à la largeur', () =
     return distinct.map((left) => lefts.filter((l) => l === left).length);
   };
 
-  test('deux colonnes avec le même nombre d’icônes (5 et 4), jamais 7 et 2', async ({ page }) => {
+  test('deux colonnes avec presque le même nombre d’icônes (6 et 5), jamais 8 et 3', async ({ page }) => {
     await page.goto('/');
-    expect(await columns(page)).toEqual([5, 4]);
+    expect(await columns(page)).toEqual([6, 5]);
   });
+
+  for (const [width, height] of [[1440, 900], [1366, 768], [1280, 720], [1920, 1080], [2560, 1300]] as const) {
+    test(`les 11 icônes tiennent sans défilement, en colonnes équilibrées, à ${width}×${height}`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto('/');
+      await expect(page.locator('#bureau-desktop .bicon')).toHaveCount(11);
+      const scrolls = await page.locator('#bureau-desktop').evaluate((el) => el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth);
+      expect(scrolls, 'la bande ne défile pas').toBe(false);
+      const perColumn = await columns(page);
+      expect(Math.max(...perColumn) - Math.min(...perColumn)).toBeLessThanOrEqual(1);
+      const band = (await page.locator('#bureau-desktop').boundingBox())!;
+      for (const box of await page.locator('#bureau-desktop .bicon').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON()))) {
+        expect(box.bottom).toBeLessThanOrEqual(band.y + band.height + 1);
+        expect(box.right).toBeLessThanOrEqual(band.x + band.width + 1);
+      }
+    });
+  }
 
   test('une seule colonne sur un écran très haut ou étroit', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1300 });
     await page.goto('/');
-    expect(await columns(page)).toEqual([9]);
+    expect(await columns(page)).toEqual([11]);
     await page.setViewportSize({ width: 1000, height: 900 });
     await expect.poll(async () => (await columns(page)).length).toBe(1);
   });
@@ -776,6 +794,8 @@ test.describe('un seul bureau, même après le chargement d’une appli', () => 
 
   const APPS: Array<[string, string]> = [
     ['Terminal', 'terminal'],
+    ['Calculatrice', 'calculator'],
+    ['Paint', 'paint'],
     ['Démineur.exe', 'minesweeper'],
     ['WORDPAD.EXE', 'wordpad'],
     ['Oh-Oh! Messenger', 'messenger'],
@@ -795,7 +815,7 @@ test.describe('un seul bureau, même après le chargement d’une appli', () => 
         layers: document.querySelectorAll('#bureau-windows').length,
         taskbarTabs: document.querySelectorAll('.bwin-tabs').length,
       }));
-      expect(counts).toEqual({ icons: 9, desktops: 1, layers: 1, taskbarTabs: 1 });
+      expect(counts).toEqual({ icons: 11, desktops: 1, layers: 1, taskbarTabs: 1 });
     });
   }
 

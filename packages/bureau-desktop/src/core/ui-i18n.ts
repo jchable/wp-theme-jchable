@@ -42,10 +42,14 @@ export const messages = {
     'shutdown.text': 'Vous pouvez maintenant éteindre votre ordinateur.',
     'shutdown.hint': 'Cliquez ou appuyez sur une touche pour redémarrer.',
 
+    'clock.label': 'Date et heure',
+
     'icons.hint': 'Double-cliquez pour ouvrir',
     'icons.group': 'Icônes du bureau',
 
     'app.terminal': 'Terminal',
+    'app.calculator': 'Calculatrice',
+    'app.paint': 'Paint',
     'app.minesweeper': 'Démineur.exe',
     'app.wordpad': 'WORDPAD.EXE',
     'app.messenger': 'Oh-Oh! Messenger',
@@ -95,10 +99,14 @@ export const messages = {
     'shutdown.text': 'It is now safe to turn off your computer.',
     'shutdown.hint': 'Click or press a key to restart.',
 
+    'clock.label': 'Date and time',
+
     'icons.hint': 'Double-click to open',
     'icons.group': 'Desktop icons',
 
     'app.terminal': 'Terminal',
+    'app.calculator': 'Calculator',
+    'app.paint': 'Paint',
     'app.minesweeper': 'Minesweeper.exe',
     'app.wordpad': 'WORDPAD.EXE',
     'app.messenger': 'Oh-Oh! Messenger',

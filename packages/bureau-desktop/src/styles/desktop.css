@@ -87,7 +87,7 @@ html.bureau-desktop-on .sidebar-windows .window {
 	gap: 0.375rem;
 	box-sizing: border-box;
 	width: 92px;
-	padding: 0.375rem;
+	padding: 0.375rem 0.25rem;
 	border: 0;
 	background: transparent;
 	color: #fff;
@@ -111,6 +111,13 @@ html.bureau-desktop-on .sidebar-windows .window {
 	padding: 0 0.25rem;
 	overflow-wrap: anywhere;
 	pointer-events: none;
+}
+
+/* Les noms de 11 caractères et plus (Calculatrice, Démineur.exe, WORDPAD.EXE) tiennent sur une seule ligne. */
+.bicon-label--long {
+	padding: 0;
+	font-size: 0.6875rem;
+	letter-spacing: -0.02em;
 }
 
 .bicon--selected .bicon-label {
@@ -375,6 +382,42 @@ html:not(.bureau-desktop-on) .bwin-handle {
 .bwin-tab[aria-pressed="true"] {
 	background: #fff;
 	box-shadow: inset 2px 2px 0 rgba(16, 16, 16, 0.3);
+}
+
+/* L'heure est un bouton (ouvre le calendrier) : il ne montre que l'heure, elle garde son cadre. */
+.taskbar-clock-button {
+	display: inline-flex;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+/* Libellé pour les lecteurs d'écran seulement. */
+.taskbar-clock-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.taskbar-clock-button:hover .taskbar-clock {
+	background: var(--b-yellow);
+}
+
+.taskbar-clock-button[aria-expanded="true"] .taskbar-clock {
+	background: #e2ded3;
+	box-shadow: inset 2px 2px 0 rgba(16, 16, 16, 0.3);
+}
+
+.taskbar-clock-button:focus-visible {
+	outline: 3px solid var(--b-ink);
+	outline-offset: 2px;
 }
 
 /* ---------- Menu Démarrer et menu contextuel ---------- */

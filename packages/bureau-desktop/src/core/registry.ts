@@ -17,6 +17,26 @@ export const APPS: readonly BureauApp[] = [
     load: () => import('../apps/terminal/index'),
   },
   {
+    id: 'calculator',
+    get title() {
+      return t('app.calculator');
+    },
+    icon: 'calculator',
+    defaultSize: { w: 280, h: 360 },
+    mobile: 'fullscreen',
+    load: () => import('../apps/calculator/index'),
+  },
+  {
+    id: 'paint',
+    get title() {
+      return t('app.paint');
+    },
+    icon: 'paint',
+    defaultSize: { w: 740, h: 590 }, // assez grande pour montrer tout le canevas de 640×400, sans barres de défilement
+    mobile: 'fullscreen',
+    load: () => import('../apps/paint/index'),
+  },
+  {
     id: 'minesweeper',
     get title() {
       return t('app.minesweeper');

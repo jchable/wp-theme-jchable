@@ -41,13 +41,15 @@ Le blog reste un vrai blog : les articles, les pages, les commentaires, le flux 
 **Le bureau interactif** (grand écran, JavaScript)
 - Icônes déplaçables dans une bande à gauche, qui s'adapte à la largeur de l'écran et n'est jamais recouverte ; leur place est mémorisée.
 - Fenêtres déplaçables, réductibles, agrandissables (le bouton devient « Restaurer » quand la fenêtre est agrandie) et fermables avec Échap.
-- Barre des tâches avec bouton Démarrer, onglets des fenêtres ouvertes, raccourcis vers le plan du site et le flux RSS, et horloge.
+- Barre des tâches avec bouton Démarrer, onglets des fenêtres ouvertes, raccourcis vers le plan du site et le flux RSS, et horloge (qui ouvre un calendrier).
 - Menu Démarrer : programmes, derniers articles, liens du blog, préférences, arrêt.
 - Pages « À propos » et autres pages du menu ouvertes dans une fenêtre, sans quitter la page.
 - Fenêtre **Préférences** : écran de veille, langue, son, rangement des icônes.
 - Quatre **écrans de veille 3D** (tunnel néon, fenêtres flottantes, graphe de connaissances, bureau en voxels).
 
-**Les applis** : Terminal, Démineur, WordPad (qui peut partir de l'article en cours), messagerie « Oh-Oh! » (les derniers commentaires du blog), Corbeille, DOOM jouable (WebAssembly), Propriétés système et Préférences.
+**Les applis** : Terminal, Démineur, WordPad (qui peut partir de l'article en cours), messagerie « Oh-Oh! » (les derniers commentaires du blog), Corbeille, DOOM jouable (WebAssembly), **Calculatrice** et **Paint** façon Windows 95, Propriétés système et Préférences.
+
+**Calendrier et horloge** : un clic sur l'heure de la barre des tâches ouvre un calendrier mensuel (premier jour de semaine selon la langue, navigation au clavier) et une horloge analogique, dans le style du thème.
 
 **Interface bilingue** français / anglais, sans plugin. Le contenu des articles n'est jamais traduit.
 
@@ -194,6 +196,7 @@ themes/jchable-arcade/      thème enfant Arcade Sobre : gabarits, parties, bloc
 packages/bureau-desktop/    code TypeScript du bureau interactif
   src/core/                 préférences, grille des icônes, fenêtres, sons, registre des applis
   src/ui/                   icônes du bureau, barre des tâches, menu Démarrer, écrans de veille…
+  src/ui/clockCalendar/     calendrier et horloge de la barre des tâches (chargés au premier clic)
   src/apps/<appli>/         une appli par dossier, chargée seulement à son lancement
 tools/                      contenu de test, Theme Check, polices, zips
 tests/e2e/                  tests Playwright du thème parent
@@ -234,6 +237,8 @@ L'écran de veille automatique ne se lance que sur l'accueil, les archives et la
 ## Étendre le bureau
 
 **Ajouter une appli** : créez `packages/bureau-desktop/src/apps/<id>/index.ts` (elle exporte `mount` et `unmount`) et son `i18n.ts`, déclarez-la dans `src/core/registry.ts` (taille, icône, comportement sur mobile) et ajoutez son titre dans `src/core/ui-i18n.ts`. Elle n'est téléchargée qu'à son premier lancement. Les tests d'une appli utilisent un faux contexte (`AppContext`, défini dans `src/core/types.ts`).
+
+**Modèles à suivre** : la Calculatrice (`src/apps/calculator/`) sépare un moteur pur (`engine.ts`) de l'interface ; Paint (`src/apps/paint/`) garde toute sa logique de dessin (remplissage, tracés, annulation) dans des modules purs testables sans canevas.
 
 **Ajouter un écran de veille** : créez `src/ui/screensaver/scenes/<id>.ts` qui exporte `create: SceneFactory` (voir `scenes/types.ts` et `scenes/math3d.ts`), inscrivez-le dans `catalog.ts` (nom et description en français et en anglais) et `loader.ts`, puis testez-le avec `expectSceneConforms` (`scenes/testing.ts`) : il vérifie les tailles extrêmes, les valeurs finies et le déterminisme. Tout le hasard passe par `context.rng`.
 

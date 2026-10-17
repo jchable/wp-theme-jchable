@@ -1,4 +1,6 @@
+import { t } from '../core/ui-i18n';
 import type { WindowManager } from '../core/windows';
+import type { ClockCalendar } from './clockCalendar/popup';
 
 export interface TaskbarOptions {
   root: HTMLElement;
@@ -13,6 +15,9 @@ export class Taskbar {
   private clockTimer: number | undefined;
   private unsubscribe: (() => void) | null = null;
   private readonly start: HTMLElement | null;
+  private clockButton: HTMLButtonElement | null = null;
+  private calendar: ClockCalendar | null = null;
+  private calendarLoading = false;
 
   constructor(private readonly options: TaskbarOptions) {
     const { root } = options;
@@ -40,18 +45,62 @@ export class Taskbar {
     }
     this.unsubscribe = this.options.windows.subscribe(() => this.renderTabs());
     this.renderTabs();
+    this.upgradeClock();
     this.tickClock();
     this.clockTimer = window.setInterval(() => this.tickClock(), 15_000);
   }
 
   destroy(): void {
     window.clearInterval(this.clockTimer);
+    this.calendar?.destroy();
+    this.calendar = null;
     this.unsubscribe?.();
     this.tabs.remove();
   }
 
   setStartExpanded(expanded: boolean): void {
     this.start?.setAttribute('aria-expanded', String(expanded));
+  }
+
+  /** L'heure devient un vrai bouton : Entrée, Espace ou clic ouvrent le calendrier (chargé à ce moment-là). */
+  private upgradeClock(): void {
+    const clock = this.options.root.querySelector<HTMLTimeElement>('time.taskbar-clock');
+    if (!clock || this.clockButton) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'taskbar-clock-button';
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.setAttribute('aria-expanded', 'false');
+    // Le nom du bouton est « Date et heure » suivi de l'heure affichée : il contient donc le texte visible (WCAG 2.5.3).
+    const label = document.createElement('span');
+    label.className = 'taskbar-clock-label';
+    label.textContent = t('clock.label');
+    clock.replaceWith(button);
+    button.append(label, clock);
+    button.addEventListener('click', () => void this.toggleCalendar());
+    this.clockButton = button;
+  }
+
+  private async toggleCalendar(): Promise<void> {
+    const button = this.clockButton;
+    if (!button || this.calendarLoading) return;
+    if (!this.calendar) {
+      this.calendarLoading = true;
+      try {
+        const { createClockCalendar } = await import('./clockCalendar/popup');
+        this.calendar = createClockCalendar({
+          anchor: button,
+          onToggle: (open) => button.setAttribute('aria-expanded', String(open)),
+        });
+        this.calendar.open();
+      } catch {
+        /* le module n'a pas pu se charger : le prochain clic réessaiera */
+      } finally {
+        this.calendarLoading = false;
+      }
+      return;
+    }
+    this.calendar.toggle();
   }
 
   private tickClock(): void {
