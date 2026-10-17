@@ -3,9 +3,9 @@ import { setLang, missingKeys } from '../../../core/i18n';
 import { DEFAULT_SCENE, SCENE_IDS, isSceneId, messages, sceneDescription, sceneLabel } from './catalog';
 
 describe('catalogue des écrans de veille', () => {
-  it('propose les quatre scènes 3D, avec le tunnel par défaut', () => {
+  it('propose les quatre scènes 3D, avec le bureau en voxels par défaut', () => {
     expect(SCENE_IDS).toEqual(['tunnel', 'windows', 'graph', 'voxel']);
-    expect(DEFAULT_SCENE).toBe('tunnel');
+    expect(DEFAULT_SCENE).toBe('voxel');
   });
 
   it('reconnaît les identifiants valides seulement', () => {

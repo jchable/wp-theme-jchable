@@ -202,10 +202,10 @@ describe('createScreensaver : scènes 3D', () => {
     s.stop();
   });
 
-  it('sans préférence ni aperçu, c’est le tunnel néon', () => {
+  it('sans préférence ni aperçu, c’est le bureau en voxels', () => {
     const s = createScreensaver({ reducedMotion: () => false, requestFrame: requestFrame as never, cancelFrame: vi.fn() as never, loadScene: loadScene as never, context });
     s.start();
-    expect(loadScene).toHaveBeenCalledWith('tunnel');
+    expect(loadScene).toHaveBeenCalledWith('voxel');
     s.stop();
   });
 });

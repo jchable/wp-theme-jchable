@@ -1,6 +1,6 @@
 import { SAVER_DELAYS } from '../../core/prefs';
 import type { AppContext, DesktopSettings } from '../../core/types';
-import { SCENE_IDS, sceneDescription, sceneLabel } from '../../ui/screensaver/scenes/catalog';
+import { DEFAULT_SCENE, SCENE_IDS, sceneDescription, sceneLabel } from '../../ui/screensaver/scenes/catalog';
 import { t } from './i18n';
 
 let root: HTMLElement | null = null;
@@ -47,7 +47,7 @@ export function mount(host: HTMLElement, ctx: AppContext): void {
   ctx.setTitle(t('title'));
   root = host;
   const read = (): Readonly<DesktopSettings> =>
-    ctx.settings?.get() ?? { lang: 'auto', sound: false, screensaver: true, saverScene: 'tunnel', saverDelayMin: 3 };
+    ctx.settings?.get() ?? { lang: 'auto', sound: false, screensaver: true, saverScene: DEFAULT_SCENE, saverDelayMin: 3 };
   const current = read();
   let saved: DesktopSettings = { ...current };
   const draft: DesktopSettings = { ...current };

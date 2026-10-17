@@ -4,7 +4,7 @@ import type { SceneId } from './types';
 /** Les écrans de veille proposés, dans l'ordre d'affichage des préférences. */
 export const SCENE_IDS: readonly SceneId[] = ['tunnel', 'windows', 'graph', 'voxel'];
 
-export const DEFAULT_SCENE: SceneId = 'tunnel';
+export const DEFAULT_SCENE: SceneId = 'voxel';
 
 export const isSceneId = (value: unknown): value is SceneId =>
   typeof value === 'string' && (SCENE_IDS as readonly string[]).includes(value);

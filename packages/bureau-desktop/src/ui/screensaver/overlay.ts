@@ -9,7 +9,7 @@ export interface ScreensaverOptions {
   reducedMotion?: () => boolean;
   requestFrame?: (cb: (time: number) => void) => number;
   cancelFrame?: (handle: number) => void;
-  /** L'écran de veille choisi par le visiteur (le tunnel néon si absent). */
+  /** L'écran de veille choisi par le visiteur (le bureau en voxels si absent). */
   scene?: () => SceneId;
   /** Charge une scène 3D à la demande. */
   loadScene?: (id: SceneId) => Promise<SceneFactory>;

@@ -206,10 +206,10 @@ Quatre écrans de veille, dessinés sur un canevas 2D avec une 3D logicielle mai
 
 | Scène | Rendu |
 |---|---|
-| **Tunnel néon** (par défaut) | un vol dans un tunnel de grilles lumineuses, avec un « JC » en 3D au bout |
+| **Tunnel néon** | un vol dans un tunnel de grilles lumineuses, avec un « JC » en 3D au bout |
 | **Fenêtres flottantes** | des fenêtres du bureau, avec les titres de vos derniers articles, qui dérivent dans l'espace |
 | **Graphe de connaissances** | un graphe 3D de sujets et d'articles, vu en orbite |
-| **Bureau en voxels** | un petit bureau en cubes dont l'écran s'allume |
+| **Bureau en voxels** (par défaut) | un petit bureau en cubes dont l'écran s'allume |
 
 L'écran de veille automatique ne se lance que sur l'accueil, les archives et la 404, jamais avec « moins d'animations ». Une scène qui ne peut pas se charger laisse un simple ciel bleu.
 

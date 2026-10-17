@@ -18,11 +18,11 @@ const storedPrefs = (page: Page) => page.evaluate(() => JSON.parse(localStorage.
 test.describe('fenêtre Préférences', () => {
   test.beforeEach(async ({}, info) => test.skip(!isDesktop(info.project.name)));
 
-  test('le menu Démarrer ouvre les préférences, le tunnel néon est coché par défaut', async ({ page }) => {
+  test('le menu Démarrer ouvre les préférences, le bureau en voxels est coché par défaut', async ({ page }) => {
     await page.goto('/');
     const win = await openSettings(page);
     await expect(win.locator('input[name="bset-scene"]')).toHaveCount(4);
-    await expect(win.locator('input[name="bset-scene"]:checked')).toHaveValue('tunnel');
+    await expect(win.locator('input[name="bset-scene"]:checked')).toHaveValue('voxel');
     await expect(win).toContainText('Tunnel néon');
     await expect(win).toContainText('Bureau en voxels');
     await expect(win.locator('.bset-auto')).toBeChecked();
@@ -124,12 +124,12 @@ test.describe('fenêtre Préférences', () => {
     await page.goto('/');
     const win = await openSettings(page);
     await expect(win.locator('.bset-save')).toBeDisabled();
-    await win.getByRole('radio', { name: /Bureau en voxels/ }).check();
+    await win.getByRole('radio', { name: /Tunnel néon/ }).check();
     await expect(win.locator('.bset-save')).toBeEnabled();
     await win.locator('.bset-close').click();
     await expect(win).toHaveCount(0);
     const again = await openSettings(page);
-    await expect(again.locator('input[name="bset-scene"]:checked')).toHaveValue('tunnel');
+    await expect(again.locator('input[name="bset-scene"]:checked')).toHaveValue('voxel');
     expect((await storedPrefs(page)).saver).toBeUndefined();
   });
 

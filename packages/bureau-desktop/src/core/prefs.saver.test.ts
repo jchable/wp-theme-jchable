@@ -24,9 +24,9 @@ class MemoryStorage implements Storage {
 }
 
 describe('préférences de l’écran de veille', () => {
-  it('par défaut : le tunnel néon, après 3 minutes', () => {
+  it('par défaut : le bureau en voxels, après 3 minutes', () => {
     const prefs = createPrefs(null).get();
-    expect(prefs.saver).toBe('tunnel');
+    expect(prefs.saver).toBe('voxel');
     expect(prefs.saverDelay).toBe(3);
   });
 
@@ -45,15 +45,15 @@ describe('préférences de l’écran de veille', () => {
     const storage = new MemoryStorage();
     storage.setItem(PREFS_KEY, JSON.stringify({ v: 1, saver: 'hologramme', saverDelay: -5 }));
     const got = createPrefs(storage).get();
-    expect(got.saver).toBe('tunnel');
+    expect(got.saver).toBe('voxel');
     expect(got.saverDelay).toBe(3);
   });
 
-  it('un écran de veille retiré (planète, badge JC) retombe sur le tunnel', () => {
+  it('un écran de veille retiré (planète, badge JC) retombe sur le bureau en voxels', () => {
     const storage = new MemoryStorage();
     for (const gone of ['planet', 'classic']) {
       storage.setItem(PREFS_KEY, JSON.stringify({ v: 1, saver: gone }));
-      expect(createPrefs(storage).get().saver).toBe('tunnel');
+      expect(createPrefs(storage).get().saver).toBe('voxel');
     }
   });
 
