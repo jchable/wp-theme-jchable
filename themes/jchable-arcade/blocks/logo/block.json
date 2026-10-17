@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-arcade/logo",
+  "title": "Logo du site",
+  "category": "theme",
+  "description": "Titre du site en minuscules, un point d'accent entre les mots (Julien Chable devient julien.chable), avec un lien vers l'accueil.",
+  "textdomain": "jchable-arcade",
+  "supports": { "html": false, "autoRegister": true, "typography": { "fontSize": true } },
+  "render": "file:./render.php"
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-arcade/home-link",
+  "title": "Lien vers l'accueil",
+  "category": "theme",
+  "description": "Bouton pixel vers la page d'accueil du site.",
+  "textdomain": "jchable-arcade",
+  "attributes": {
+    "label": { "type": "string", "default": "Rejouer" }
+  },
+  "supports": { "html": false, "autoRegister": true },
+  "render": "file:./render.php"
+}

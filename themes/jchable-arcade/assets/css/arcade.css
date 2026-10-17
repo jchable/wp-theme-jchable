@@ -1,0 +1,1112 @@
+/* Thème Arcade Sobre : fond nuit, cartes aux coins pixel, couleurs néon. Aucun JavaScript. */
+
+:root {
+	--arcade-dot-cyan: color-mix(in srgb, var(--wp--preset--color--cyan) 33%, transparent);
+	--arcade-dot-accent: color-mix(in srgb, var(--wp--preset--color--accent) 20%, transparent);
+	--arcade-gap: 28px;
+}
+
+body {
+	background-image: radial-gradient(var(--arcade-dot-cyan) 1.5px, transparent 1.5px), radial-gradient(var(--arcade-dot-accent) 1.5px, transparent 1.5px);
+	background-size: 96px 96px, 140px 140px;
+	background-position: 0 0, 40px 60px;
+	overflow-wrap: break-word;
+}
+
+::selection {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--base);
+}
+
+/* La page occupe la hauteur de l'écran : le pied de page reste en bas. */
+.wp-site-blocks {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.wp-site-blocks > * {
+	margin-block-start: 0;
+}
+
+.wp-site-blocks > footer {
+	margin-top: auto;
+}
+
+/* ---------- Focus visible, accessible au clavier ---------- */
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 3px solid var(--wp--preset--color--accent);
+	outline-offset: 3px;
+}
+
+.skip-link.screen-reader-text:focus {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--base);
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: 1.125rem;
+	padding: 12px 20px;
+	z-index: 100000;
+}
+
+#recherche:target {
+	outline: 3px dashed var(--wp--preset--color--cyan);
+	outline-offset: 4px;
+}
+
+/* ---------- Coins « pixel » : 4 px pour les boutons, 8 px pour les grandes cartes ---------- */
+
+.arcade-menu .current-menu-item > a,
+.arcade-menu a[aria-current="page"],
+.wp-block-button__link,
+.wp-element-button,
+.arcade-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next),
+.arcade-post-nav a,
+.arcade-button a,
+.wp-block-comments-pagination a {
+	--px: 4px;
+	clip-path: polygon(0 var(--px), var(--px) var(--px), var(--px) 0, calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px), 100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%, var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)));
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card,
+.arcade-single,
+.arcade-comments {
+	--px: 8px;
+	clip-path: polygon(0 var(--px), var(--px) var(--px), var(--px) 0, calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px), 100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%, var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)));
+}
+
+/* Le contour de focus d'un élément aux coins coupés serait rogné : on retire la découpe tant qu'il a le focus. */
+:is(.arcade-menu a, .wp-block-button__link, .wp-element-button, .arcade-pagination a, .arcade-post-nav a, .arcade-button a, .wp-block-comments-pagination a):focus-visible {
+	clip-path: none;
+}
+
+/* ---------- En-tête ---------- */
+
+.arcade-header {
+	padding-block: 20px;
+}
+
+.arcade-header .arcade-header__bar {
+	gap: 16px;
+}
+
+.arcade-header .arcade-header__nav {
+	gap: 6px;
+}
+
+.wp-block-jchable-arcade-logo {
+	color: var(--wp--preset--color--contrast);
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: 1.5rem;
+	font-weight: 600;
+	line-height: 1.2;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	text-decoration: none;
+}
+
+.wp-block-jchable-arcade-logo:hover {
+	color: var(--wp--preset--color--contrast);
+}
+
+.arcade-logo__dot {
+	color: var(--wp--preset--color--accent);
+}
+
+.arcade-header .arcade-menu {
+	font-size: var(--wp--preset--font-size--base);
+	font-weight: 500;
+	max-width: 100%;
+}
+
+.arcade-header .arcade-menu .wp-block-navigation__container {
+	gap: 6px;
+}
+
+/* Les entrées de menu sont des éléments flex : sans ces règles, un libellé interminable ne rétrécit pas. */
+.arcade-header .arcade-menu,
+.arcade-header .arcade-menu .wp-block-navigation__container,
+.arcade-header .arcade-menu .wp-block-navigation-item,
+.arcade-header .arcade-menu .wp-block-navigation-item__content {
+	max-width: 100%;
+	min-width: 0;
+}
+
+.arcade-header .arcade-menu .wp-block-navigation-item__label {
+	overflow-wrap: anywhere;
+}
+
+.arcade-header .arcade-menu .wp-block-navigation-item__content {
+	color: var(--wp--preset--color--contrast);
+	padding: 12px 16px;
+	text-decoration: none;
+}
+
+.arcade-header .arcade-menu .wp-block-navigation-item__content:hover {
+	color: var(--wp--preset--color--accent);
+}
+
+.arcade-header .arcade-menu .current-menu-item > .wp-block-navigation-item__content,
+.arcade-header .arcade-menu .wp-block-navigation-item__content[aria-current="page"] {
+	background: var(--wp--preset--color--raised);
+}
+
+.arcade-header .arcade-search-button {
+	margin: 0;
+}
+
+.arcade-header .arcade-search-button .wp-block-button__link {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--base);
+	font-size: var(--wp--preset--font-size--base);
+	font-weight: 600;
+	padding: 12px 16px;
+	text-decoration: none;
+}
+
+.arcade-header .arcade-search-button .wp-block-button__link:hover {
+	background: var(--wp--preset--color--contrast);
+}
+
+/* ---------- Héros (accueil) et écran GAME OVER ---------- */
+
+.wp-block-group.arcade-hero {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 72px 0 64px;
+	text-align: center;
+}
+
+.arcade-hero > *,
+.arcade-gameover > * {
+	margin: 0;
+}
+
+.arcade-hero__eyebrow,
+.arcade-eyebrow {
+	color: var(--wp--preset--color--cyan);
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+	letter-spacing: 0.2em;
+	margin: 0;
+}
+
+.arcade-hero .arcade-hero__title,
+.arcade-gameover .arcade-hero__title {
+	color: var(--wp--preset--color--accent);
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: var(--wp--preset--font-size--xx-large);
+	font-weight: 700;
+	line-height: 0.9;
+	margin: 0;
+	overflow-wrap: anywhere;
+	text-shadow: 6px 6px 0 var(--wp--preset--color--pink);
+}
+
+.arcade-hero .arcade-hero__title a {
+	color: inherit;
+}
+
+.arcade-hero .arcade-hero__tagline {
+	color: var(--wp--preset--color--muted);
+	font-size: 1.3125rem;
+	line-height: 1.5;
+	max-width: 640px;
+}
+
+.arcade-hero__pixels {
+	height: 24px;
+	max-width: 100%;
+	width: 264px;
+}
+
+.arcade-hero__pixels .px-cyan {
+	fill: var(--wp--preset--color--cyan);
+}
+
+.arcade-hero__pixels .px-accent {
+	fill: var(--wp--preset--color--accent);
+}
+
+.arcade-hero__pixels .px-pink {
+	fill: var(--wp--preset--color--pink);
+}
+
+.arcade-gameover {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding-block: 56px 72px;
+	text-align: center;
+	width: 100%;
+}
+
+.arcade-gameover .arcade-hero__title {
+	font-size: clamp(2.5rem, 8vw, 6rem);
+}
+
+.arcade-gameover .arcade-gameover__text {
+	color: var(--wp--preset--color--muted);
+}
+
+.arcade-gameover .wp-block-jchable-request-path {
+	background: var(--wp--preset--color--surface);
+	border: 2px solid var(--wp--preset--color--border);
+	color: var(--wp--preset--color--cyan);
+	font-family: var(--wp--preset--font-family--mono);
+	max-width: 100%;
+	padding: 8px 14px;
+}
+
+.arcade-gameover .arcade-gameover__search {
+	max-width: 520px;
+	text-align: left;
+	width: 100%;
+}
+
+/* ---------- Boutons pixel (pagination, navigation, retour) ---------- */
+
+.arcade-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next),
+.arcade-post-nav a,
+.arcade-button a,
+.wp-block-comments-pagination a {
+	background: transparent;
+	border: 3px solid var(--wp--preset--color--contrast);
+	box-sizing: border-box;
+	color: var(--wp--preset--color--contrast);
+	display: inline-block;
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: 1.25rem;
+	line-height: 1.3;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	padding: 14px 28px;
+	text-align: center;
+	text-decoration: none;
+}
+
+.arcade-pagination .wp-block-query-pagination-previous {
+	border-color: var(--wp--preset--color--border);
+	color: var(--wp--preset--color--muted);
+}
+
+.arcade-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next):hover,
+.arcade-post-nav a:hover,
+.arcade-button a:hover,
+.wp-block-comments-pagination a:hover {
+	border-color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--accent);
+}
+
+.arcade-post-nav a {
+	font-size: 1.125rem;
+	padding: 12px 22px;
+}
+
+.arcade-button {
+	margin: 0;
+}
+
+/* ---------- Fil des articles : carte mise en avant puis grille ---------- */
+
+.arcade-feed {
+	display: flex;
+	flex-direction: column;
+	gap: var(--arcade-gap);
+}
+
+.arcade-feed > * {
+	margin: 0;
+}
+
+.arcade-feed .wp-block-post-template {
+	display: grid;
+	gap: var(--arcade-gap);
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.arcade-feed .wp-block-post-template > li {
+	margin: 0;
+	min-width: 0;
+	padding: 0;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child {
+	grid-column: 1 / -1;
+}
+
+/* Liseré supérieur : cyan puis rose en alternance. */
+.arcade-feed .wp-block-post-template > li:nth-child(odd) {
+	--arcade-card-accent: var(--wp--preset--color--cyan);
+	--arcade-card-meta: var(--wp--preset--color--cyan);
+}
+
+.arcade-feed .wp-block-post-template > li:nth-child(even) {
+	--arcade-card-accent: var(--wp--preset--color--pink);
+	--arcade-card-meta: var(--wp--preset--color--pink-light);
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:nth-child(odd) {
+	--arcade-card-accent: var(--wp--preset--color--pink);
+	--arcade-card-meta: var(--wp--preset--color--pink-light);
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:nth-child(even) {
+	--arcade-card-accent: var(--wp--preset--color--cyan);
+	--arcade-card-meta: var(--wp--preset--color--cyan);
+}
+
+.arcade-card {
+	background: var(--wp--preset--color--surface);
+	border-top: 4px solid var(--arcade-card-accent, var(--wp--preset--color--cyan));
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	height: 100%;
+	overflow-wrap: anywhere;
+	padding: var(--arcade-gap);
+}
+
+.arcade-card > * {
+	margin: 0;
+}
+
+.arcade-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+}
+
+.arcade-card__body > * {
+	margin: 0;
+}
+
+/* Informations : « STAGE 06 · 2 oct 2026 ». */
+.arcade-meta {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+	gap: 4px 12px;
+	margin: 0;
+}
+
+.arcade-meta > * {
+	margin: 0;
+}
+
+.arcade-meta .wp-block-jchable-arcade-stage {
+	color: var(--arcade-card-meta, var(--wp--preset--color--cyan));
+	font-family: var(--wp--preset--font-family--mono);
+}
+
+.arcade-meta .wp-block-post-date {
+	color: var(--arcade-card-meta, var(--wp--preset--color--muted));
+}
+
+.arcade-meta .wp-block-post-date::before,
+.arcade-meta .wp-block-post-terms::before {
+	content: "·";
+	content: "·" / "";
+	margin-right: 12px;
+}
+
+.arcade-card .wp-block-post-title {
+	font-family: var(--wp--preset--font-family--body);
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 600;
+	line-height: 1.25;
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.arcade-card .wp-block-post-title a {
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+}
+
+.arcade-card .wp-block-post-title a:hover {
+	color: var(--wp--preset--color--accent);
+	text-decoration: underline;
+}
+
+.arcade-card .wp-block-post-excerpt {
+	color: var(--wp--preset--color--muted);
+	line-height: 1.6;
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.arcade-card .wp-block-post-excerpt p {
+	margin: 0;
+}
+
+/* Sur les cartes ordinaires : ni visuel, ni catégorie, ni bouton. */
+.arcade-card .wp-block-post-featured-image,
+.arcade-card .wp-block-post-terms,
+.arcade-card .wp-block-read-more {
+	display: none;
+}
+
+/* Carte mise en avant (page 1 de l'accueil) : visuel + texte côte à côte. */
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card {
+	border-top: 0;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 0;
+	padding: 0;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card .wp-block-post-featured-image {
+	background: var(--wp--preset--color--placeholder);
+	display: block;
+	flex: 1 1 320px;
+	margin: 0;
+	min-height: clamp(200px, 40vw, 280px);
+	overflow: hidden;
+	position: relative;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card .wp-block-post-featured-image img {
+	height: 100%;
+	inset: 0;
+	object-fit: cover;
+	position: absolute;
+	width: 100%;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card__body {
+	flex: 1 1 380px;
+	gap: 16px;
+	padding: clamp(20px, 4vw, 36px);
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card .wp-block-post-title {
+	font-size: clamp(1.625rem, 2.8vw, 2.25rem);
+	letter-spacing: -0.02em;
+	line-height: 1.15;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card .wp-block-post-excerpt {
+	font-size: var(--wp--preset--font-size--medium);
+	line-height: 1.65;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card .wp-block-post-terms {
+	display: block;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card .wp-block-read-more {
+	align-self: flex-start;
+	color: var(--wp--preset--color--accent);
+	display: inline-block;
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: 1.25rem;
+	padding: 6px 0;
+	text-decoration: none;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-card .wp-block-read-more:hover {
+	color: var(--wp--preset--color--contrast);
+}
+
+/* Pastille « STAGE nn » de la carte mise en avant et de l'article. */
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-meta .wp-block-jchable-arcade-stage,
+.arcade-single .arcade-meta .wp-block-jchable-arcade-stage {
+	background: var(--wp--preset--color--cyan);
+	color: var(--wp--preset--color--base);
+	padding: 3px 8px;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-meta .wp-block-post-date::before,
+.arcade-single .arcade-meta .wp-block-post-date::before {
+	content: none;
+	margin: 0;
+}
+
+body:not(.paged) .is-featured-feed .wp-block-post-template > li:first-child .arcade-meta .wp-block-post-date,
+.arcade-single .arcade-meta .wp-block-post-date {
+	color: var(--wp--preset--color--muted);
+}
+
+/* ---------- Pagination ---------- */
+
+.arcade-pagination {
+	align-items: center;
+	gap: 12px 16px;
+	justify-content: center;
+}
+
+.arcade-pagination > * {
+	margin: 0;
+	max-width: 100%;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.arcade-pagination .page-numbers {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: 0.875rem;
+	padding: 6px 10px;
+}
+
+.arcade-pagination a.page-numbers {
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+}
+
+.arcade-pagination .page-numbers.current {
+	color: var(--wp--preset--color--accent);
+}
+
+/* ---------- En-tête de page (archives, recherche, plan du site) ---------- */
+
+.arcade-pagehead {
+	margin-bottom: var(--arcade-gap);
+}
+
+.arcade-pagehead > * {
+	margin: 0;
+}
+
+.arcade-pagehead > * + * {
+	margin-top: 12px;
+}
+
+.arcade-pagehead h1 {
+	color: var(--wp--preset--color--accent);
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: var(--wp--preset--font-size--x-large);
+	font-weight: 700;
+	line-height: 1.1;
+	overflow-wrap: anywhere;
+	text-shadow: 4px 4px 0 var(--wp--preset--color--pink);
+}
+
+.arcade-pagehead .wp-block-term-description {
+	color: var(--wp--preset--color--muted);
+}
+
+/* ---------- Barre latérale ---------- */
+
+.arcade-sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.arcade-sidebar > * {
+	margin: 0;
+}
+
+.arcade-panel {
+	background: var(--wp--preset--color--surface);
+	box-sizing: border-box;
+	overflow-wrap: anywhere;
+	padding: 24px;
+}
+
+.arcade-panel > * {
+	margin: 0;
+}
+
+.arcade-panel > * + * {
+	margin-top: 12px;
+}
+
+.arcade-panel .arcade-panel__title,
+.arcade-sitemap__card .arcade-panel__title {
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: 1.375rem;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.arcade-panel--score .arcade-panel__title {
+	color: var(--wp--preset--color--accent);
+}
+
+.arcade-panel p {
+	color: var(--wp--preset--color--muted);
+	line-height: 1.6;
+}
+
+/* High score : libellés atténués à gauche, valeurs à droite. */
+.wp-block-jchable-arcade-high-score {
+	display: grid;
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: 0.875rem;
+	gap: 10px;
+	grid-template-columns: minmax(0, 1fr) auto;
+	margin: 0;
+}
+
+.wp-block-jchable-arcade-high-score > div {
+	display: contents;
+}
+
+.wp-block-jchable-arcade-high-score dt {
+	color: var(--wp--preset--color--muted);
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.wp-block-jchable-arcade-high-score dd {
+	margin: 0;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	text-align: right;
+}
+
+/* Liste déroulante des archives et champs de recherche. */
+.wp-block-archives-dropdown select,
+.wp-block-archives select,
+.wp-block-search .wp-block-search__input,
+.comment-form :is(input[type="text"], input[type="email"], input[type="url"], textarea) {
+	background: var(--wp--preset--color--base);
+	border: 2px solid var(--wp--preset--color--border);
+	border-radius: 0;
+	box-sizing: border-box;
+	color: var(--wp--preset--color--contrast);
+	font: inherit;
+	max-width: 100%;
+	padding: 12px;
+	width: 100%;
+}
+
+.wp-block-search .wp-block-search__inside-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	min-width: 0;
+}
+
+.wp-block-search .wp-block-search__input {
+	flex: 1 1 140px;
+	min-width: 0;
+	width: auto;
+}
+
+.wp-block-search .wp-block-search__button {
+	border: 0;
+	margin: 0;
+}
+
+.wp-element-button,
+.wp-block-button__link {
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	text-decoration: none;
+}
+
+/* ---------- Plan du site ---------- */
+
+.arcade-sitemap {
+	display: grid;
+	gap: var(--arcade-gap);
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.arcade-sitemap > * {
+	margin: 0;
+	min-width: 0;
+}
+
+.arcade-sitemap__card {
+	background: var(--wp--preset--color--surface);
+	border-top: 4px solid var(--wp--preset--color--cyan);
+	overflow-wrap: anywhere;
+	padding: 24px;
+}
+
+.arcade-sitemap__card:nth-child(even) {
+	border-top-color: var(--wp--preset--color--pink);
+}
+
+.arcade-sitemap__card > * {
+	margin: 0;
+}
+
+.arcade-sitemap__card > * + * {
+	margin-top: 12px;
+}
+
+.arcade-sitemap__card :is(ul, ol) {
+	list-style: square;
+	padding-left: 1.25rem;
+}
+
+.arcade-sitemap__card li::marker {
+	color: var(--wp--preset--color--accent);
+}
+
+.arcade-sitemap__card a {
+	text-decoration: none;
+}
+
+.arcade-sitemap__card a:hover {
+	text-decoration: underline;
+}
+
+/* ---------- Article et page ---------- */
+
+.arcade-single {
+	background: var(--wp--preset--color--surface);
+	box-sizing: border-box;
+	overflow-wrap: anywhere;
+	padding: clamp(20px, 4vw, 40px);
+}
+
+.arcade-single > * {
+	margin: 0;
+}
+
+.arcade-single > * + * {
+	margin-top: 24px;
+}
+
+.arcade-single__head > * {
+	margin: 0;
+}
+
+.arcade-single__head > * + * {
+	margin-top: 16px;
+}
+
+.arcade-single h1 {
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: var(--wp--preset--font-size--x-large);
+	font-weight: 700;
+	line-height: 1.1;
+}
+
+.arcade-single .wp-block-post-featured-image {
+	margin-inline: 0;
+}
+
+.arcade-single .wp-block-post-featured-image img {
+	display: block;
+	height: auto;
+	width: 100%;
+}
+
+.arcade-single .wp-block-post-content > :not(.alignwide, .alignfull, .wp-block-table) {
+	max-width: min(46rem, 100%);
+}
+
+.arcade-single .wp-block-post-content > * + * {
+	margin-top: 1.25rem;
+}
+
+.arcade-single .wp-block-post-content :is(h2, h3, h4) {
+	margin-top: 2rem;
+}
+
+.arcade-single .wp-block-post-content li::marker {
+	color: var(--wp--preset--color--accent);
+}
+
+.arcade-single .wp-block-post-content :is(code, kbd, samp) {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: 0.9em;
+}
+
+.arcade-single .wp-block-post-content :where(p, li) code {
+	background: var(--wp--preset--color--base);
+	padding: 2px 6px;
+}
+
+.arcade-single .wp-block-post-content :is(table, .wp-block-table) {
+	max-width: 100%;
+}
+
+.arcade-single .wp-block-post-content :is(th, td) {
+	border: 2px solid var(--wp--preset--color--border);
+	padding: 8px 12px;
+}
+
+.arcade-single .wp-block-post-content :is(figcaption, .wp-element-caption) {
+	color: var(--wp--preset--color--muted);
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+	margin-top: 8px;
+}
+
+.arcade-single .wp-block-post-content .wp-block-separator {
+	border-style: dashed;
+	border-width: 4px 0 0;
+}
+
+.arcade-single .wp-block-post-content cite {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+/* ---------- Commentaires ---------- */
+
+.arcade-comments {
+	background: var(--wp--preset--color--surface);
+	box-sizing: border-box;
+	margin-top: var(--arcade-gap);
+	overflow-wrap: anywhere;
+	padding: clamp(20px, 4vw, 40px);
+}
+
+.arcade-comments > * {
+	margin: 0;
+}
+
+.arcade-comments > * + * {
+	margin-top: 24px;
+}
+
+.arcade-comments .wp-block-comments-title,
+.arcade-comments .comment-reply-title {
+	font-family: var(--wp--preset--font-family--pixel);
+	font-size: 1.375rem;
+	font-weight: 600;
+}
+
+.arcade-comments .wp-block-comment-template {
+	list-style: none;
+	margin-block: 0;
+	padding: 0;
+}
+
+.arcade-comments .wp-block-comment-template > li {
+	margin: 0;
+}
+
+.arcade-comments .wp-block-comment-template > li + li {
+	margin-top: 16px;
+}
+
+.arcade-comment {
+	border-top: 2px dashed var(--wp--preset--color--line);
+	padding-top: 16px;
+}
+
+.arcade-comment > * {
+	margin: 0;
+}
+
+.arcade-comment > * + * {
+	margin-top: 8px;
+}
+
+.arcade-comment .wp-block-comment-author-name {
+	font-weight: 600;
+}
+
+.arcade-comment .wp-block-comment-author-name a {
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+}
+
+.arcade-comment .wp-block-comment-date,
+.arcade-comment .wp-block-comment-date a {
+	color: var(--wp--preset--color--muted);
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+	text-decoration: none;
+}
+
+.arcade-comment .wp-block-comment-reply-link {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.arcade-comments .comment-form {
+	display: grid;
+	gap: 16px;
+}
+
+.arcade-comments .comment-form > * {
+	margin: 0;
+}
+
+.arcade-comments .comment-form label {
+	display: block;
+	margin-bottom: 6px;
+}
+
+.arcade-comments .comment-form .comment-notes,
+.arcade-comments .comment-form .logged-in-as {
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.arcade-comments .comment-form .required {
+	color: var(--wp--preset--color--pink-light);
+}
+
+.arcade-comments .comment-form-cookies-consent {
+	align-items: baseline;
+	display: flex;
+	gap: 8px;
+}
+
+.arcade-comments .comment-form-cookies-consent label {
+	display: inline;
+	margin: 0;
+}
+
+.arcade-comments .comment-form .form-submit {
+	margin: 0;
+}
+
+.arcade-comments .comment-form input[type="submit"] {
+	background: var(--wp--preset--color--accent);
+	border: 0;
+	color: var(--wp--preset--color--base);
+	cursor: pointer;
+	font-family: var(--wp--preset--font-family--body);
+	font-size: var(--wp--preset--font-size--base);
+	font-weight: 600;
+	padding: 12px 20px;
+}
+
+.arcade-comments .comment-form input[type="submit"]:hover {
+	background: var(--wp--preset--color--contrast);
+}
+
+/* ---------- Navigation entre articles ---------- */
+
+.arcade-post-nav {
+	gap: 12px;
+	margin-top: var(--arcade-gap);
+}
+
+.arcade-post-nav > * {
+	margin: 0;
+	max-width: 100%;
+	min-width: 0;
+}
+
+/* ---------- Pied de page : filet pointillé ---------- */
+
+/* Le filet va d un bord a l autre : le groupe pleine largeur porte deja le remplissage lateral de la page. */
+.wp-block-group.arcade-footer {
+	border-top: 4px dashed var(--wp--preset--color--line);
+	margin-top: 72px;
+	padding-block: 28px;
+}
+
+.wp-block-archives__label,
+.wp-block-categories__label {
+	border: 0;
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+.arcade-footer .arcade-footer__bar {
+	color: var(--wp--preset--color--muted);
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+	gap: 12px;
+}
+
+.arcade-footer .arcade-footer__left {
+	gap: 0 0.5ch;
+}
+
+.arcade-footer .arcade-footer__bar > *,
+.arcade-footer .arcade-footer__left > * {
+	margin: 0;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.arcade-footer .wp-block-site-title {
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 400;
+	line-height: 1.6;
+}
+
+.arcade-footer .wp-block-site-title::before {
+	content: "© ";
+}
+
+.arcade-footer .arcade-footer__slogan::before {
+	content: "·";
+	content: "·" / "";
+	margin-right: 0.5ch;
+}
+
+.arcade-footer a {
+	color: var(--wp--preset--color--contrast);
+}
+
+/* ---------- Débordements : mots interminables, médias ---------- */
+
+.wp-block-post-content img,
+.wp-block-post-content video,
+.wp-block-post-content iframe {
+	max-width: 100%;
+}
+
+.wp-block-site-tagline,
+.wp-block-site-title,
+.wp-block-query-title,
+.wp-block-term-description,
+.wp-block-comments-title {
+	overflow-wrap: anywhere;
+}
+
+/* ---------- Mouvement : transitions discrètes, jamais si l'on demande de les réduire ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+	a,
+	.wp-element-button,
+	.wp-block-button__link,
+	input[type="submit"] {
+		transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		scroll-behavior: auto !important;
+		transition: none !important;
+	}
+}
+
+/* ---------- Petits écrans ---------- */
+
+@media (max-width: 600px) {
+	.wp-block-group.arcade-hero {
+		padding: 40px 0 40px;
+	}
+
+	.arcade-hero .arcade-hero__title,
+	.arcade-gameover .arcade-hero__title {
+		text-shadow: 4px 4px 0 var(--wp--preset--color--pink);
+	}
+
+	.arcade-hero .arcade-hero__tagline {
+		font-size: 1.125rem;
+	}
+
+	.arcade-pagination :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next) {
+		padding: 12px 18px;
+	}
+}

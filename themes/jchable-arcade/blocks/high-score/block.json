@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-arcade/high-score",
+  "title": "High score",
+  "category": "theme",
+  "description": "Date du premier billet, du dernier billet et nombre de billets publiés.",
+  "textdomain": "jchable-arcade",
+  "attributes": {
+    "firstLabel": { "type": "string", "default": "Premier billet" },
+    "lastLabel": { "type": "string", "default": "Dernier billet" },
+    "countLabel": { "type": "string", "default": "Billets publiés" }
+  },
+  "supports": { "html": false, "autoRegister": true, "color": { "text": true, "background": true }, "typography": { "fontSize": true } },
+  "render": "file:./render.php"
+}

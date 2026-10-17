@@ -1,0 +1,63 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"section","className":"arcade-hero","layout":{"type":"constrained","contentSize":"1320px"}} -->
+<section aria-label="Présentation" class="wp-block-group arcade-hero"><!-- wp:paragraph {"className":"arcade-hero__eyebrow"} -->
+<p class="arcade-hero__eyebrow">— INSERT COIN · DEPUIS 2009 —</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:site-title {"level":1,"isLink":false,"className":"arcade-hero__title"} /-->
+
+<!-- wp:site-tagline {"className":"arcade-hero__tagline"} /-->
+
+<!-- wp:html -->
+<svg class="arcade-hero__pixels" aria-hidden="true" focusable="false" width="264" height="24" viewBox="0 0 66 6" shape-rendering="crispEdges"><g class="px-cyan"><rect x="0" y="2" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/></g><g class="px-accent"><rect x="20" y="0" width="6" height="2"/><rect x="18" y="2" width="10" height="2"/><rect x="18" y="4" width="2" height="2"/><rect x="26" y="4" width="2" height="2"/></g><g class="px-pink"><rect x="38" y="0" width="2" height="2"/><rect x="44" y="0" width="2" height="2"/><rect x="38" y="2" width="8" height="2"/><rect x="36" y="4" width="2" height="2"/><rect x="46" y="4" width="2" height="2"/></g><g class="px-cyan"><rect x="56" y="2" width="2" height="2"/><rect x="60" y="2" width="2" height="2"/><rect x="64" y="2" width="2" height="2"/></g></svg>
+<!-- /wp:html --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"site-body","layout":{"type":"constrained","contentSize":"1320px"}} -->
+<div class="wp-block-group site-body"><!-- wp:group {"className":"site-columns","layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top"}} -->
+<div class="wp-block-group site-columns"><!-- wp:group {"tagName":"main","anchor":"contenu","className":"site-main","layout":{"type":"default"}} -->
+<main id="contenu" class="wp-block-group site-main"><!-- wp:query {"queryId":1,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true},"className":"arcade-feed is-featured-feed"} -->
+<div class="wp-block-query arcade-feed is-featured-feed"><!-- wp:post-template {"layout":{"type":"default"}} -->
+<!-- wp:group {"tagName":"article","className":"arcade-card","layout":{"type":"default"}} -->
+<article class="wp-block-group arcade-card"><!-- wp:post-featured-image {"isLink":false,"className":"arcade-card__visual"} /-->
+
+<!-- wp:group {"className":"arcade-card__body","layout":{"type":"default"}} -->
+<div class="wp-block-group arcade-card__body"><!-- wp:group {"className":"arcade-meta","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group arcade-meta"><!-- wp:jchable-arcade/stage /-->
+
+<!-- wp:post-date {"format":"j M Y"} /-->
+
+<!-- wp:post-terms {"term":"category"} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:post-title {"level":2,"isLink":true} /-->
+
+<!-- wp:post-excerpt {"excerptLength":30} /-->
+
+<!-- wp:read-more {"content":"▶ Press start","className":"arcade-card__start"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+
+<!-- wp:query-pagination {"paginationArrow":"none","className":"arcade-pagination","layout":{"type":"flex","justifyContent":"center","flexWrap":"wrap"}} -->
+<!-- wp:query-pagination-previous {"label":"Articles plus récents"} /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next {"label":"Continue ? ◀ Articles plus anciens"} /-->
+<!-- /wp:query-pagination -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>Aucun article pour le moment.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"sidebar","tagName":"aside","className":"site-sidebar"} /--></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

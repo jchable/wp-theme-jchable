@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jchable-arcade/stage",
+  "title": "Stage (numéro d'ordre)",
+  "category": "theme",
+  "description": "Numéro d'ordre de l'article parmi les articles publiés : STAGE 01 pour le plus ancien.",
+  "textdomain": "jchable-arcade",
+  "usesContext": ["postId", "postType"],
+  "attributes": {
+    "label": { "type": "string", "default": "STAGE" }
+  },
+  "supports": { "html": false, "autoRegister": true, "color": { "text": true, "background": true }, "typography": { "fontSize": true } },
+  "render": "file:./render.php"
+}
