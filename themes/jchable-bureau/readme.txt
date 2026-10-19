@@ -2,7 +2,7 @@
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,10 +19,13 @@ jchable Bureau is distributed under the terms of the GNU GPL v2 or later.
 
 Polices Chivo et Chivo Mono : SIL Open Font License 1.1, voir assets/fonts/LICENSE-OFL.txt.
 DOOM.EXE : moteur Chocolate Doom (portage doom-wasm de Cloudflare), GPL v2 ou ultérieure, avec SDL2 (zlib) et le code d'exécution Emscripten (MIT/NCSA) ; données doom1.wad (DOOM shareware, © id Software, redistribuable gratuitement et sans modification). Textes de licence, version exacte et lien vers le code source : voir assets/doom/README.md et assets/doom/LICENSE-*.txt.
-Code JavaScript du bureau (dossier assets/dist) : code du thème, sous la licence du thème. Aucun service externe n'est appelé.
+Code JavaScript du bureau (dossier assets/dist) : code du thème, sous la licence du thème. Aucun service externe n'est appelé ; si le site charge le tracker Matomo, le bureau lui envoie seulement des événements d'usage anonymes (applis ouvertes, durée, écran de veille, réglages), voir le README du dépôt.
 Pictogrammes SVG : créés pour ce thème, sous la même licence que le thème.
 
 == Changelog ==
+
+= 0.3.0 =
+* Mesure d'audience : si le site charge le tracker Matomo, le bureau lui envoie des événements d'usage anonymes (catégorie « Bureau ») : applis ouvertes, durée d'utilisation active, écran de veille lancé, réglages modifiés. Sans tracker, rien n'est envoyé ; aucun identifiant ni contenu d'appli n'est transmis.
 
 = 0.2.0 =
 * Nouvelles applis : Calculatrice et Paint façon Windows 95.
