@@ -1,3 +1,4 @@
+import { createMatomoTrack, createUsageTracker, diffSettings } from './analytics';
 import { focusAnchor } from './anchor';
 import { arrangeDesktopIcons } from './iconOrder';
 import { getLang, resolveLang, setLang } from './i18n';
@@ -65,6 +66,16 @@ export function bootstrap(): void {
     return (await response.json()) as T;
   };
 
+  // Mesure d'audience (événements Matomo) : quelles applis, combien de temps, quels réglages.
+  const track = createMatomoTrack();
+  const usage = createUsageTracker({ track });
+  let previewing = false; // l'aperçu des Préférences n'est pas un écran de veille « vu »
+
+  const currentSettings = (): DesktopSettings => {
+    const p = prefs.get();
+    return { lang: p.lang, sound: p.sound, screensaver: p.screensaver, saverScene: p.saver, saverDelayMin: p.saverDelay };
+  };
+
   const manager = new WindowManager({
     layer: windowsLayer,
     config,
@@ -75,15 +86,23 @@ export function bootstrap(): void {
     playSound: (name) => sound.play(name),
     openBsod: (message) => showBsod(message),
     settings: {
-      get: (): DesktopSettings => {
-        const p = prefs.get();
-        return { lang: p.lang, sound: p.sound, screensaver: p.screensaver, saverScene: p.saver, saverDelayMin: p.saverDelay };
-      },
+      get: currentSettings,
       update: (patch) => applySettings(patch),
     },
-    previewScreensaver: (sceneId) => saver.start(isSceneId(sceneId) ? sceneId : undefined),
+    previewScreensaver: (sceneId) => {
+      previewing = true;
+      saver.start(isSceneId(sceneId) ? sceneId : undefined);
+    },
     resetIcons: () => resetAll(),
   });
+
+  usage.setVisible(!document.hidden);
+  manager.subscribe(() => usage.sync(manager.list()));
+  document.addEventListener('visibilitychange', () => {
+    usage.setVisible(!document.hidden);
+    if (document.hidden) usage.flush();
+  });
+  window.addEventListener('pagehide', () => usage.flush());
 
   // --- Icônes du bureau (grand écran) et fenêtres déplaçables de la barre latérale ---
   const desktopHost = document.createElement('div');
@@ -159,6 +178,7 @@ export function bootstrap(): void {
 
   // Un réglage de la fenêtre Préférences : valeurs invalides ignorées, effet immédiat.
   const applySettings = (patch: Partial<DesktopSettings>): void => {
+    const before = currentSettings();
     prefs.update((p) => {
       if (patch.sound !== undefined) p.sound = Boolean(patch.sound);
       if (patch.screensaver !== undefined) p.screensaver = Boolean(patch.screensaver);
@@ -166,6 +186,7 @@ export function bootstrap(): void {
       if (typeof patch.saverDelayMin === 'number' && SAVER_DELAYS.includes(patch.saverDelayMin)) p.saverDelay = patch.saverDelayMin;
       if (patch.lang === 'auto' || patch.lang === 'fr' || patch.lang === 'en') p.lang = patch.lang;
     });
+    for (const change of diffSettings(before, currentSettings())) track('Préférence', change);
     if (patch.saverDelayMin !== undefined) armIdle();
     if (patch.lang !== undefined) location.reload();
   };
@@ -176,7 +197,14 @@ export function bootstrap(): void {
   };
 
   // --- Écran de veille : pages d'accueil, d'archives et 404 seulement ---
-  const saver = createScreensaver({ scene: () => prefs.get().saver });
+  const saver = createScreensaver({
+    scene: () => prefs.get().saver,
+    onChange: (running, sceneId) => {
+      usage.setPaused(running); // un écran de veille qui tourne n'est pas du temps d'utilisation
+      if (running && !previewing) track('Écran de veille', sceneId);
+      if (!running) previewing = false;
+    },
+  });
   const saverEligible = isScreensaverEligiblePage(document.body);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let idle: IdleWatcher | null = null;

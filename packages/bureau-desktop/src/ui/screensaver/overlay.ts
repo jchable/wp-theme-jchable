@@ -15,6 +15,8 @@ export interface ScreensaverOptions {
   loadScene?: (id: SceneId) => Promise<SceneFactory>;
   /** Le contexte d'une scène (titres, couleurs, langue) ; les dimensions sont ajoutées par l'écran de veille. */
   context?: () => SceneContext;
+  /** Prévenu une fois au démarrage (avec la scène lancée) et une fois à l'arrêt. */
+  onChange?: (running: boolean, sceneId: SceneId) => void;
 }
 
 export interface Screensaver {
@@ -94,6 +96,16 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
   let dpr = 1;
   let destroyed = false;
   let animated = true;
+  let currentScene: SceneId = DEFAULT_SCENE;
+
+  /** Un avis qui plante ne doit pas empêcher l'écran de veille de démarrer ou de s'arrêter. */
+  const notify = (running: boolean): void => {
+    try {
+      options.onChange?.(running, currentScene);
+    } catch {
+      /* ignoré */
+    }
+  };
 
   const size = (): { w: number; h: number } => ({ w: Math.max(1, window.innerWidth), h: Math.max(1, window.innerHeight) });
 
@@ -192,10 +204,12 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       root.append(canvas, live);
       const { w, h } = size();
       const id = sceneId ?? options.scene?.() ?? DEFAULT_SCENE;
+      currentScene = id;
       renderer = skyRenderer(w, h);
       fit();
       document.body.append(root);
       live.textContent = t('liveText');
+      notify(true);
 
       startedAt = Date.now();
       lastTime = null;
@@ -210,6 +224,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
     },
 
     stop() {
+      const wasRunning = root !== null;
       generation++;
       if (frame !== null) {
         cancelFrame(frame);
@@ -221,6 +236,7 @@ export function createScreensaver(options: ScreensaverOptions = {}): Screensaver
       root?.remove();
       root = canvas = ctx = renderer = null;
       lastTime = null;
+      if (wasRunning) notify(false);
     },
 
     isRunning() {

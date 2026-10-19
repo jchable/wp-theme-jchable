@@ -250,6 +250,21 @@ Le bureau mémorise, dans le **localStorage du navigateur du visiteur** (clé `j
 
 Ces données servent uniquement à une fonction demandée par le visiteur et restent sur son appareil : à notre avis, elles entrent dans l'exemption de consentement de la directive ePrivacy (ce n'est pas un avis juridique). Une phrase dans votre page de confidentialité suffit.
 
+## Mesure d'audience (Matomo)
+
+Si le site charge le tracker Matomo (le snippet habituel, qui crée `window._paq`), le Bureau lui envoie des **événements de catégorie « Bureau »** pour savoir comment le bureau est utilisé. Sans tracker, il n'envoie rien : le thème n'appelle lui-même aucun service externe, il pousse seulement dans la file du tracker, dont l'opt-out et le Do Not Track s'appliquent donc tels quels. Le code est dans `packages/bureau-desktop/src/core/analytics.ts`.
+
+| Action | Nom | Valeur | Quand |
+|---|---|---|---|
+| `Ouverture` | identifiant de l'appli (`calculator`, `paint`, `page-a-propos`…) | — | une fenêtre s'ouvre (la ramener au premier plan ne compte pas) |
+| `Durée active` | identifiant de l'appli | secondes (plafonnées à 30 min) | à la fermeture, et pour les fenêtres encore ouvertes quand le visiteur quitte la page ou cache l'onglet |
+| `Écran de veille` | identifiant de la scène | — | l'écran de veille démarre (automatiquement ou par le menu Démarrer ; pas pour l'aperçu des Préférences) |
+| `Préférence` | `réglage=valeur` (`saverScene=graph`, `lang=en`, `sound=on`…) | — | un réglage change vraiment à l'enregistrement |
+
+La **durée active** ne compte que le temps où la fenêtre est au premier plan, non réduite, l'onglet visible et l'écran de veille éteint. Dans Matomo : *Comportement → Événements → Noms d'événement* (sous l'action « Durée active », la moyenne de la valeur est le temps moyen par ouverture). Pour la part des visites qui utilisent le bureau, créez un segment `eventCategory==Bureau`.
+
+Ce qui n'est **jamais** envoyé : identifiant de visiteur (`setUserId`), contenu des applis (dessins, calculs, texte du WordPad, commandes du Terminal), position des fenêtres ou des icônes. Les noms d'événements viennent d'un jeu fermé (applis, scènes, réglages), jamais de ce que le visiteur saisit. Cela reste dans l'esprit de l'exemption de consentement pour la mesure d'audience (ce n'est pas un avis juridique) ; ne détournez pas ces événements vers de la personnalisation ou du recoupement entre sites. Un visiteur qui bloque le tracker n'est simplement pas compté : lisez les chiffres en classement et en tendance. Les événements comptent comme des actions dans Matomo : le taux de rebond baisse pour les visites qui ouvrent une fenêtre.
+
 Les contrôles de sécurité, leurs limites et les précautions de production sont décrits dans
 [le guide de déploiement](docs/deploiement.md#9-sécurité-et-limites-de-laudit).
 

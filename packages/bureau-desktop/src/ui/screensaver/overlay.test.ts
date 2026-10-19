@@ -88,6 +88,35 @@ describe('createScreensaver', () => {
     s.stop();
   });
 
+  it('prévient quand l’écran de veille démarre (avec la scène choisie) et quand il s’arrête, une fois chacun', () => {
+    const onChange = vi.fn();
+    const s = createScreensaver({
+      reducedMotion: () => false,
+      requestFrame: requestFrame as never,
+      cancelFrame: cancelFrame as never,
+      loadScene: async () => markScene,
+      scene: () => 'tunnel',
+      onChange,
+    });
+    s.stop(); // rien ne tourne : pas d’avis
+    s.start();
+    s.start();
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenLastCalledWith(true, 'tunnel');
+    s.stop();
+    s.stop();
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange).toHaveBeenLastCalledWith(false, 'tunnel');
+  });
+
+  it('l’aperçu d’une scène prévient avec cette scène', () => {
+    const onChange = vi.fn();
+    const s = createScreensaver({ reducedMotion: () => true, loadScene: async () => markScene, scene: () => 'tunnel', onChange });
+    s.start('graph');
+    expect(onChange).toHaveBeenCalledWith(true, 'graph');
+    s.stop();
+  });
+
   it('ne vole pas le focus et ne verrouille pas le défilement', () => {
     const btn = document.createElement('button');
     document.body.append(btn);
