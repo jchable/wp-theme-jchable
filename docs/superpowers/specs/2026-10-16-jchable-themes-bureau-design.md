@@ -293,4 +293,3 @@ Chaque étape se termine sur quelque chose qu'on peut installer et tester.
 - **Shareware DOOM :** confirmer les conditions de redistribution, sinon utiliser Freedoom.
 - **Textes des gags** (Corbeille, écran bleu, Propriétés) : à valider par Julien.
 - **Nom de la messagerie :** « Oh-Oh! Messenger » est provisoire.
-- **Renommage du dépôt** (`wp-theme-vanhalen`) : décidé par Julien plus tard ; sans impact sur le code.
